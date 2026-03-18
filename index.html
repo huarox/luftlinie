@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <!--
 ╔══════════════════════════════════════════════════════════════╗
 ║  LUFTLINIE — Firebase Edition  (single HTML file)            ║
@@ -11,6 +12,7 @@
 ║  5. Open the URL in Chrome on your iPhone — done.            ║
 ╚══════════════════════════════════════════════════════════════╝
 -->
+
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -18,6 +20,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Luftlinie</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' rx='14' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232196f3'/%3E%3Cstop offset='1' stop-color='%230050c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='30' cy='30' r='7' fill='white'/%3E%3Ccircle cx='30' cy='30' r='14' stroke='white' stroke-width='1.5' fill='none' opacity='.55'/%3E%3Ccircle cx='30' cy='30' r='21' stroke='white' stroke-width='1' fill='none' opacity='.28'/%3E%3Cline x1='30' y1='7' x2='30' y2='13' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='53' y1='30' x2='47' y2='30' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='30' y1='53' x2='30' y2='47' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='7' y1='30' x2='13' y2='30' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' rx='14' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232196f3'/%3E%3Cstop offset='1' stop-color='%230050c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='30' cy='30' r='7' fill='white'/%3E%3Ccircle cx='30' cy='30' r='14' stroke='white' stroke-width='1.5' fill='none' opacity='.55'/%3E%3Ccircle cx='30' cy='30' r='21' stroke='white' stroke-width='1' fill='none' opacity='.28'/%3E%3Cline x1='30' y1='7' x2='30' y2='13' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='53' y1='30' x2='47' y2='30' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='30' y1='53' x2='30' y2='47' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='7' y1='30' x2='13' y2='30' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -219,26 +223,27 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .rip::after{content:'';position:absolute;left:50%;top:50%;width:72px;height:72px;border-radius:50%;transform:translate(-50%,-50%) scale(0.25);opacity:0;animation:rip-out 0.85s 0.18s cubic-bezier(.2,.8,.35,1) forwards;border-color:inherit}
 .rip-auto::after{border-color:rgba(0,122,255,.25)}.rip-success::after{border-color:rgba(52,199,89,.40)}
 .rip-error::after{border-color:rgba(255,59,48,.40)}.rip-warn::after{border-color:rgba(255,159,10,.40)}
-@keyframes flash-auto-col{0%{color:var(--blue)}100%{color:inherit}}
-@keyframes flash-success-col{0%{color:var(--green)}100%{color:inherit}}
-@keyframes flash-error-col{0%{color:var(--red)}100%{color:inherit}}
-@keyframes flash-warn-col{0%{color:var(--orange)}100%{color:inherit}}
-.na-dist.flash-auto{animation:dist-flash .3s ease,flash-auto-col .5s ease}
-.na-dist.flash-success{animation:dist-flash .3s ease,flash-success-col .5s ease}
-.na-dist.flash-error{animation:dist-flash .3s ease,flash-error-col .5s ease}
-.na-dist.flash-warn{animation:dist-flash .3s ease,flash-warn-col .5s ease}
+/* ripple-only feedback — no color flashing on the number */
+/* ripple color flashes removed — rings are enough signal */
 .refresh-btn{display:flex;align-items:center;gap:6px;margin-top:16px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r20);padding:8px 16px;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-sm)}
 .refresh-btn svg{width:13px;height:13px;flex-shrink:0}
 .refresh-btn:hover{background:var(--surf1);box-shadow:var(--sh-md)}
 .refresh-btn.spinning svg{animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.na-progress{padding:0 28px;flex-shrink:0}
-.na-prog-labels{display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
-.na-track{height:3px;background:var(--border);border-radius:2px;position:relative;overflow:visible}
-.na-fill{height:100%;border-radius:2px;background:var(--blue);max-width:100%;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
-.na-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px rgba(0,122,255,.45);transition:left 1.2s cubic-bezier(.4,0,.2,1)}
-.na-foot{padding:12px 18px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.na-progress{display:none}
+.na-foot{padding:20px 18px 36px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .na-upd{font-size:12px;color:var(--t3)}.na-noise{font-size:11px;color:var(--t3);font-weight:600}
+/* ── DANGER CARD (at-risk in elimination) ────────────────── */
+@keyframes danger-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.0)}50%{box-shadow:0 0 0 4px rgba(255,59,48,.35)}}
+.nav-card.danger{border-color:rgba(255,59,48,.5);background:rgba(255,59,48,.06);animation:danger-pulse 1.4s ease-in-out infinite}
+/* ── COMPASS BUTTON ──────────────────────────────────────── */
+.compass-btn{width:34px;height:34px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .14s;flex-shrink:0;position:relative;z-index:500}
+.compass-btn.active{background:rgba(0,122,255,.12);border-color:rgba(0,122,255,.35)}
+/* map container rotation for heading-up mode */
+.map-rotate-wrap{flex:1;min-height:0;overflow:hidden;position:relative}
+.map-rotate-wrap .leaflet-container{transition:transform .3s ease}
+/* ── ELIM COUNTDOWN (host/spec panel) ────────────────────── */
+.elim-countdown{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--orange);padding:4px 10px;border-radius:20px;background:rgba(255,159,10,.1);border:1px solid rgba(255,159,10,.2)}
 .results-panel{background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--border);padding:14px 14px 30px;flex-shrink:0}
 .winner-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.2);border-radius:var(--r10);margin-bottom:12px}
 .winner-ico{font-size:28px}.winner-info{flex:1}
@@ -316,6 +321,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div id="app">
 
 <!-- ══ LANDING ══ -->
+
 <div class="sc active" id="sc-land">
   <div class="land-glass">
     <div class="land-icon">
@@ -347,6 +353,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ SETUP ══ -->
+
 <div class="sc" id="sc-setup">
   <div class="top-bar">
     <button class="back-btn" onclick="Nav.go('land')">
@@ -363,90 +370,94 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <p class="mode-hint" id="mode-hint">You'll tap the map to drop the secret target. A range ring shows the ideal distance.</p>
 
-    <div class="section-label" style="margin-top:22px">Difficulty</div>
-    <div class="card">
-      <div class="stars-row" id="stars">
-        <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
-        <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
-        <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
-        <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
-        <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
-      </div>
-      <p class="diff-text" id="diff-txt">Medium — navigators get 2× the ideal drive time</p>
-    </div>
+```
+<div class="section-label" style="margin-top:22px">Difficulty</div>
+<div class="card">
+  <div class="stars-row" id="stars">
+    <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
+    <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
+    <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
+    <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
+    <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
+  </div>
+  <p class="diff-text" id="diff-txt">Medium — navigators get 2× the ideal drive time</p>
+</div>
 
-    <div class="section-label" style="margin-top:22px">Drive Time</div>
-    <div class="card">
-      <div class="card-row"><span class="row-label">Ideal duration</span><span class="row-val" id="sv-time">30 min</span></div>
-      <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
-      <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90 min</span></div>
-      <div class="timelimit-row">
-        <span class="tl-lbl">Navigator time limit</span><span class="tl-val" id="sv-limit">60 min</span>
-      </div>
-    </div>
+<div class="section-label" style="margin-top:22px">Drive Time</div>
+<div class="card">
+  <div class="card-row"><span class="row-label">Ideal duration</span><span class="row-val" id="sv-time">30 min</span></div>
+  <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
+  <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90 min</span></div>
+  <div class="timelimit-row">
+    <span class="tl-lbl">Navigator time limit</span><span class="tl-val" id="sv-limit">60 min</span>
+  </div>
+</div>
 
-    <div class="section-label" style="margin-top:22px">Arrival Radius</div>
-    <div class="card">
-      <p class="radius-hint">How close navigators must get to trigger arrival.</p>
-      <div class="radius-row">
-        <div class="mini-seg" id="seg-radius">
-          <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
-          <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
-          <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
-          <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
-        </div>
-      </div>
+<div class="section-label" style="margin-top:22px">Arrival Radius</div>
+<div class="card">
+  <p class="radius-hint">How close navigators must get to trigger arrival.</p>
+  <div class="radius-row">
+    <div class="mini-seg" id="seg-radius">
+      <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
+      <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
+      <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
+      <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
     </div>
+  </div>
+</div>
 
-    <div class="section-label" style="margin-top:22px">Your Role</div>
-    <div class="card">
-      <p class="radius-hint">Navigate alongside your players, or watch as spectator?</p>
-      <div class="radius-row">
-        <div class="seg-ctrl" id="seg-host-role">
-          <button class="seg" data-v="navigator" onclick="App.setHostRole('navigator')">🧭 Navigator</button>
-          <button class="seg active" data-v="spectator" onclick="App.setHostRole('spectator')">👁 Spectator</button>
-        </div>
-      </div>
+<div class="section-label" style="margin-top:22px">Your Role</div>
+<div class="card">
+  <p class="radius-hint">Navigate alongside your players, or watch as spectator?</p>
+  <div class="radius-row">
+    <div class="seg-ctrl" id="seg-host-role">
+      <button class="seg" data-v="navigator" onclick="App.setHostRole('navigator')">🧭 Navigator</button>
+      <button class="seg active" data-v="spectator" onclick="App.setHostRole('spectator')">👁 Spectator</button>
     </div>
+  </div>
+</div>
 
-    <div class="section-label" style="margin-top:22px">Extras</div>
-    <div class="card">
-      <div class="setup-toggle-row">
-        <div>
-          <div class="setup-toggle-label">⚡ Elimination</div>
-          <div class="setup-toggle-sub">Furthest player knocked out every 5 min</div>
-        </div>
-        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-elim">
-          <button class="seg active" data-v="off" onclick="App.setElimMode(false)">Off</button>
-          <button class="seg" data-v="on" onclick="App.setElimMode(true)">On</button>
-        </div>
-      </div>
-      <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-        <div>
-          <div class="setup-toggle-label">🙈 Blind Start</div>
-          <div class="setup-toggle-sub">Distance hidden until you've moved 500m</div>
-        </div>
-        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blind">
-          <button class="seg active" data-v="off" onclick="App.setBlindStart(false)">Off</button>
-          <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
-        </div>
-      </div>
+<div class="section-label" style="margin-top:22px">Extras</div>
+<div class="card">
+  <div class="setup-toggle-row">
+    <div>
+      <div class="setup-toggle-label">⚡ Elimination</div>
+      <div class="setup-toggle-sub">Furthest player knocked out every 5 min</div>
     </div>
-
-    <div class="section-label" style="margin-top:22px">Your Name</div>
-    <div class="card">
-      <div style="padding:10px 14px">
-        <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host">
-      </div>
+    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-elim">
+      <button class="seg active" data-v="off" onclick="App.setElimMode(false)">Off</button>
+      <button class="seg" data-v="on" onclick="App.setElimMode(true)">On</button>
     </div>
+  </div>
+  <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+    <div>
+      <div class="setup-toggle-label">🙈 Blind Start</div>
+      <div class="setup-toggle-sub">Distance hidden until you've moved 500m</div>
+    </div>
+    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blind">
+      <button class="seg active" data-v="off" onclick="App.setBlindStart(false)">Off</button>
+      <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
+    </div>
+  </div>
+</div>
 
-    <button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="App.goMap()">
-      Place Target on Map →
-    </button>
+<div class="section-label" style="margin-top:22px">Your Name</div>
+<div class="card">
+  <div style="padding:10px 14px">
+    <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host">
+  </div>
+</div>
+
+<button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="App.goMap()">
+  Place Target on Map →
+</button>
+```
+
   </div>
 </div>
 
 <!-- ══ MAP (target placement) ══ -->
+
 <div class="sc map-sc" id="sc-map">
   <div class="map-topbar">
     <button class="map-back-btn" onclick="Nav.go('setup')">
@@ -463,6 +474,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ HOST LOBBY ══ -->
+
 <div class="sc" id="sc-hlobby">
   <div class="top-bar">
     <button class="back-btn" onclick="Nav.go('map')">
@@ -500,6 +512,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ HOST ACTIVE ══ -->
+
 <div class="sc map-sc" id="sc-hactive">
   <div class="host-bar">
     <div class="live-badge"><span class="live-dot"></span>LIVE</div>
@@ -508,6 +521,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="htb-val" id="ha-timer">00:00</div>
     </div>
     <div style="display:flex;gap:6px;align-items:center">
+      <span class="elim-countdown hidden" id="ha-elim-cd"></span>
+      <button class="compass-btn" id="compass-btn-host" onclick="App.toggleMapOrientation('host')" title="Toggle heading up">🧭</button>
       <button class="role-toggle-btn" id="btn-role-toggle" onclick="App.toggleMyView()">👁 My View</button>
       <button class="btn-destruct sm" onclick="App.abortGame()">Abort</button>
     </div>
@@ -523,6 +538,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ SPECTATOR MAP ══ -->
+
 <div class="sc map-sc" id="sc-spectator">
   <div class="host-bar">
     <div class="live-badge spec-badge"><span class="live-dot" style="background:#BF5AF2"></span>WATCHING</div>
@@ -530,7 +546,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="htb-lbl">Time Left</div>
       <div class="htb-val" id="sp-timer">00:00</div>
     </div>
-    <button class="btn-destruct sm" onclick="App.leaveOrHostView()">Leave</button>
+    <div style="display:flex;gap:6px;align-items:center">
+      <span class="elim-countdown hidden" id="sp-elim-cd"></span>
+      <button class="compass-btn" id="compass-btn-spec" onclick="App.toggleMapOrientation('spec')" title="Toggle heading up">🧭</button>
+      <button class="btn-destruct sm" onclick="App.leaveOrHostView()">Leave</button>
+    </div>
   </div>
   <div id="specmap"></div>
   <div class="host-panel">
@@ -543,6 +563,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ JOIN ══ -->
+
 <div class="sc" id="sc-join">
   <div class="center-glass">
     <button class="back-btn" onclick="Nav.go('land')" style="align-self:flex-start">
@@ -573,6 +594,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ NAV WAIT ══ -->
+
 <div class="sc" id="sc-nwait">
   <div class="top-bar">
     <button class="back-btn" onclick="App.leaveGame()">
@@ -596,6 +618,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ NAV ACTIVE ══ -->
+
 <div class="sc nav-active-sc" id="sc-nactive">
   <div class="na-bar">
     <div class="na-players">
@@ -638,6 +661,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ RESULTS ══ -->
+
 <div class="sc map-sc" id="sc-results">
   <div class="map-topbar" style="justify-content:center">
     <div class="map-pill green-pill">🏁 Route Revealed</div>
@@ -666,6 +690,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div><!-- #app -->
 
 <!-- OVERLAYS -->
+
 <div class="overlay hidden" id="ov-cd">
   <div class="cd-wrap">
     <svg class="cd-svg" viewBox="0 0 120 120">
@@ -711,9 +736,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div id="toast" class="toast hidden"></div>
 
 <!-- ══ SCRIPTS ══ -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
 'use strict';
 /* ═══════════════════════════════════════════════════════════
@@ -777,9 +806,14 @@ const S = {
   /* timer */
   timerIv:null,
   /* elimination */
-  elimIv:null, latestPlayers:{},
+  elimIv:null, latestPlayers:{}, nextElimTime:0,
   /* sound */
-  soundEnabled:true, audioCtx:null, lastProximityBeep:0,
+  soundEnabled:true, audioCtx:null, lastProximityBeep:0, _lastProxBand:null,
+  _lastUrgentBeep:-1, _lastElimBeep:-1,
+  /* wake lock */
+  wakeLock:null,
+  /* map orientation */
+  mapOrientMode:{host:false,spec:false}, _compassHeading:0, _orientListener:null,
   /* anti-flash */
   _lastLobbyHtml:null, _lastNWaitHtml:null,
   /* screen */
@@ -825,6 +859,28 @@ function startClientTimer(){
     ['ha-timer','na-timer','sp-timer'].forEach(id=>{
       const e=el(id); if(e){e.textContent=txt;e.classList.toggle('urgent',rem<300);}
     });
+    // Urgent timer beeps: single beep at 60s, rapid double-beep at 10s
+    if(rem<=60&&rem>59.5) playTone(440,0.06,0.10);
+    if(rem<=10&&rem>0&&Math.floor(rem)!==S._lastUrgentBeep){
+      S._lastUrgentBeep=Math.floor(rem);
+      playTone(880,0.05,0.12);
+      setTimeout(()=>playTone(880,0.05,0.10),120);
+    }
+    // Elim countdown display
+    if(S.elimMode&&S.nextElimTime>0){
+      const toElim=Math.max(0,(S.nextElimTime-Date.now())/1000);
+      const cdTxt='⚡ '+fmtTime(toElim);
+      ['ha-elim-cd','sp-elim-cd'].forEach(id=>{
+        const e=el(id);if(e){e.textContent=cdTxt;e.classList.toggle('hidden',toElim<=0);}
+      });
+      // Warning beep 30s before elimination
+      if(toElim<=30&&toElim>29.5) playTone(330,0.08,0.12,'triangle');
+      // Final warning: pulse at 10s
+      if(toElim<=10&&toElim>0&&Math.floor(toElim)!==S._lastElimBeep){
+        S._lastElimBeep=Math.floor(toElim);
+        playTone(220,0.06,0.10,'triangle');
+      }
+    }
     if(rem<=0){
       clearInterval(S.timerIv);
       if(S.status==='active'&&!S.arrived&&S.isHost) gRef().update({status:'finished'});
@@ -875,6 +931,9 @@ function resetGameState(){
   S.latestPlayers={};S.lastProximityBeep=0;
   S._lastLobbyHtml=null;S._lastNWaitHtml=null;
   S.lastAccuracy=null;
+  stopWakeLock();
+  stopMapOrientation();
+  S.mapOrientMode={host:false,spec:false};S._lastUrgentBeep=-1;S._lastElimBeep=-1;S.nextElimTime=0;
 }
 function goHome(){ resetGameState(); goScreen('land'); }
 
@@ -1178,15 +1237,21 @@ function startPlayersListener(){
 /* ── HOST ACTIVE ─────────────────────────────────────────── */
 function launchHostActive(){
   S.hostViewActive=true;
+  S._lastUrgentBeep=-1;S._lastElimBeep=-1;
   goScreen('hactive');setTimeout(initHostMap,80);
   startClientTimer();
   const btn=el('btn-role-toggle');
   if(btn) btn.textContent=S.hostRole==='navigator'?'🧭 My Nav View':'👁 My Spec View';
-  // Start elimination timer if enabled (host only)
   if(S.elimMode&&S.isHost){
     if(S.elimIv)clearInterval(S.elimIv);
-    S.elimIv=setInterval(runElimCheck,5*60*1000); // every 5 minutes
+    S.nextElimTime=Date.now()+5*60*1000;
+    S.elimIv=setInterval(()=>{
+      runElimCheck();
+      S.nextElimTime=Date.now()+5*60*1000; // reset after each elim
+      S._lastElimBeep=-1;
+    },5*60*1000);
   }
+  startWakeLock();
 }
 
 function toggleMyView(){
@@ -1221,10 +1286,21 @@ function initHostMap(){
 
 function renderNavCards(elId,players){
   const cards=el(elId);if(!cards||!players)return;
+  // Find who is furthest (at risk of next elimination)
+  let dangerIdx=-1;
+  if(S.elimMode){
+    let maxDist=-1;
+    players.forEach((p,i)=>{
+      if(p.arrived||p.eliminated||!p.lat)return;
+      const d=computeDist(p)||0;
+      if(d>maxDist){maxDist=d;dangerIdx=i;}
+    });
+  }
   cards.innerHTML=players.map((p,i)=>{
-    const arr=p.arrived,elim=p.eliminated;
+    const arr=p.arrived,elim=p.eliminated,isDanger=(i===dangerIdx);
     const distTxt=arr?'🏁 In!':elim?'💀 Out':p.lat?(fmtDist(computeDist(p))+' '+distUnit(computeDist(p))):'—';
-    return`<div class="nav-card${arr?' arrived':''}${elim?' elim':''}"><div class="nc-dot" style="background:${elim?'#8e8e93':PCOLS[i%PCOLS.length]}"></div><div><div class="nc-name">${escHtml(p.name)}</div><div class="nc-dist${arr?' arrived':''}">${distTxt}</div></div></div>`;
+    const cls=`nav-card${arr?' arrived':''}${elim?' elim':''}${isDanger?' danger':''}`;
+    return`<div class="${cls}"><div class="nc-dot" style="background:${elim?'#8e8e93':PCOLS[i%PCOLS.length]}"></div><div><div class="nc-name">${escHtml(p.name)}${isDanger?' ⚠️':''}</div><div class="nc-dist${arr?' arrived':''}">${distTxt}</div></div></div>`;
   }).join('');
 }
 
@@ -1370,6 +1446,7 @@ function startGPS(){
   const opts={enableHighAccuracy:true,maximumAge:0,timeout:10000};
   S.gpsWatch=navigator.geolocation.watchPosition(handleGPSPos,handleGPSErr,opts);
   S.gpsInterval=setInterval(()=>navigator.geolocation.getCurrentPosition(handleGPSPos,()=>{},{enableHighAccuracy:true,maximumAge:0,timeout:6000}),3000);
+  startWakeLock();
 }
 function stopGPS(){
   if(S.gpsWatch!=null){navigator.geolocation.clearWatch(S.gpsWatch);S.gpsWatch=null;}
@@ -1420,9 +1497,21 @@ async function sendPosUpdate(manual=false){
     upd.arrived=true;upd.arrSec=Math.round(elapsed);
     S.arrived=true;S.arrivalElapsed=Math.round(elapsed);
     await pRef(token).update(upd);
-    await gRef().update({status:'finished'});
     playArrivalSound();
     triggerArrival(Math.round(elapsed),S.startDist);
+    // In elimination mode: first arrival ends game for all (competitive finish)
+    // In standard mode: blind finish — game keeps running, others don't know
+    if(S.elimMode){
+      await gRef().update({status:'finished'});
+    } else {
+      // Check if ALL navigators have now arrived
+      const allSnap=await db.ref(`games/${S.gameCode}/players`).once('value');
+      const allP=allSnap.val()||{};
+      const navs=Object.values(allP).filter(p=>p.role==='navigator');
+      if(navs.length>0&&navs.every(p=>p.arrived)){
+        await gRef().update({status:'finished'});
+      }
+    }
     return;
   }
   await pRef(token).update(upd);
@@ -1465,10 +1554,9 @@ function spawnRipple(type='auto'){
   const w=el('na-ripples');if(!w)return;
   const r=document.createElement('div');r.className='rip rip-'+type;
   w.appendChild(r);setTimeout(()=>r.remove(),900);
+  // Just pulse opacity on the number — no color change (was causing white/blue/orange flash)
   const nd=el('na-dist');if(!nd)return;
-  nd.classList.remove('flash-auto','flash-success','flash-error','flash-warn');
-  void nd.offsetWidth;nd.classList.add('flash-'+type);
-  setTimeout(()=>nd.classList.remove('flash-auto','flash-success','flash-error','flash-warn'),700);
+  nd.classList.remove('updating');void nd.offsetWidth;nd.classList.add('updating');
 }
 
 /* ── ARRIVAL ─────────────────────────────────────────────── */
@@ -1524,8 +1612,20 @@ function initResMap(){
 function showCountdown(cb){
   const ov=el('ov-cd'),numEl=el('cd-num'),arc=el('cd-arc');
   const circ=2*Math.PI*52;ov.classList.remove('hidden');let n=3;
-  (function tick(){numEl.textContent=n;arc.style.strokeDashoffset=circ*(1-n/3);n--;
-    if(n<0){ov.classList.add('hidden');cb();}else setTimeout(tick,1000);})();
+  (function tick(){
+    numEl.textContent=n;arc.style.strokeDashoffset=circ*(1-n/3);
+    // Beep: low tick for 3,2 — higher ping for 1 — chord for go
+    if(n>0) playTone(n===1?880:440,0.08,0.18);
+    n--;
+    if(n<0){
+      ov.classList.add('hidden');
+      // Game start chord: C4-E4-G4 quick arpeggio
+      playTone(523,0.12,0.20);
+      setTimeout(()=>playTone(659,0.12,0.20),80);
+      setTimeout(()=>playTone(784,0.18,0.22),160);
+      cb();
+    } else setTimeout(tick,1000);
+  })();
 }
 
 /* ── INIT ────────────────────────────────────────────────── */
@@ -1663,6 +1763,114 @@ function playReplay(){
   setTimeout(()=>{btn.disabled=false;btn.textContent='▶ Replay Routes';},allTrails[0].trail.length*35+500);
 }
 
+/* ── WAKE LOCK ───────────────────────────────────────────── */
+// Uses Screen Wake Lock API only — zero audio session interaction,
+// music keeps playing uninterrupted. No silent video fallback.
+async function startWakeLock(){
+  if(S.wakeLock) return; // already held
+  if(!('wakeLock' in navigator)) return; // not supported — screen may dim, that's fine
+  try{
+    S.wakeLock = await navigator.wakeLock.request('screen');
+    S.wakeLock.addEventListener('release',()=>{ S.wakeLock=null; });
+  } catch(_){} // user or OS denied — silent fail
+}
+function stopWakeLock(){
+  try{ S.wakeLock?.release(); }catch(_){}
+  S.wakeLock=null;
+}
+// Re-acquire if tab becomes visible again (wake lock auto-releases on page hide)
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&S.status==='active') startWakeLock();
+});
+
+/* ── MAP ORIENTATION (heading-up) ────────────────────────── */
+// Rotates the Leaflet map CSS to match compass heading.
+// Controls and the North indicator are counter-rotated to stay upright.
+// Uses webkitCompassHeading (iOS) or absolute DeviceOrientation (Android).
+function toggleMapOrientation(which){
+  const btn=el(which==='host'?'compass-btn-host':'compass-btn-spec');
+  const map=which==='host'?S.hostMap:S.specMap;
+  if(!map) return;
+
+  S.mapOrientMode[which]=!S.mapOrientMode[which];
+  const on=S.mapOrientMode[which];
+  if(btn) btn.classList.toggle('active',on);
+
+  if(!on){
+    // Reset rotation
+    const container=map.getContainer();
+    container.style.transform='';
+    container.style.transformOrigin='';
+    stopMapOrientation();
+    return;
+  }
+
+  // iOS 13+ requires explicit permission for DeviceOrientationEvent
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission()
+      .then(state=>{ if(state==='granted') startMapOrientation(which,map); else toast('Compass permission denied'); })
+      .catch(()=>toast('Compass not available'));
+  } else {
+    startMapOrientation(which,map);
+  }
+}
+
+function startMapOrientation(which,map){
+  stopMapOrientation(); // clear any previous listener
+  const container=map.getContainer();
+  container.style.transformOrigin='50% 50%';
+
+  S._orientListener=(e)=>{
+    // webkitCompassHeading: 0=North, clockwise, iOS only
+    // For Android: use 360-alpha (alpha counts anti-clockwise from North)
+    const heading = e.webkitCompassHeading != null
+      ? e.webkitCompassHeading
+      : (360 - (e.alpha||0));
+    S._compassHeading=heading;
+    // Rotate map container opposite to heading so map stays north-up relative to device
+    container.style.transform=`rotate(${-heading}deg)`;
+    // Show a compass rose bearing label
+    const n=el('compass-btn-'+(which==='host'?'host':'spec'));
+    if(n) n.title=Math.round(heading)+'° '+headingLabel(heading);
+  };
+  window.addEventListener('deviceorientation',S._orientListener,true);
+}
+
+function stopMapOrientation(){
+  if(S._orientListener){
+    window.removeEventListener('deviceorientation',S._orientListener,true);
+    S._orientListener=null;
+  }
+}
+
+function headingLabel(deg){
+  const dirs=['N','NE','E','SE','S','SW','W','NW'];
+  return dirs[Math.round(deg/45)%8];
+}
+
+/* ── PROXIMITY SOUNDS — stepped thresholds ───────────────── */
+// Replacing the previous version with cleaner stepped logic.
+// Five distinct distance bands, cooldown resets on each band change
+// so crossing a threshold always triggers a sound.
+const PROX_BANDS=[
+  {max:2000,min:1000,freq:400,vol:0.07,cooldown:8000},
+  {max:1000,min:500, freq:520,vol:0.09,cooldown:6000},
+  {max:500, min:250, freq:660,vol:0.11,cooldown:4000},
+  {max:250, min:100, freq:784,vol:0.13,cooldown:2500},
+  {max:100, min:0,   freq:988,vol:0.15,cooldown:1500},
+];
+function playProximitySound(distM){
+  if(!S.soundEnabled) return;
+  const band=PROX_BANDS.find(b=>distM<b.max&&distM>=b.min);
+  if(!band) return;
+  const now=Date.now();
+  // Reset cooldown if we changed band (moved closer)
+  if(band!==S._lastProxBand){ S._lastProxBand=band; S.lastProximityBeep=0; }
+  if(now-S.lastProximityBeep<band.cooldown) return;
+  S.lastProximityBeep=now;
+  playTone(band.freq,0.07,band.vol);
+}
+
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
@@ -1672,9 +1880,11 @@ const App={
   joinGame,leaveGame,
   manualRefresh,dismissSpeed,showResults,
   toggleSound,playReplay,watchAfterElim,
+  toggleMapOrientation,
   goHome,
 };
 const Nav={go:goScreen};
 </script>
+
 </body>
 </html>
