@@ -1169,7 +1169,7 @@ function updateHostMapDots(players){
     const last=trail[trail.length-1];
     if(!last||hav(last[0],last[1],pt[0],pt[1])>5)trail.push(pt);
     if(trail.length>1){if(S.hostTrails[p.id])S.hostMap.removeLayer(S.hostTrails[p.id]);S.hostTrails[p.id]=L.polyline(trail,{color:PCOLS[i%PCOLS.length],weight:2,opacity:.55,dashArray:'5 4'}).addTo(S.hostMap);}
-    S.hostDots[p.id]=L.marker(pt,{icon:dotIcon(PCOLS[i%PCOLS.length],13,true)}).bindTooltip(p.name,{permanent:false,direction:'top'}).addTo(S.hostMap);
+    S.hostDots[p.id]=L.marker(pt,{icon:dotIcon(PCOLS[i%PCOLS.length],13,true)}).bindTooltip(escHtml(p.name),{permanent:false,direction:'top'}).addTo(S.hostMap);
   });
 }
 
