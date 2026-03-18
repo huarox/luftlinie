@@ -162,6 +162,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .nav-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
 .nav-card{background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r10);padding:10px 11px;display:flex;align-items:center;gap:4px;transition:all .2s}
 .nav-card.arrived{background:rgba(52,199,89,.08);border-color:rgba(52,199,89,.25)}
+.nav-card.elim{background:rgba(142,142,147,.06);border-color:rgba(142,142,147,.15);opacity:.6}
 .nc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-right:4px}
 .nc-name{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
 .nc-dist{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--t1)}
@@ -294,10 +295,19 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .gps-warn-text{flex:1;display:flex;flex-direction:column;gap:2px}
 .gps-warn-text strong{font-size:14px;color:var(--red)}
 .gps-warn-text span{font-size:12px;color:var(--t2);line-height:1.4}
-*{-webkit-tap-highlight-color:transparent}
-::placeholder{color:var(--t4)}
-::-webkit-scrollbar{width:0}
-.hidden{display:none!important}
+/* ── EXTRAS TOGGLES (setup) ──────────────────────────────── */
+.setup-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:14px}
+.setup-toggle-label{font-size:15px;color:var(--t1);font-weight:500}
+.setup-toggle-sub{font-size:12px;color:var(--t3);margin-top:2px;line-height:1.4}
+/* ── SOUND BUTTON ────────────────────────────────────────── */
+.sound-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:3px;opacity:.35;transition:opacity .2s;line-height:1}
+.sound-btn.active{opacity:1}
+/* ── BLIND START DISPLAY ─────────────────────────────────── */
+.blind-num{font-family:var(--mono);font-size:clamp(72px,21vw,114px);font-weight:700;line-height:.9;letter-spacing:-2px;color:var(--t3);font-variant-numeric:tabular-nums}
+/* ── REPLAY BUTTON ───────────────────────────────────────── */
+.replay-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:11px;border-radius:var(--r10);border:none;background:var(--surf2);border:1px solid var(--border2);color:var(--blue);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all .14s;margin-bottom:8px}
+.replay-btn:hover{background:var(--surf1)}
+.replay-btn:disabled{opacity:.4;cursor:default}
 </style>
 </head>
 <body>
@@ -323,7 +333,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       </svg>
     </div>
     <h1 class="land-title">Luftlinie</h1>
-    <p class="land-sub">Navigate to a secret location<br>using only straight-line distance.</p>
+    <p class="land-sub">You know how far.<br>You don't know where.</p>
     <div class="land-actions">
       <button class="btn-primary btn-lg btn-full" onclick="Nav.go('setup')">
         <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -404,6 +414,30 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
   </div>
 </div>
 
+<div class="section-label" style="margin-top:22px">Extras</div>
+<div class="card">
+  <div class="setup-toggle-row">
+    <div>
+      <div class="setup-toggle-label">⚡ Elimination</div>
+      <div class="setup-toggle-sub">Furthest player knocked out every 5 min</div>
+    </div>
+    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-elim">
+      <button class="seg active" data-v="off" onclick="App.setElimMode(false)">Off</button>
+      <button class="seg" data-v="on" onclick="App.setElimMode(true)">On</button>
+    </div>
+  </div>
+  <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+    <div>
+      <div class="setup-toggle-label">🙈 Blind Start</div>
+      <div class="setup-toggle-sub">Distance hidden until you've moved 500m</div>
+    </div>
+    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blind">
+      <button class="seg active" data-v="off" onclick="App.setBlindStart(false)">Off</button>
+      <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
+    </div>
+  </div>
+</div>
+
 <div class="section-label" style="margin-top:22px">Your Name</div>
 <div class="card">
   <div style="padding:10px 14px">
@@ -463,6 +497,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="list-row"><span class="row-label">Time limit</span><span class="row-val blue" id="hl-tlim">—</span></div>
       <div class="list-row"><span class="row-label">Difficulty</span><span class="row-val" id="hl-diff">—</span></div>
       <div class="list-row"><span class="row-label">Arrival radius</span><span class="row-val" id="hl-radius">—</span></div>
+      <div class="list-row"><span class="row-label">Elimination</span><span class="row-val" id="hl-elim">—</span></div>
+      <div class="list-row"><span class="row-label">Blind start</span><span class="row-val" id="hl-blind">—</span></div>
       <div class="list-row"><span class="row-label">Target</span><span class="row-val green" id="hl-target">✓ Set</span></div>
     </div>
     <button class="btn-green btn-lg btn-full" style="margin-top:20px" id="btn-lock" onclick="App.lockStart()">
@@ -581,7 +617,10 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <span id="na-pcount">—</span>
     </div>
     <div class="na-timer" id="na-timer">—</div>
-    <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
+      <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
+    </div>
   </div>
   <div class="gps-warn hidden" id="gps-warn">
     <span>⚠️</span>
@@ -634,6 +673,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="stat"><div class="stat-v" id="stat-players">—</div><div class="stat-l">Players</div></div>
     </div>
     <div id="result-rows" class="result-rows"></div>
+    <button class="replay-btn" id="replay-btn" onclick="App.playReplay()">▶ Replay Routes</button>
     <button class="btn-primary btn-lg btn-full" onclick="App.goHome()">New Game</button>
   </div>
 </div>
@@ -659,6 +699,17 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="warn-title">Passenger Mode Only</div>
     <p class="warn-body">Do not interact with this app while driving.</p>
     <button class="btn-primary" onclick="App.dismissSpeed()">Understood</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="ov-eliminated">
+  <div class="arrive-rings"><div class="arr-ring ar1" style="border-color:rgba(255,59,48,.3)"></div><div class="arr-ring ar2" style="border-color:rgba(255,59,48,.3)"></div></div>
+  <div class="arrive-box">
+    <div class="arrive-ico" style="filter:none">💀</div>
+    <div class="arrive-title" style="color:var(--red)">Eliminated</div>
+    <div class="arrive-time">You were furthest from the target</div>
+    <div class="arrive-dist" id="elim-rank"></div>
+    <button class="btn-primary btn-lg" onclick="App.watchAfterElim()">👁 Watch Game</button>
   </div>
 </div>
 
@@ -719,6 +770,7 @@ const DIFF  = {
 const S = {
   /* setup */
   idealMin:30, diff:3, arrRadius:50, mode:'manual', hostRole:'spectator', role:'navigator',
+  elimMode:false, blindStart:false,
   /* identity */
   gameCode:null, isHost:false, myToken:null, myName:'You',
   hostPlayerToken:null, hostViewActive:true,
@@ -727,6 +779,9 @@ const S = {
   timeLimitSec:3600, startedAt:null, status:'idle',
   /* navigation */
   startDist:null, lastDist:null, arrived:false, arrivalElapsed:null,
+  eliminated:false,
+  /* blind start */
+  blindStartDist:0, blindUnlocked:false,
   /* GPS */
   myLat:null, myLon:null, lastAccuracy:null,
   prevLat:null, prevLon:null, prevGPSTime:null,
@@ -741,6 +796,10 @@ const S = {
   gameListener:null, playersListener:null,
   /* timer */
   timerIv:null,
+  /* elimination */
+  elimIv:null, latestPlayers:{},
+  /* sound */
+  soundEnabled:true, audioCtx:null, lastProximityBeep:0,
   /* anti-flash */
   _lastLobbyHtml:null, _lastNWaitHtml:null,
   /* screen */
@@ -808,7 +867,7 @@ function toggleTheme(){
   const html=document.documentElement;
   const dark=html.getAttribute('data-theme')==='dark';
   html.setAttribute('data-theme',dark?'light':'dark');
-  set('theme-label',dark?'🌙 Dark Mode':'☀ Light Mode');
+  set('theme-label',dark?'🌙 Dark Mode':'☀️ Light Mode');
   [S.leafMap,S.hostMap,S.specMap,S.resMap].forEach(m=>{
     if(!m)return; m.eachLayer(l=>{if(l._url)m.removeLayer(l);}); addTiles(m);
   });
@@ -829,8 +888,11 @@ function resetGameState(){
   S.targetLat=null;S.targetLon=null;S.noiseSeed=0.5;
   S.timeLimitSec=3600;S.startedAt=null;S.status='idle';
   S.startDist=null;S.lastDist=null;S.arrived=false;S.arrivalElapsed=null;
+  S.eliminated=false;S.blindStartDist=0;S.blindUnlocked=false;
   S.speedKmh=0;S.speedWarnShown=false;
   S.gameListener=null;S.playersListener=null;S.timerIv=null;
+  if(S.elimIv){clearInterval(S.elimIv);S.elimIv=null;}
+  S.latestPlayers={};S.lastProximityBeep=0;
   S._lastLobbyHtml=null;S._lastNWaitHtml=null;
   S.lastAccuracy=null;
 }
@@ -870,6 +932,14 @@ function setRadius(r){
 function setRole(r){
   S.role=r;
   document.querySelectorAll('#seg-role .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===r));
+}
+function setElimMode(on){
+  S.elimMode=!!on;
+  document.querySelectorAll('#seg-elim .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
+}
+function setBlindStart(on){
+  S.blindStart=!!on;
+  document.querySelectorAll('#seg-blind .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
 }
 function updateGoMapBtn(){
   const btn=el('btn-go-map'); if(!btn)return;
@@ -975,6 +1045,7 @@ async function createGameFB(){
   await gRef().set({
     status:'lobby',idealMin:S.idealMin,diff:S.diff,arrRadius:S.arrRadius,
     timeLimitSec:S.timeLimitSec,noiseSeed:S.noiseSeed,hostRole:S.hostRole,
+    elimMode:S.elimMode,blindStart:S.blindStart,
     targetLat:null,targetLon:null,startedAt:null,createdAt:SV.TIMESTAMP
   });
   S.isHost=true;
@@ -1017,6 +1088,8 @@ function renderHLobby(){
   set('hl-tlim',fmtTime(S.timeLimitSec));
   set('hl-diff',DIFF.labels[S.diff]);
   set('hl-radius',S.arrRadius+'m');
+  set('hl-elim',S.elimMode?'⚡ On':'Off');
+  set('hl-blind',S.blindStart?'🙈 On':'Off');
   startPlayersListener();
 }
 
@@ -1033,7 +1106,7 @@ async function lockStart(){
   if(btn){btn.disabled=false;btn.textContent='Lock & Start';}
   // Auto-join host as player
   const tok=randToken();S.myToken=tok;S.hostPlayerToken=tok;
-  await pRef(tok).set({name:S.myName,role:S.hostRole,lat:null,lon:null,speedKmh:0,arrived:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+  await pRef(tok).set({name:S.myName,role:S.hostRole,lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
   // Fetch actual startedAt from Firebase (server timestamp)
   const snap=await gRef().once('value');
   const g=snap.val();
@@ -1052,31 +1125,45 @@ function startPlayersListener(){
   db.ref(`games/${S.gameCode}/players`).on('value',snap=>{
     const raw=snap.val()||{};
     const players=Object.entries(raw).map(([id,p])=>({id,...p}));
-    const navs=players.filter(p=>p.role==='navigator');
-    // Lobby
+    S.latestPlayers=raw; // cache for elimination check
+    const navs=players.filter(p=>p.role==='navigator'&&!p.eliminated);
+    const allNavs=players.filter(p=>p.role==='navigator');
+    // Lobby — show everyone including spectators
     if(S.screen==='hlobby'){
-      const newHtml=navs.length||players.filter(p=>p.role==='spectator').length
+      const newHtml=players.length
         ? players.map((p,i)=>`<div class="player-row"><div class="p-dot" style="background:${PCOLS[i%PCOLS.length]}">${p.name[0].toUpperCase()}</div><span class="p-name">${escHtml(p.name)}</span><span class="p-role-tag">${p.role==='spectator'?'👁 Spectator':'🧭 Navigator'}</span></div>`).join('')
         : '<div class="empty-state">Waiting for players…</div>';
       if(newHtml!==S._lastLobbyHtml){const l=el('hl-players');if(l){l.innerHTML=newHtml;S._lastLobbyHtml=newHtml;}}
       set('hl-badge',players.length+' joined');
+    }
+    // Check if this navigator was eliminated
+    if(S.myToken&&!S.eliminated&&S.status==='active'&&S.screen==='nactive'){
+      const me=raw[S.myToken];
+      if(me?.eliminated){
+        S.eliminated=true;
+        stopGPS();
+        playElimSound();
+        const remaining=navs.filter(p=>p.id!==S.myToken).length;
+        set('elim-rank',remaining>0?remaining+' player'+(remaining>1?'s':'')+' still in':'Last one out');
+        el('ov-eliminated').classList.remove('hidden');
+      }
     }
     // Nav wait
     if(S.screen==='nwait'){
       const newHtml=`<div class="player-row"><div class="p-dot" style="background:#007AFF">${S.myName[0].toUpperCase()}</div><span class="p-name">${escHtml(S.myName)} <span style="color:var(--t3)">(you)</span></span></div>${players.length>1?`<div class="nw-others">+${players.length-1} other${players.length>2?'s':''}</div>`:''}`;
       if(newHtml!==S._lastNWaitHtml){const l=el('nw-players');if(l){l.innerHTML=newHtml;S._lastNWaitHtml=newHtml;}}
     }
-    // Host active
+    // Host active — show active navigators only
     if(S.screen==='hactive'||S.hostViewActive===false&&S.isHost){
       set('ha-nbadge',navs.length);
       renderNavCards('ha-cards',navs);
-      updateHostMapDots(navs);
+      updateHostMapDots(allNavs); // show everyone on map including eliminated (greyed)
     }
     // Spectator
     if(S.screen==='spectator'){
       set('sp-nbadge',navs.length);
       renderNavCards('sp-cards',navs);
-      if(S.specMap&&S.targetLat) updateSpecMap({players:navs,target_lat:S.targetLat,target_lon:S.targetLon,arr_radius:S.arrRadius});
+      if(S.specMap&&S.targetLat) updateSpecMap({players:allNavs,target_lat:S.targetLat,target_lon:S.targetLon,arr_radius:S.arrRadius});
     }
   });
   // Game state listener
@@ -1087,6 +1174,7 @@ function startPlayersListener(){
       S.status='active';S.startedAt=g.startedAt;
       S.targetLat=g.targetLat;S.targetLon=g.targetLon;
       S.noiseSeed=g.noiseSeed;S.arrRadius=g.arrRadius;
+      S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;
       if(S.screen==='nwait'){
         showCountdown(()=>{
           if(S.role==='spectator'){goScreen('spectator');startClientTimer();}
@@ -1114,6 +1202,11 @@ function launchHostActive(){
   startClientTimer();
   const btn=el('btn-role-toggle');
   if(btn) btn.textContent=S.hostRole==='navigator'?'🧭 My Nav View':'👁 My Spec View';
+  // Start elimination timer if enabled (host only)
+  if(S.elimMode&&S.isHost){
+    if(S.elimIv)clearInterval(S.elimIv);
+    S.elimIv=setInterval(runElimCheck,5*60*1000); // every 5 minutes
+  }
 }
 
 function toggleMyView(){
@@ -1149,8 +1242,9 @@ function initHostMap(){
 function renderNavCards(elId,players){
   const cards=el(elId);if(!cards||!players)return;
   cards.innerHTML=players.map((p,i)=>{
-    const arr=p.arrived;const d=p.distance_m;
-    return`<div class="nav-card${arr?' arrived':''}"><div class="nc-dot" style="background:${PCOLS[i%PCOLS.length]}"></div><div><div class="nc-name">${escHtml(p.name)}</div><div class="nc-dist${arr?' arrived':''}">${arr?'🏁 In!':p.lat?(fmtDist(computeDist(p))+' '+distUnit(computeDist(p))):'—'}</div></div></div>`;
+    const arr=p.arrived,elim=p.eliminated;
+    const distTxt=arr?'🏁 In!':elim?'💀 Out':p.lat?(fmtDist(computeDist(p))+' '+distUnit(computeDist(p))):'—';
+    return`<div class="nav-card${arr?' arrived':''}${elim?' elim':''}"><div class="nc-dot" style="background:${elim?'#8e8e93':PCOLS[i%PCOLS.length]}"></div><div><div class="nc-name">${escHtml(p.name)}</div><div class="nc-dist${arr?' arrived':''}">${distTxt}</div></div></div>`;
   }).join('');
 }
 
@@ -1179,6 +1273,27 @@ async function abortGame(){
   clearInterval(S.timerIv);goHome();toast('Game aborted');
 }
 
+/* ── ELIMINATION CHECK (host only, runs every 5 min) ─────── */
+async function runElimCheck(){
+  if(!S.isHost||S.status!=='active')return;
+  const raw=S.latestPlayers;
+  const active=Object.entries(raw)
+    .filter(([,p])=>p.role==='navigator'&&!p.arrived&&!p.eliminated&&p.lat)
+    .map(([id,p])=>({id,...p,dist:hav(+p.lat,+p.lon,S.targetLat,S.targetLon)}));
+  if(active.length<=1){clearInterval(S.elimIv);return;} // last player or game over
+  active.sort((a,b)=>b.dist-a.dist);
+  const loser=active[0];
+  await db.ref(`games/${S.gameCode}/players/${loser.id}`).update({eliminated:true});
+  toast(`${escHtml(loser.name)} eliminated 💀`,3500);
+}
+
+function watchAfterElim(){
+  el('ov-eliminated').classList.add('hidden');
+  // Switch to spectator view
+  S.role='spectator';S.isSpectator=true;
+  goScreen('spectator');setTimeout(initSpecMap,80);
+}
+
 /* ── JOIN ────────────────────────────────────────────────── */
 async function joinGame(){
   const code=(el('inp-code')?.value||'').trim().toUpperCase();
@@ -1195,9 +1310,9 @@ async function joinGame(){
     if(g.status==='finished')throw new Error('Game already finished.');
     S.gameCode=code;S.myName=name;
     S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;
-    S.noiseSeed=g.noiseSeed;
+    S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;
     const tok=randToken();S.myToken=tok;
-    await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:S.role,lat:null,lon:null,speedKmh:0,arrived:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+    await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:S.role,lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
     btn.disabled=false;btn.textContent='Join →';
     startPlayersListener();
     if(g.status==='active'){
@@ -1325,13 +1440,19 @@ async function sendPosUpdate(manual=false){
     upd.arrived=true;upd.arrSec=Math.round(elapsed);
     S.arrived=true;S.arrivalElapsed=Math.round(elapsed);
     await pRef(token).update(upd);
-    // Mark game finished
     await gRef().update({status:'finished'});
+    playArrivalSound();
     triggerArrival(Math.round(elapsed),S.startDist);
     return;
   }
   await pRef(token).update(upd);
-  updateNavDisplay(noised);
+  // Blind start check overrides normal display
+  if(S.blindStart&&!S.blindUnlocked){
+    updateBlindDisplay(noised);
+  } else {
+    updateNavDisplay(noised);
+    playProximitySound(dist);
+  }
 }
 
 async function manualRefresh(){
@@ -1430,7 +1551,7 @@ function showCountdown(cb){
 /* ── INIT ────────────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded',()=>{
   if(window.matchMedia?.('(prefers-color-scheme:dark)').matches){
-    document.documentElement.setAttribute('data-theme','dark');set('theme-label','☀ Light Mode');
+    document.documentElement.setAttribute('data-theme','dark');set('theme-label','☀️ Light Mode');
   }
   el('sl-time')?.addEventListener('input',upSetup);upSetup();
   // Check Firebase config
@@ -1447,14 +1568,130 @@ window.addEventListener('DOMContentLoaded',()=>{
   goScreen('land');
 });
 
+/* ── SOUND ───────────────────────────────────────────────── */
+// Apple-inspired: short sine tones, clean attack/decay, no Web Audio harshness
+function getAudioCtx(){
+  if(!S.audioCtx) S.audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return S.audioCtx;
+}
+function playTone(freq,dur=0.08,vol=0.18,type='sine'){
+  if(!S.soundEnabled)return;
+  try{
+    const ctx=getAudioCtx();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.type=type;osc.frequency.value=freq;
+    const now=ctx.currentTime;
+    gain.gain.setValueAtTime(0,now);
+    gain.gain.linearRampToValueAtTime(vol,now+0.01);  // fast attack
+    gain.gain.exponentialRampToValueAtTime(0.001,now+dur); // natural decay
+    osc.start(now);osc.stop(now+dur+0.05);
+  }catch(_){}
+}
+function playArrivalSound(){
+  // Rising three-note chime — C5, E5, G5 with slight delay each
+  playTone(523,0.18,0.22);
+  setTimeout(()=>playTone(659,0.18,0.22),120);
+  setTimeout(()=>playTone(784,0.28,0.25),240);
+}
+function playProximitySound(distM){
+  // Gentle pulse that gets faster and higher as you get closer
+  // Only fires max once per 4s to avoid overwhelming
+  const now=Date.now();
+  if(now-S.lastProximityBeep<4000)return;
+  if(distM>500)return; // only under 500m
+  S.lastProximityBeep=now;
+  const freq=distM<100?880:distM<250?660:520;
+  const vol=distM<100?0.14:0.08;
+  playTone(freq,0.06,vol);
+}
+function playElimSound(){
+  // Low descending tone — dull thud
+  playTone(220,0.25,0.20,'triangle');
+  setTimeout(()=>playTone(150,0.35,0.15,'triangle'),180);
+}
+function toggleSound(){
+  S.soundEnabled=!S.soundEnabled;
+  const btn=el('sound-btn');
+  if(btn){btn.textContent=S.soundEnabled?'🔊':'🔇';btn.classList.toggle('active',S.soundEnabled);}
+  if(S.soundEnabled){
+    // Unlock AudioContext on first user interaction (iOS requires this)
+    try{getAudioCtx().resume();}catch(_){}
+    playTone(440,0.06,0.08); // brief confirm beep
+  }
+}
+
+/* ── BLIND START ─────────────────────────────────────────── */
+function updateBlindDisplay(distM){
+  const nd=el('na-dist'),nu=el('na-unit'),eyebrow=el('na-eyebrow');
+  if(!S.blindStart||S.blindUnlocked){
+    // Normal display
+    if(eyebrow)eyebrow.textContent='DISTANCE TO TARGET';
+    nd?.classList.remove('blind-num');
+    updateNavDisplay(distM);
+    return;
+  }
+  // Still blind — show dashes, track distance moved from start
+  if(S.myTrail.length>=2){
+    const first=S.myTrail[0],last=S.myTrail[S.myTrail.length-1];
+    S.blindStartDist=hav(first[0],first[1],last[0],last[1]);
+    if(S.blindStartDist>=500){
+      S.blindUnlocked=true;
+      playTone(523,0.1,0.15);
+      setTimeout(()=>playTone(659,0.15,0.18),100);
+      toast('Blind start lifted — distance revealed',2500);
+      updateNavDisplay(distM);
+      return;
+    }
+  }
+  const moved=Math.round(S.blindStartDist);
+  const remaining=Math.max(0,500-moved);
+  if(eyebrow)eyebrow.textContent='MOVE '+remaining+'m TO UNLOCK';
+  if(nd){nd.textContent='—';nd.classList.add('blind-num');}
+  if(nu)nu.textContent='KM';
+}
+
+/* ── REPLAY ──────────────────────────────────────────────── */
+function playReplay(){
+  const btn=el('replay-btn');
+  if(!S.resMap||!S.myTrail.length){toast('No route data to replay');return;}
+  btn.disabled=true;btn.textContent='Playing…';
+  // Gather all trails
+  const allTrails=[];
+  if(S.myTrail.length>1) allTrails.push({trail:S.myTrail,color:'#34C759'});
+  Object.entries(S.playerTrails).forEach(([,trail],i)=>{
+    if(trail.length>1) allTrails.push({trail,color:PCOLS[i%PCOLS.length]});
+  });
+  if(!allTrails.length){btn.disabled=false;btn.textContent='▶ Replay Routes';return;}
+  // Remove old replay layers
+  if(S._replayLayers){S._replayLayers.forEach(l=>{try{S.resMap.removeLayer(l);}catch(_){}});}
+  S._replayLayers=[];
+  // Animate each trail
+  allTrails.forEach(({trail,color})=>{
+    const pts=[...trail];
+    const line=L.polyline([],{color,weight:3,opacity:.85}).addTo(S.resMap);
+    S._replayLayers.push(line);
+    let i=0;
+    const step=()=>{
+      if(i>=pts.length){return;}
+      line.addLatLng(pts[i]);i++;
+      setTimeout(step,30); // ~30fps playback
+    };
+    step();
+  });
+  setTimeout(()=>{btn.disabled=false;btn.textContent='▶ Replay Routes';},allTrails[0].trail.length*35+500);
+}
+
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
-  setMode,setDiff,setRadius,setRole,setHostRole,updateGoMapBtn,upSetup,
+  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,updateGoMapBtn,upSetup,
   goMap,smartPick,confirmTarget,
   copyLink,lockStart,toggleMyView,leaveOrHostView,abortGame,
   joinGame,leaveGame,
   manualRefresh,dismissSpeed,showResults,
+  toggleSound,playReplay,watchAfterElim,
   goHome,
 };
 const Nav={go:goScreen};
