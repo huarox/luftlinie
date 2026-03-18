@@ -151,9 +151,9 @@ Works out of the box. Enable your phone’s hotspot — players connect to it. T
 
 -----
 
-## Firebase security note
+## Firebase security rules
 
-The default setup uses Firebase test mode rules, which allow open read/write for 30 days. For longer-term use, update your database rules in the Firebase console to restrict access. A minimal example:
+The default test mode rules expire after 30 days and leave the database open. Replace them with these in the Firebase console under **Realtime Database → Rules**:
 
 ```json
 {
@@ -161,12 +161,27 @@ The default setup uses Firebase test mode rules, which allow open read/write for
     "games": {
       "$gameId": {
         ".read": true,
-        ".write": true
+        ".write": "!data.exists() || data.child('status').val() === 'lobby'",
+        "players": {
+          "$playerId": {
+            ".read": true,
+            ".write": true,
+            ".validate": "newData.hasChildren(['name','role'])",
+            "name":     { ".validate": "newData.isString() && newData.val().length <= 32" },
+            "role":     { ".validate": "newData.val() === 'navigator' || newData.val() === 'spectator'" },
+            "lat":      { ".validate": "newData.val() === null || (newData.isNumber() && newData.val() >= -90 && newData.val() <= 90)" },
+            "lon":      { ".validate": "newData.val() === null || (newData.isNumber() && newData.val() >= -180 && newData.val() <= 180)" },
+            "arrived":  { ".validate": "newData.isBoolean()" },
+            "speedKmh": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 300" }
+          }
+        }
       }
     }
   }
 }
 ```
+
+This validates all data shapes, rejects impossible coordinates, and prevents writes to games that are already active.
 
 -----
 
