@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║  LUFTLINIE — Firebase Edition  (single HTML file)            ║
+║  ─────────────────────────────────────────────────────────── ║
+║  SETUP (one time):                                           ║
+║  1. Create a free Firebase project at console.firebase.google.com
+║  2. Add a Realtime Database (Start in Test Mode)             ║
+║  3. Fill in FIREBASE_CONFIG below                            ║
+║  4. Host this file on GitHub Pages or Netlify (free)         ║
+║  5. Open the URL in Chrome on your iPhone — done.            ║
+╚══════════════════════════════════════════════════════════════╝
+-->
+
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Luftlinie</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  --mono:"SF Mono","Menlo","Monaco","Courier New",monospace;
+  --blue:#007AFF;--blue2:#0063CC;--blue-lt:#409CFF;
+  --green:#34C759;--red:#FF3B30;--orange:#FF9F0A;--purple:#BF5AF2;
+  --bg:#f0f4fa;
+  --surf1:rgba(255,255,255,0.82);--surf2:rgba(255,255,255,0.60);
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.05);
+  --t1:rgba(0,0,0,0.88);--t2:rgba(0,0,0,0.55);--t3:rgba(0,0,0,0.32);--t4:rgba(0,0,0,0.16);
+  --sh-sm:0 1px 4px rgba(0,0,0,.09),0 1px 2px rgba(0,0,0,.05);
+  --sh-md:0 4px 16px rgba(0,0,0,.10),0 2px 5px rgba(0,0,0,.06);
+  --sh-lg:0 12px 40px rgba(0,0,0,.14),0 4px 12px rgba(0,0,0,.08);
+  --blur:blur(28px) saturate(180%);
+  --r8:8px;--r10:10px;--r12:12px;--r14:14px;--r16:16px;--r20:20px;--topbar:52px;
+}
+[data-theme="dark"]{
+  --bg:#000;--surf1:rgba(28,28,30,0.85);--surf2:rgba(44,44,46,0.75);
+  --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.07);
+  --t1:rgba(255,255,255,0.92);--t2:rgba(255,255,255,0.58);
+  --t3:rgba(255,255,255,0.32);--t4:rgba(255,255,255,0.14);
+  --sh-sm:0 1px 4px rgba(0,0,0,.45);--sh-md:0 4px 16px rgba(0,0,0,.55);--sh-lg:0 12px 40px rgba(0,0,0,.70);
+}
+[data-theme="dark"] .bg-blob.b1{background:radial-gradient(ellipse,rgba(0,60,180,.55) 0%,transparent 65%)}
+[data-theme="dark"] .bg-blob.b2{background:radial-gradient(ellipse,rgba(0,100,120,.45) 0%,transparent 65%)}
+[data-theme="dark"] .bg-blob.b3{background:radial-gradient(ellipse,rgba(60,0,100,.35) 0%,transparent 65%)}
+[data-theme="dark"] #bg{background:#05080f}
+html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased;overflow:hidden}
+body{background:var(--bg);color:var(--t1);transition:background .3s}
+#bg{position:fixed;inset:0;z-index:0;background:linear-gradient(155deg,#c8e6ff 0%,#ddf0fb 30%,#e8f4f0 60%,#fffbe8 100%);overflow:hidden;transition:background .4s ease}
+.bg-blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.8;animation:blob-drift 20s ease-in-out infinite alternate}
+.b1{width:70vw;height:70vw;top:-20vw;left:-10vw;background:radial-gradient(ellipse,rgba(130,200,255,.7) 0%,transparent 65%);animation-duration:18s}
+.b2{width:60vw;height:60vw;top:20vh;right:-15vw;background:radial-gradient(ellipse,rgba(100,220,180,.55) 0%,transparent 65%);animation-duration:24s;animation-direction:alternate-reverse}
+.b3{width:50vw;height:50vw;bottom:-10vw;left:20vw;background:radial-gradient(ellipse,rgba(190,180,255,.5) 0%,transparent 65%);animation-duration:30s}
+@keyframes blob-drift{from{transform:translate(0,0) scale(1)}to{transform:translate(20px,-15px) scale(1.06)}}
+.bg-noise{position:absolute;inset:0;pointer-events:none;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");background-size:180px 180px}
+#app{position:relative;z-index:1;width:100%;height:100%;overflow:hidden}
+.sc{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateX(16px) scale(.99);transition:opacity .22s ease,transform .22s cubic-bezier(.4,0,.2,1)}
+.sc.active{opacity:1;pointer-events:all;transform:translateX(0) scale(1)}
+.map-sc{overflow:hidden}.nav-active-sc{background:var(--bg)!important}
+.top-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;height:var(--topbar);flex-shrink:0;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
+.top-title{flex:1;text-align:center;font-size:17px;font-weight:600;color:var(--t1)}
+.back-btn{display:flex;align-items:center;gap:2px;background:none;border:none;color:var(--blue);font-size:17px;font-weight:400;cursor:pointer;font-family:var(--font);padding:4px;border-radius:6px;transition:opacity .15s;white-space:nowrap;min-width:70px}
+.back-btn svg{width:18px;height:18px}
+.body-scroll{flex:1;overflow-y:auto;padding:16px 16px 48px;-webkit-overflow-scrolling:touch}
+.section-label{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--t3);padding-left:4px;margin-bottom:6px}
+.seg-ctrl{display:flex;background:var(--surf2);border-radius:var(--r8);padding:2px;gap:2px;border:1px solid var(--border2);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.seg{flex:1;padding:7px 10px;border-radius:7px;border:none;background:none;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .14s}
+.seg.active{background:var(--surf1);color:var(--t1);box-shadow:var(--sh-sm)}
+[data-theme="dark"] .seg.active{background:rgba(88,88,92,.65)}
+.mini-seg{display:flex;gap:4px;flex-wrap:wrap}
+.mseg{padding:5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surf2);font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .13s}
+.mseg.active{background:var(--blue);color:white;border-color:var(--blue)}
+.card{background:var(--surf1);border:1px solid var(--border2);border-radius:var(--r12);box-shadow:var(--sh-sm);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);overflow:hidden}
+.card-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px 0}
+.list-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border2)}
+.row-label{font-size:15px;color:var(--t1);font-weight:400}
+.row-val{font-size:15px;font-weight:600;color:var(--t2)}
+.row-val.blue{color:var(--blue)}.row-val.green{color:var(--green)}
+.slider{display:block;width:calc(100% - 28px);margin:10px 14px 4px;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:linear-gradient(to right,var(--blue) var(--pct,25%),rgba(0,0,0,.12) var(--pct,25%));outline:none;cursor:pointer}
+[data-theme="dark"] .slider{background:linear-gradient(to right,var(--blue) var(--pct,25%),rgba(255,255,255,.15) var(--pct,25%))}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--surf1);cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.22),0 0 0 .5px rgba(0,0,0,.08)}
+.slider-marks{display:flex;justify-content:space-between;padding:0 14px 12px;font-size:11px;color:var(--t3)}
+.stars-row{display:flex;gap:6px;padding:12px 14px 6px}
+.star{background:none;border:none;font-size:28px;cursor:pointer;color:rgba(0,0,0,.13);line-height:1;padding:2px;transition:all .12s}
+[data-theme="dark"] .star{color:rgba(255,255,255,.13)}
+.star.on{color:var(--orange)}.star:hover{transform:scale(1.12)}
+.diff-text{font-size:13px;color:var(--t2);padding:0 14px 12px;line-height:1.5}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 22px;border-radius:var(--r20);border:none;background:var(--blue);color:white;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:all .14s;white-space:nowrap;box-shadow:0 2px 8px rgba(0,122,255,.3)}
+.btn-primary:hover{background:var(--blue-lt);transform:translateY(-1px)}
+.btn-primary:active{transform:scale(.98)}
+.btn-primary:disabled{opacity:.42;cursor:default;transform:none;box-shadow:none}
+.btn-primary.btn-lg{font-size:16px;padding:14px 26px}.btn-primary.btn-full{width:100%}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--r20);background:var(--surf2);color:var(--blue);border:1px solid var(--border);font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;transition:all .13s;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.btn-secondary:hover{background:var(--surf1)}
+.btn-secondary.btn-sm{font-size:13px;padding:7px 14px}.btn-secondary.btn-full{width:100%}
+.btn-green{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 22px;border-radius:var(--r20);border:none;background:var(--green);color:white;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(52,199,89,.3);transition:all .14s}
+.btn-green:hover{filter:brightness(1.07);transform:translateY(-1px)}
+.btn-green.btn-lg{font-size:16px;padding:14px 26px}.btn-green.btn-full{width:100%}
+.btn-green:disabled{opacity:.42;cursor:default;transform:none}
+.btn-destruct{display:inline-flex;align-items:center;justify-content:center;padding:7px 14px;border-radius:var(--r20);border:none;background:rgba(255,59,48,.1);color:var(--red);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .13s}
+.btn-destruct:hover{background:rgba(255,59,48,.2)}
+.btn-destruct.sm{font-size:12px;padding:5px 12px}
+.btn-text{background:none;border:none;color:var(--blue);font-family:var(--font);font-size:14px;cursor:pointer;padding:6px;transition:opacity .14s}
+.btn-text:hover{opacity:.7}
+.btn-ico{width:15px;height:15px;flex-shrink:0}
+.badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
+.badge.blue{background:rgba(0,122,255,.1);color:var(--blue)}
+.badge.green{background:rgba(52,199,89,.1);color:var(--green)}
+#sc-land{justify-content:center;align-items:center}
+.land-glass{display:flex;flex-direction:column;align-items:center;padding:32px 28px;text-align:center;width:calc(100% - 32px);max-width:340px;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.7);border-radius:var(--r20);box-shadow:var(--sh-lg)}
+[data-theme="dark"] .land-glass{border-color:rgba(255,255,255,.12)}
+.land-icon{width:84px;height:84px;border-radius:22px;background:linear-gradient(145deg,#2196f3 0%,#0050c8 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,80,200,.45),inset 0 1px 0 rgba(255,255,255,.2);margin-bottom:18px;padding:16px;animation:float 4s ease-in-out infinite}
+.land-icon svg{width:100%;height:100%}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.land-title{font-size:38px;font-weight:800;letter-spacing:-1px;color:var(--t1);margin-bottom:10px}
+.land-sub{font-size:15px;color:var(--t2);line-height:1.65;margin-bottom:28px}
+.land-actions{display:flex;flex-direction:column;gap:9px;width:100%}
+.land-foot{position:absolute;bottom:28px;font-size:13px;color:rgba(255,255,255,.6);text-shadow:0 1px 6px rgba(0,0,0,.2);letter-spacing:.3px}
+.map-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
+.map-back-btn{width:34px;height:34px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--blue);cursor:pointer;transition:all .14s;flex-shrink:0}
+.map-back-btn svg{width:17px;height:17px}
+.map-pill{font-size:12px;font-weight:500;color:var(--t2);background:var(--surf2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);transition:background .2s,border-color .2s,color .2s}
+.green-pill{background:rgba(52,199,89,.12);color:var(--green);border-color:rgba(52,199,89,.25)}
+.smart-btn{padding:6px 13px;border-radius:20px;border:1px solid rgba(191,90,242,.35);background:rgba(191,90,242,.1);color:var(--purple);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .13s;flex-shrink:0}
+.smart-btn:hover{background:rgba(191,90,242,.18)}
+#leafmap,#hostmap,#resultmap,#specmap{flex:1;min-height:0}
+.map-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 26px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--border)}
+.map-foot-info{font-size:14px;color:var(--t2);flex:1}
+.leaflet-container{background:#d4e8f0}
+[data-theme="dark"] .leaflet-container{background:#0f1a2a}
+.leaflet-control-attribution{display:none!important}
+.leaflet-control-zoom a{background:var(--surf1)!important;color:var(--t1)!important;border-color:var(--border)!important;font-weight:700!important}
+.leaflet-popup-content-wrapper{background:var(--surf1)!important;color:var(--t1)!important;border:1px solid var(--border)!important;box-shadow:var(--sh-md)!important;border-radius:var(--r10)!important}
+.leaflet-popup-tip{background:var(--surf1)!important}
+.code-card{background:var(--surf1);border:1px solid rgba(255,255,255,.7);border-radius:var(--r16);box-shadow:var(--sh-md);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);padding:22px;text-align:center}
+[data-theme="dark"] .code-card{border-color:var(--border)}
+.code-eye{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
+.code-big{font-family:var(--mono);font-size:44px;font-weight:700;letter-spacing:8px;color:var(--t1);margin-bottom:6px}
+.code-sub{font-size:13px;color:var(--t3)}
+.player-list{display:flex;flex-direction:column;gap:6px;min-height:52px}
+.player-row{display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--surf1);border:1px solid var(--border2);border-radius:var(--r10);box-shadow:var(--sh-sm);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.p-dot{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:white}
+.p-name{flex:1;font-size:15px;font-weight:500;color:var(--t1)}
+.p-role-tag{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px}
+.empty-state{font-size:14px;color:var(--t3);text-align:center;padding:16px}
+.host-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:2px;color:var(--red)}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:live-pulse 1.4s ease-in-out infinite}
+@keyframes live-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.5)}60%{box-shadow:0 0 0 5px rgba(255,59,48,0)}}
+.host-timer-block{text-align:center}
+.htb-lbl{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);font-weight:700}
+.htb-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
+.htb-val.urgent{color:var(--red);animation:blink 1s ease infinite}
+@keyframes blink{50%{opacity:.3}}
+.host-panel{background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--border);padding:12px 14px 22px;flex-shrink:0}
+.hp-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.nav-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.nav-card{background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r10);padding:10px 11px;display:flex;align-items:center;gap:4px;transition:all .2s}
+.nav-card.arrived{background:rgba(52,199,89,.08);border-color:rgba(52,199,89,.25)}
+.nc-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-right:4px}
+.nc-name{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--t3);margin-bottom:4px}
+.nc-dist{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--t1)}
+.nc-dist.arrived{color:var(--green)}
+#sc-join{justify-content:center;align-items:center}
+.center-glass{display:flex;flex-direction:column;align-items:stretch;padding:26px 24px;width:calc(100% - 32px);max-width:340px;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.72);border-radius:var(--r20);box-shadow:var(--sh-lg)}
+[data-theme="dark"] .center-glass{border-color:var(--border)}
+.join-icon{font-size:50px;text-align:center;margin-bottom:12px}
+.join-title{font-size:26px;font-weight:800;color:var(--t1);text-align:center;margin-bottom:22px;letter-spacing:-.5px}
+.join-form{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field-lbl{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3)}
+.input{background:var(--surf2);border:1.5px solid var(--border);border-radius:var(--r8);padding:10px 13px;font-size:16px;font-family:var(--font);font-weight:500;color:var(--t1);outline:none;transition:border-color .15s,box-shadow .15s;width:100%}
+.input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,122,255,.18)}
+.input.mono{font-family:var(--mono);text-align:center;letter-spacing:6px;font-size:22px}
+.input::placeholder{color:var(--t4)}
+.err-msg{font-size:13px;color:var(--red);text-align:center;padding:4px}
+#sc-nwait{background:var(--bg)!important}
+.nwait-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px}
+.radar{position:relative;width:88px;height:88px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.radar-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(0,122,255,.25);animation:radar-expand 2.4s ease-out infinite}
+.rr1{width:34px;height:34px}.rr2{width:60px;height:60px;animation-delay:.65s}.rr3{width:88px;height:88px;animation-delay:1.3s}
+@keyframes radar-expand{0%{opacity:.7;transform:scale(.2)}100%{opacity:0;transform:scale(1)}}
+.radar-core{width:44px;height:44px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(0,122,255,.45);z-index:1}
+.radar-core svg{width:20px;height:20px}
+.nw-name{font-size:30px;font-weight:800;color:var(--t1)}
+.nw-status{font-size:15px;color:var(--t2);text-align:center}
+.nwait-list{display:flex;flex-direction:column;gap:5px;width:100%;max-width:280px}
+.role-pill{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:5px 16px;border-radius:20px;background:rgba(0,122,255,.1);color:var(--blue);border:1px solid rgba(0,122,255,.18)}
+.nw-others{text-align:center;font-size:13px;color:var(--t3);padding:6px}
+.na-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 0;flex-shrink:0}
+.na-players{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--t2);font-weight:500}
+.na-players svg{width:13px;height:13px}
+.na-timer{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--t2);font-variant-numeric:tabular-nums}
+.na-timer.urgent{color:var(--red);animation:blink 1s ease infinite}
+.na-gps{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--t3);padding:4px 10px;border-radius:20px;background:var(--surf2);border:1px solid var(--border2);transition:all .3s}
+.na-gps.live{color:var(--green);background:rgba(52,199,89,.1);border-color:rgba(52,199,89,.2)}
+.na-gps.lost{color:var(--orange)}
+.gps-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.na-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:16px}
+.na-eyebrow{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--t3);margin-bottom:12px}
+.na-dist-row{display:flex;align-items:flex-end;gap:8px;position:relative;z-index:2}
+.na-dist{font-family:var(--mono);font-size:clamp(72px,21vw,114px);font-weight:700;line-height:.9;letter-spacing:-2px;color:var(--t1);transition:color .5s ease;font-variant-numeric:tabular-nums}
+.na-dist.updating{animation:dist-flash .3s ease}
+@keyframes dist-flash{0%,100%{opacity:1}50%{opacity:.35}}
+.na-dist.close{color:var(--orange)}.na-dist.very-close{color:var(--green)}
+[data-theme="dark"] .na-dist.very-close{text-shadow:0 0 50px rgba(52,199,89,.4)}
+.na-unit{font-family:var(--mono);font-size:clamp(18px,5.5vw,30px);font-weight:400;color:var(--t3);letter-spacing:2px;margin-bottom:5px}
+.na-ripples{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+@keyframes rip-out{0%{transform:translate(-50%,-50%) scale(0.25);opacity:1}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
+.rip{position:absolute;left:50%;top:50%;width:72px;height:72px;border-radius:50%;border:2.5px solid transparent;transform:translate(-50%,-50%);pointer-events:none;animation:rip-out 0.85s cubic-bezier(.2,.8,.35,1) forwards}
+.rip-auto{border-color:rgba(0,122,255,.55);box-shadow:0 0 10px rgba(0,122,255,.20)}
+.rip-success{border-color:rgba(52,199,89,.80);box-shadow:0 0 12px rgba(52,199,89,.30)}
+.rip-error{border-color:rgba(255,59,48,.80);box-shadow:0 0 12px rgba(255,59,48,.30)}
+.rip-warn{border-color:rgba(255,159,10,.80);box-shadow:0 0 12px rgba(255,159,10,.30)}
+.rip::after{content:'';position:absolute;left:50%;top:50%;width:72px;height:72px;border-radius:50%;transform:translate(-50%,-50%) scale(0.25);opacity:0;animation:rip-out 0.85s 0.18s cubic-bezier(.2,.8,.35,1) forwards;border-color:inherit}
+.rip-auto::after{border-color:rgba(0,122,255,.25)}.rip-success::after{border-color:rgba(52,199,89,.40)}
+.rip-error::after{border-color:rgba(255,59,48,.40)}.rip-warn::after{border-color:rgba(255,159,10,.40)}
+@keyframes flash-auto-col{0%{color:var(--blue)}100%{color:inherit}}
+@keyframes flash-success-col{0%{color:var(--green)}100%{color:inherit}}
+@keyframes flash-error-col{0%{color:var(--red)}100%{color:inherit}}
+@keyframes flash-warn-col{0%{color:var(--orange)}100%{color:inherit}}
+.na-dist.flash-auto{animation:dist-flash .3s ease,flash-auto-col .5s ease}
+.na-dist.flash-success{animation:dist-flash .3s ease,flash-success-col .5s ease}
+.na-dist.flash-error{animation:dist-flash .3s ease,flash-error-col .5s ease}
+.na-dist.flash-warn{animation:dist-flash .3s ease,flash-warn-col .5s ease}
+.refresh-btn{display:flex;align-items:center;gap:6px;margin-top:16px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r20);padding:8px 16px;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-sm)}
+.refresh-btn svg{width:13px;height:13px;flex-shrink:0}
+.refresh-btn:hover{background:var(--surf1);box-shadow:var(--sh-md)}
+.refresh-btn.spinning svg{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.na-progress{padding:0 28px;flex-shrink:0}
+.na-prog-labels{display:flex;justify-content:space-between;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.na-track{height:3px;background:var(--border);border-radius:2px;position:relative;overflow:visible}
+.na-fill{height:100%;border-radius:2px;background:var(--blue);max-width:100%;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.na-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:11px;height:11px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px rgba(0,122,255,.45);transition:left 1.2s cubic-bezier(.4,0,.2,1)}
+.na-foot{padding:12px 18px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.na-upd{font-size:12px;color:var(--t3)}.na-noise{font-size:11px;color:var(--t3);font-weight:600}
+.results-panel{background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--border);padding:14px 14px 30px;flex-shrink:0}
+.winner-row{display:flex;align-items:center;gap:12px;padding:13px 14px;background:rgba(52,199,89,.08);border:1px solid rgba(52,199,89,.2);border-radius:var(--r10);margin-bottom:12px}
+.winner-ico{font-size:28px}.winner-info{flex:1}
+.winner-name{font-size:16px;font-weight:700;color:var(--t1)}.winner-sub{font-size:12px;color:var(--t2);margin-top:2px}
+.winner-time{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--green)}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}
+.stat{background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r10);padding:11px;text-align:center}
+.stat-v{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--t1)}
+.stat-v.blue{color:var(--blue)}.stat-v.green{color:var(--green)}
+.stat-l{font-size:10px;color:var(--t3);margin-top:3px;letter-spacing:.5px;font-weight:600}
+.result-rows{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.rr-row{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r8)}
+.rr-pos{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t3);width:20px}
+.rr-name{flex:1;font-size:13px;font-weight:600;color:var(--t1)}.rr-time{font-family:var(--mono);font-size:12px;color:var(--t2)}
+.overlay{position:fixed;inset:0;z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .3s;background:rgba(0,0,0,.55);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.overlay.hidden{opacity:0;pointer-events:none}
+.cd-wrap{position:relative;width:138px;height:138px;display:flex;align-items:center;justify-content:center}
+.cd-svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.cd-ring-bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:3}
+.cd-ring-fg{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:0;transition:stroke-dashoffset .9s linear}
+.cd-num{font-family:var(--mono);font-size:58px;font-weight:700;color:white;position:relative;z-index:1}
+.cd-lbl{color:rgba(255,255,255,.6);font-size:16px;font-weight:500;margin-top:18px;letter-spacing:.5px}
+.warn-box{background:var(--surf1);border:1px solid var(--border);border-radius:var(--r16);padding:28px 24px;max-width:300px;text-align:center;box-shadow:var(--sh-lg)}
+.warn-ico{font-size:44px;margin-bottom:12px}
+.warn-title{font-size:20px;font-weight:700;color:var(--red);margin-bottom:10px}
+.warn-body{font-size:14px;color:var(--t2);line-height:1.65;margin-bottom:20px}
+.arrive-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.arr-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(52,199,89,.4);animation:arr-ring-expand 2.5s ease-out infinite}
+.ar2{animation-delay:.9s}
+@keyframes arr-ring-expand{0%{width:60px;height:60px;opacity:.8}100%{width:500px;height:500px;opacity:0}}
+.arrive-box{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.arrive-ico{font-size:72px;animation:bounce .5s ease infinite alternate;filter:drop-shadow(0 4px 20px rgba(52,199,89,.4))}
+@keyframes bounce{to{transform:translateY(-8px)}}
+.arrive-title{font-size:32px;font-weight:800;color:white;letter-spacing:-.5px}
+.arrive-time{font-family:var(--mono);font-size:18px;color:rgba(255,255,255,.75)}
+.arrive-dist{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:8px}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.75);color:white;backdrop-filter:var(--blur);border-radius:22px;padding:10px 20px;font-size:14px;font-weight:500;z-index:9999;transition:opacity .3s,transform .3s;border:1px solid rgba(255,255,255,.15);white-space:nowrap}
+.toast.hidden{opacity:0;transform:translateX(-50%) translateY(10px);pointer-events:none}
+.mode-hint{font-size:13px;color:var(--t2);padding:7px 4px 0;line-height:1.5;min-height:36px}
+.timelimit-row{display:flex;justify-content:space-between;align-items:center;padding:0 14px 12px;border-top:1px solid var(--border2);margin-top:2px;padding-top:10px}
+.tl-lbl{font-size:13px;color:var(--t3)}.tl-val{font-size:14px;font-weight:700;color:var(--blue)}
+.radius-hint{font-size:13px;color:var(--t2);padding:10px 14px 2px;line-height:1.5}
+.radius-row{padding:6px 14px 14px}
+.ring-lbl{font-size:11px;font-weight:600;color:#007AFF;background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.25);padding:2px 7px;border-radius:10px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)}
+[data-theme=dark] .ring-lbl{background:rgba(0,122,255,.2);border-color:rgba(0,122,255,.4)}
+.spec-badge{background:rgba(191,90,242,.12)!important}
+.role-toggle-btn{padding:6px 13px;font-size:12px;font-weight:700;background:var(--surf2);border:1.5px solid var(--border);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap}
+.role-toggle-btn:hover{background:var(--surf1);box-shadow:var(--sh-sm)}
+.gps-warn{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,59,48,.08);border-bottom:1px solid rgba(255,59,48,.18);flex-shrink:0}
+.gps-warn.hidden{display:none!important}
+.gps-warn>span{font-size:18px;flex-shrink:0}
+.gps-warn-text{flex:1;display:flex;flex-direction:column;gap:2px}
+.gps-warn-text strong{font-size:14px;color:var(--red)}
+.gps-warn-text span{font-size:12px;color:var(--t2);line-height:1.4}
+*{-webkit-tap-highlight-color:transparent}
+::placeholder{color:var(--t4)}
+::-webkit-scrollbar{width:0}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true">
+  <div class="bg-blob b1"></div><div class="bg-blob b2"></div>
+  <div class="bg-blob b3"></div><div class="bg-noise"></div>
+</div>
+<div id="app">
+
+<!-- ══ LANDING ══ -->
+
+<div class="sc active" id="sc-land">
+  <div class="land-glass">
+    <div class="land-icon">
+      <svg viewBox="0 0 60 60" fill="none">
+        <circle cx="30" cy="30" r="8" fill="white"/>
+        <circle cx="30" cy="30" r="16" stroke="white" stroke-width="1.5" fill="none" opacity=".5"/>
+        <circle cx="30" cy="30" r="24" stroke="white" stroke-width="1" fill="none" opacity=".25"/>
+        <line x1="30" y1="6" x2="30" y2="14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="54" y1="30" x2="46" y2="30" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="30" y1="54" x2="30" y2="46" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <line x1="6" y1="30" x2="14" y2="30" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h1 class="land-title">Luftlinie</h1>
+    <p class="land-sub">Navigate to a secret location<br>using only straight-line distance.</p>
+    <div class="land-actions">
+      <button class="btn-primary btn-lg btn-full" onclick="Nav.go('setup')">
+        <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Host a Game
+      </button>
+      <button class="btn-secondary btn-lg btn-full" onclick="Nav.go('join')">
+        <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Join as Player
+      </button>
+      <button class="btn-text" onclick="toggleTheme()" id="theme-label">🌙 Dark Mode</button>
+    </div>
+  </div>
+  <div class="land-foot">No maps. No compass. Just a number.</div>
+</div>
+
+<!-- ══ SETUP ══ -->
+
+<div class="sc" id="sc-setup">
+  <div class="top-bar">
+    <button class="back-btn" onclick="Nav.go('land')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
+    </button>
+    <span class="top-title">New Game</span>
+    <div style="width:72px"></div>
+  </div>
+  <div class="body-scroll">
+    <div class="section-label">Target Mode</div>
+    <div class="seg-ctrl" id="seg-mode">
+      <button class="seg active" data-v="manual" onclick="App.setMode('manual')">📍 Manual</button>
+      <button class="seg" data-v="smart" onclick="App.setMode('smart')">✦ Smart</button>
+    </div>
+    <p class="mode-hint" id="mode-hint">You'll tap the map to drop the secret target. A range ring shows the ideal distance.</p>
+
+```
+<div class="section-label" style="margin-top:22px">Difficulty</div>
+<div class="card">
+  <div class="stars-row" id="stars">
+    <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
+    <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
+    <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
+    <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
+    <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
+  </div>
+  <p class="diff-text" id="diff-txt">Medium — navigators get 2× the ideal drive time</p>
+</div>
+
+<div class="section-label" style="margin-top:22px">Drive Time</div>
+<div class="card">
+  <div class="card-row"><span class="row-label">Ideal duration</span><span class="row-val" id="sv-time">30 min</span></div>
+  <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
+  <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90 min</span></div>
+  <div class="timelimit-row">
+    <span class="tl-lbl">Navigator time limit</span><span class="tl-val" id="sv-limit">60 min</span>
+  </div>
+</div>
+
+<div class="section-label" style="margin-top:22px">Arrival Radius</div>
+<div class="card">
+  <p class="radius-hint">How close navigators must get to trigger arrival.</p>
+  <div class="radius-row">
+    <div class="mini-seg" id="seg-radius">
+      <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
+      <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
+      <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
+      <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
+    </div>
+  </div>
+</div>
+
+<div class="section-label" style="margin-top:22px">Your Role</div>
+<div class="card">
+  <p class="radius-hint">Navigate alongside your players, or watch as spectator?</p>
+  <div class="radius-row">
+    <div class="seg-ctrl" id="seg-host-role">
+      <button class="seg" data-v="navigator" onclick="App.setHostRole('navigator')">🧭 Navigator</button>
+      <button class="seg active" data-v="spectator" onclick="App.setHostRole('spectator')">👁 Spectator</button>
+    </div>
+  </div>
+</div>
+
+<div class="section-label" style="margin-top:22px">Your Name</div>
+<div class="card">
+  <div style="padding:10px 14px">
+    <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host">
+  </div>
+</div>
+
+<button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="App.goMap()">
+  Place Target on Map →
+</button>
+```
+
+  </div>
+</div>
+
+<!-- ══ MAP (target placement) ══ -->
+
+<div class="sc map-sc" id="sc-map">
+  <div class="map-topbar">
+    <button class="map-back-btn" onclick="Nav.go('setup')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <div class="map-pill" id="map-hint">Tap map to place target</div>
+    <button class="smart-btn" id="smart-btn" onclick="App.smartPick()">✦ Smart</button>
+  </div>
+  <div id="leafmap"></div>
+  <div class="map-foot">
+    <span class="map-foot-info" id="map-info">No target set</span>
+    <button class="btn-primary" id="btn-confirm" disabled onclick="App.confirmTarget()">Confirm →</button>
+  </div>
+</div>
+
+<!-- ══ HOST LOBBY ══ -->
+
+<div class="sc" id="sc-hlobby">
+  <div class="top-bar">
+    <button class="back-btn" onclick="Nav.go('map')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
+    </button>
+    <span class="top-title">Lobby</span>
+    <span class="badge blue" id="hl-badge">0 joined</span>
+  </div>
+  <div class="body-scroll">
+    <div class="code-card">
+      <div class="code-eye">Game Code</div>
+      <div class="code-big" id="hl-code">——</div>
+      <div class="code-sub">Share with your players</div>
+      <button class="btn-secondary btn-sm" onclick="App.copyLink()" style="margin-top:12px">
+        <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Join Link
+      </button>
+    </div>
+    <div class="section-label" style="margin-top:20px">Players</div>
+    <div id="hl-players" class="player-list"><div class="empty-state">Waiting for players…</div></div>
+    <div class="section-label" style="margin-top:20px">Game Details</div>
+    <div class="card card-list">
+      <div class="list-row"><span class="row-label">Time limit</span><span class="row-val blue" id="hl-tlim">—</span></div>
+      <div class="list-row"><span class="row-label">Difficulty</span><span class="row-val" id="hl-diff">—</span></div>
+      <div class="list-row"><span class="row-label">Arrival radius</span><span class="row-val" id="hl-radius">—</span></div>
+      <div class="list-row"><span class="row-label">Target</span><span class="row-val green" id="hl-target">✓ Set</span></div>
+    </div>
+    <button class="btn-green btn-lg btn-full" style="margin-top:20px" id="btn-lock" onclick="App.lockStart()">
+      <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Lock &amp; Start
+    </button>
+  </div>
+</div>
+
+<!-- ══ HOST ACTIVE ══ -->
+
+<div class="sc map-sc" id="sc-hactive">
+  <div class="host-bar">
+    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+    <div class="host-timer-block">
+      <div class="htb-lbl">Time Left</div>
+      <div class="htb-val" id="ha-timer">00:00</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="role-toggle-btn" id="btn-role-toggle" onclick="App.toggleMyView()">👁 My View</button>
+      <button class="btn-destruct sm" onclick="App.abortGame()">Abort</button>
+    </div>
+  </div>
+  <div id="hostmap"></div>
+  <div class="host-panel">
+    <div class="hp-row">
+      <span class="section-label" style="margin:0">Navigators</span>
+      <span class="badge blue" id="ha-nbadge">0</span>
+    </div>
+    <div id="ha-cards" class="nav-card-grid"></div>
+  </div>
+</div>
+
+<!-- ══ SPECTATOR MAP ══ -->
+
+<div class="sc map-sc" id="sc-spectator">
+  <div class="host-bar">
+    <div class="live-badge spec-badge"><span class="live-dot" style="background:#BF5AF2"></span>WATCHING</div>
+    <div class="host-timer-block">
+      <div class="htb-lbl">Time Left</div>
+      <div class="htb-val" id="sp-timer">00:00</div>
+    </div>
+    <button class="btn-destruct sm" onclick="App.leaveOrHostView()">Leave</button>
+  </div>
+  <div id="specmap"></div>
+  <div class="host-panel">
+    <div class="hp-row">
+      <span class="section-label" style="margin:0">Navigators</span>
+      <span class="badge" style="background:rgba(191,90,242,.15);color:#BF5AF2" id="sp-nbadge">0</span>
+    </div>
+    <div id="sp-cards" class="nav-card-grid"></div>
+  </div>
+</div>
+
+<!-- ══ JOIN ══ -->
+
+<div class="sc" id="sc-join">
+  <div class="center-glass">
+    <button class="back-btn" onclick="Nav.go('land')" style="align-self:flex-start">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
+    </button>
+    <div class="join-icon">📍</div>
+    <h2 class="join-title">Join Game</h2>
+    <div class="join-form">
+      <div class="field">
+        <label class="field-lbl">Game Code</label>
+        <input class="input mono" id="inp-code" placeholder="ABC123" maxlength="6" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+      </div>
+      <div class="field">
+        <label class="field-lbl">Your Name</label>
+        <input class="input" id="inp-name" placeholder="Navigator" maxlength="20">
+      </div>
+      <div class="field">
+        <label class="field-lbl">Role</label>
+        <div class="seg-ctrl" id="seg-role">
+          <button class="seg active" data-v="navigator" onclick="App.setRole('navigator')">🧭 Navigator</button>
+          <button class="seg" data-v="spectator" onclick="App.setRole('spectator')">👁 Spectator</button>
+        </div>
+      </div>
+      <button class="btn-primary btn-lg btn-full" onclick="App.joinGame()">Join →</button>
+      <div class="err-msg hidden" id="join-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NAV WAIT ══ -->
+
+<div class="sc" id="sc-nwait">
+  <div class="top-bar">
+    <button class="back-btn" onclick="App.leaveGame()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Leave
+    </button>
+    <span class="top-title" id="nw-title">Game ——</span>
+    <div style="width:72px"></div>
+  </div>
+  <div class="nwait-body">
+    <div class="radar">
+      <div class="radar-ring rr1"></div><div class="radar-ring rr2"></div><div class="radar-ring rr3"></div>
+      <div class="radar-core">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+    </div>
+    <div class="nw-name" id="nw-name">You</div>
+    <div class="nw-status">Waiting for host to start…</div>
+    <div id="nw-players" class="nwait-list"></div>
+    <div class="role-pill" id="nw-role">Navigator</div>
+  </div>
+</div>
+
+<!-- ══ NAV ACTIVE ══ -->
+
+<div class="sc nav-active-sc" id="sc-nactive">
+  <div class="na-bar">
+    <div class="na-players">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span id="na-pcount">—</span>
+    </div>
+    <div class="na-timer" id="na-timer">—</div>
+    <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
+  </div>
+  <div class="gps-warn hidden" id="gps-warn">
+    <span>⚠️</span>
+    <div class="gps-warn-text">
+      <strong id="gps-warn-title">GPS blocked</strong>
+      <span id="gps-warn-body">Enable location in browser settings.</span>
+    </div>
+  </div>
+  <div class="na-center">
+    <div class="na-eyebrow">DISTANCE TO TARGET</div>
+    <div class="na-dist-row">
+      <div class="na-dist" id="na-dist">—</div>
+      <div class="na-unit" id="na-unit">KM</div>
+    </div>
+    <div class="na-ripples" id="na-ripples"></div>
+    <button class="refresh-btn" onclick="App.manualRefresh()" id="refresh-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Refresh Distance
+    </button>
+  </div>
+  <div class="na-progress">
+    <div class="na-prog-labels"><span>Start</span><span id="na-pct">—</span><span>Target</span></div>
+    <div class="na-track"><div class="na-fill" id="na-fill"></div><div class="na-thumb" id="na-thumb"></div></div>
+  </div>
+  <div class="na-foot">
+    <div class="na-upd" id="na-upd">Acquiring GPS…</div>
+    <div class="na-noise hidden" id="na-noise">🔒 Protected</div>
+  </div>
+</div>
+
+<!-- ══ RESULTS ══ -->
+
+<div class="sc map-sc" id="sc-results">
+  <div class="map-topbar" style="justify-content:center">
+    <div class="map-pill green-pill">🏁 Route Revealed</div>
+  </div>
+  <div id="resultmap"></div>
+  <div class="results-panel">
+    <div class="winner-row">
+      <span class="winner-ico">🏆</span>
+      <div class="winner-info">
+        <div class="winner-name" id="res-name">—</div>
+        <div class="winner-sub">First to reach the target</div>
+      </div>
+      <div class="winner-time" id="res-time">—</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-v blue" id="stat-dist">—</div><div class="stat-l">Straight-line</div></div>
+      <div class="stat"><div class="stat-v green" id="stat-time">—</div><div class="stat-l">Time taken</div></div>
+      <div class="stat"><div class="stat-v" id="stat-players">—</div><div class="stat-l">Players</div></div>
+    </div>
+    <div id="result-rows" class="result-rows"></div>
+    <button class="btn-primary btn-lg btn-full" onclick="App.goHome()">New Game</button>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<!-- OVERLAYS -->
+
+<div class="overlay hidden" id="ov-cd">
+  <div class="cd-wrap">
+    <svg class="cd-svg" viewBox="0 0 120 120">
+      <circle class="cd-ring-bg" cx="60" cy="60" r="52"/>
+      <circle class="cd-ring-fg" id="cd-arc" cx="60" cy="60" r="52"/>
+    </svg>
+    <div class="cd-num" id="cd-num">3</div>
+  </div>
+  <div class="cd-lbl">Get Ready</div>
+</div>
+
+<div class="overlay hidden" id="ov-speed">
+  <div class="warn-box">
+    <div class="warn-ico">⚠️</div>
+    <div class="warn-title">Passenger Mode Only</div>
+    <p class="warn-body">Do not interact with this app while driving.</p>
+    <button class="btn-primary" onclick="App.dismissSpeed()">Understood</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="ov-arrive">
+  <div class="arrive-rings"><div class="arr-ring ar1"></div><div class="arr-ring ar2"></div></div>
+  <div class="arrive-box">
+    <div class="arrive-ico">🏁</div>
+    <div class="arrive-title">Target Reached!</div>
+    <div class="arrive-time" id="arr-time">—</div>
+    <div class="arrive-dist" id="arr-dist"></div>
+    <button class="btn-primary btn-lg" onclick="App.showResults()">View Results →</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<!-- ══ SCRIPTS ══ -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════════
+   LUFTLINIE — Firebase Edition
+   Fill in FIREBASE_CONFIG below, then host the file anywhere.
+════════════════════════════════════════════════════════════ */
+
+// ── CONFIGURE THIS ────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBVPDeqopZPQNsK_LEfVpG8UUEiZakSYWI",
+  authDomain:        "luftlinie-4ea9a.firebaseapp.com",
+  databaseURL:       "https://luftlinie-4ea9a-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "luftlinie-4ea9a",
+  storageBucket:     "luftlinie-4ea9a.firebasestorage.app",
+  messagingSenderId: "326189819495",
+  appId:             "1:326189819495:web:9a9418e75b4e1198c516c2"
+};
+// ─────────────────────────────────────────────────────────
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.database();
+const SV = firebase.database.ServerValue;
+
+const PCOLS = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFB347','#C39BD3','#A8E6CF','#FF8B94'];
+const HOME  = { lat:47.816, lon:16.243 };
+const DIFF  = {
+  labels: ['','Easy','Normal','Medium','Hard','Expert'],
+  mult:   [0,3,2.5,2,1.5,1.2],
+  descs:  ['','Easy — 3× the ideal drive time','Normal — 2.5× the ideal drive time',
+           'Medium — 2× the ideal drive time','Hard — 1.5× the ideal drive time','Expert — 1.2× the ideal drive time'],
+};
+
+/* ── STATE ───────────────────────────────────────────────── */
+const S = {
+  /* setup */
+  idealMin:30, diff:3, arrRadius:50, mode:'manual', hostRole:'spectator', role:'navigator',
+  /* identity */
+  gameCode:null, isHost:false, myToken:null, myName:'You',
+  hostPlayerToken:null, hostViewActive:true,
+  /* game data from Firebase */
+  targetLat:null, targetLon:null, noiseSeed:0.5,
+  timeLimitSec:3600, startedAt:null, status:'idle',
+  /* navigation */
+  startDist:null, lastDist:null, arrived:false, arrivalElapsed:null,
+  /* GPS */
+  myLat:null, myLon:null, lastAccuracy:null,
+  prevLat:null, prevLon:null, prevGPSTime:null,
+  speedKmh:0, speedWarnShown:false, gpsWatch:null, gpsInterval:null,
+  /* maps */
+  leafMap:null, leafTgtM:null, rangeRing:null, _ringLabel:null,
+  hostMap:null, hostTgtM:null, hostDots:{}, hostTrails:{},
+  specMap:null, specDots:{}, specRoutes:{}, specTgtM:null, specArrCircle:null,
+  resMap:null, myTrail:[], playerTrails:{},
+  _lastRoutePos:{}, _routePending:{},
+  /* Firebase */
+  gameListener:null, playersListener:null,
+  /* timer */
+  timerIv:null,
+  /* anti-flash */
+  _lastLobbyHtml:null, _lastNWaitHtml:null,
+  /* screen */
+  screen:'land',
+};
+
+/* ── UTILS ───────────────────────────────────────────────── */
+function hav(la1,lo1,la2,lo2){
+  const R=6371000,dL=(la2-la1)*Math.PI/180,dO=(lo2-lo1)*Math.PI/180;
+  const a=Math.sin(dL/2)**2+Math.cos(la1*Math.PI/180)*Math.cos(la2*Math.PI/180)*Math.sin(dO/2)**2;
+  return R*2*Math.asin(Math.sqrt(Math.max(0,a)));
+}
+function fmtDist(m){ if(m==null||isNaN(m))return'—'; if(m>=10000)return(m/1000).toFixed(1); if(m>=1000)return(m/1000).toFixed(2); return Math.round(m)+''; }
+function distUnit(m){ return(!m||m>=1000)?'KM':'M'; }
+function fmtTime(s){ s=Math.max(0,Math.floor(s||0)); return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+function noiseDist(dist,seed){ return Math.max(0,dist+(seed-0.5)*60); }
+function randCode(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join(''); }
+function randToken(){ return Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2); }
+const el  = id => document.getElementById(id);
+const set = (id,v) => { const e=el(id); if(e)e.textContent=v; };
+const hide = id => { const e=el(id); if(e)e.classList.add('hidden'); };
+const show = id => { const e=el(id); if(e)e.classList.remove('hidden'); };
+const escHtml = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function gRef(){ return db.ref(`games/${S.gameCode}`); }
+function pRef(tok){ return db.ref(`games/${S.gameCode}/players/${tok||S.myToken}`); }
+
+function toast(msg,dur=2800){
+  const t=el('toast'); t.textContent=msg; t.classList.remove('hidden');
+  clearTimeout(t._tid); t._tid=setTimeout(()=>t.classList.add('hidden'),dur);
+}
+
+/* ── TIMER ───────────────────────────────────────────────── */
+function currentTimeRemaining(){
+  if(!S.startedAt) return S.timeLimitSec;
+  return Math.max(0,S.timeLimitSec-(Date.now()-S.startedAt)/1000);
+}
+function startClientTimer(){
+  clearInterval(S.timerIv);
+  S.timerIv=setInterval(()=>{
+    const rem=currentTimeRemaining();
+    const txt=fmtTime(rem);
+    ['ha-timer','na-timer','sp-timer'].forEach(id=>{
+      const e=el(id); if(e){e.textContent=txt;e.classList.toggle('urgent',rem<300);}
+    });
+    if(rem<=0){
+      clearInterval(S.timerIv);
+      if(S.status==='active'&&!S.arrived&&S.isHost) gRef().update({status:'finished'});
+    }
+  },500);
+}
+
+/* ── NAVIGATION ──────────────────────────────────────────── */
+function goScreen(id){
+  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  const sc=el('sc-'+id);
+  if(sc) requestAnimationFrame(()=>sc.classList.add('active'));
+  S.screen=id;
+  if(id==='map')       setTimeout(initLeafMap,80);
+  if(id==='hactive')   setTimeout(initHostMap,80);
+  if(id==='spectator') setTimeout(initSpecMap,80);
+  if(id==='results')   setTimeout(initResMap,80);
+}
+function toggleTheme(){
+  const html=document.documentElement;
+  const dark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',dark?'light':'dark');
+  set('theme-label',dark?'🌙 Dark Mode':'☀ Light Mode');
+  [S.leafMap,S.hostMap,S.specMap,S.resMap].forEach(m=>{
+    if(!m)return; m.eachLayer(l=>{if(l._url)m.removeLayer(l);}); addTiles(m);
+  });
+}
+window.toggleTheme=toggleTheme;
+
+/* ── STATE RESET ─────────────────────────────────────────── */
+function resetGameState(){
+  clearInterval(S.timerIv); stopGPS();
+  if(S.gameListener&&S.gameCode){ try{gRef().off();}catch(_){} }
+  if(S.playersListener&&S.gameCode){ try{db.ref(`games/${S.gameCode}/players`).off();}catch(_){} }
+  [S.leafMap,S.hostMap,S.specMap,S.resMap].forEach(m=>{try{m?.remove();}catch(_){}});
+  S.leafMap=null;S.leafTgtM=null;S.rangeRing=null;S._ringLabel=null;
+  S.hostMap=null;S.hostTgtM=null;S.hostDots={};S.hostTrails={};
+  S.specMap=null;S.specDots={};S.specRoutes={};S.specTgtM=null;S.specArrCircle=null;
+  S.resMap=null;S.myTrail=[];S.playerTrails={};S._lastRoutePos={};S._routePending={};
+  S.gameCode=null;S.isHost=false;S.myToken=null;S.hostPlayerToken=null;S.hostViewActive=true;
+  S.targetLat=null;S.targetLon=null;S.noiseSeed=0.5;
+  S.timeLimitSec=3600;S.startedAt=null;S.status='idle';
+  S.startDist=null;S.lastDist=null;S.arrived=false;S.arrivalElapsed=null;
+  S.speedKmh=0;S.speedWarnShown=false;
+  S.gameListener=null;S.playersListener=null;S.timerIv=null;
+  S._lastLobbyHtml=null;S._lastNWaitHtml=null;
+  S.lastAccuracy=null;
+}
+function goHome(){ resetGameState(); goScreen('land'); }
+
+/* ── SETUP ───────────────────────────────────────────────── */
+function upSetup(){
+  const t=+(el('sl-time')?.value||30); S.idealMin=t;
+  const pct=((t-10)/80*100).toFixed(1);
+  const sl=el('sl-time'); if(sl)sl.style.setProperty('--pct',pct+'%');
+  set('sv-time',t+' min'); set('sv-limit',Math.round(t*DIFF.mult[S.diff])+' min');
+  updateRangeRing();
+}
+function setDiff(d){
+  S.diff=d;
+  document.querySelectorAll('#stars .star').forEach(s=>s.classList.toggle('on',+s.dataset.v<=d));
+  set('diff-txt',DIFF.descs[d]); upSetup();
+}
+function setMode(m){
+  S.mode=m;
+  document.querySelectorAll('#seg-mode .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===m));
+  set('mode-hint',m==='manual'
+    ?"You'll tap the map to drop the secret target. A range ring shows the ideal distance."
+    :S.hostRole==='navigator'?"Target auto-placed on a real road — you won't see the map, keeping it fair."
+    :"A target will be auto-placed on a real road at a realistic drive distance.");
+  updateGoMapBtn();
+}
+function setHostRole(r){
+  S.hostRole=r;
+  document.querySelectorAll('#seg-host-role .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===r));
+  setMode(S.mode); updateGoMapBtn();
+}
+function setRadius(r){
+  S.arrRadius=r;
+  document.querySelectorAll('#seg-radius .mseg').forEach(b=>b.classList.toggle('active',+b.dataset.v===r));
+}
+function setRole(r){
+  S.role=r;
+  document.querySelectorAll('#seg-role .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===r));
+}
+function updateGoMapBtn(){
+  const btn=el('btn-go-map'); if(!btn)return;
+  btn.textContent=(S.mode==='smart'&&S.hostRole==='navigator')?'Find Smart Target →':'Place Target on Map →';
+}
+
+/* ── MAP TILES ───────────────────────────────────────────── */
+function tileUrl(){
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  return dark?'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+             :'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+}
+function addTiles(map){ L.tileLayer(tileUrl(),{maxZoom:19,attribution:'© Carto'}).addTo(map); }
+function pinIcon(col,sz=20){
+  return L.divIcon({html:`<div style="width:${sz}px;height:${sz}px;background:${col};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz],className:''});
+}
+function dotIcon(col,sz=12,glow=false){
+  return L.divIcon({html:`<div style="width:${sz}px;height:${sz}px;background:${col};border-radius:50%;border:2px solid white;${glow?`box-shadow:0 0 10px ${col}`:'box-shadow:0 1px 4px rgba(0,0,0,.3)'}"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],className:''});
+}
+
+/* ── RANGE RING ──────────────────────────────────────────── */
+function idealRangeM(){ return(S.idealMin/60)*40*1000; }
+function updateRangeRing(){
+  if(!S.leafMap)return;
+  const center=[S.myLat||HOME.lat,S.myLon||HOME.lon],r=idealRangeM();
+  if(S.rangeRing)S.leafMap.removeLayer(S.rangeRing);
+  S.rangeRing=L.circle(center,{radius:r,color:'#007AFF',weight:1.5,dashArray:'8 6',fillColor:'#007AFF',fillOpacity:.04,interactive:false}).addTo(S.leafMap);
+  const labelLat=center[0]+(r/111000);
+  if(S._ringLabel)S.leafMap.removeLayer(S._ringLabel);
+  S._ringLabel=L.marker([labelLat,center[1]],{icon:L.divIcon({html:`<div class="ring-lbl">~${S.idealMin} min drive</div>`,iconSize:[120,20],iconAnchor:[60,10],className:''}),interactive:false}).addTo(S.leafMap);
+}
+
+/* ── LEAF MAP ────────────────────────────────────────────── */
+function initLeafMap(){
+  if(S.leafMap){S.leafMap.invalidateSize();updateRangeRing();return;}
+  const center=[S.myLat||HOME.lat,S.myLon||HOME.lon],zoom=S.myLat?12:9;
+  S.leafMap=L.map('leafmap',{center,zoom});
+  addTiles(S.leafMap);
+  if(S.myLat) L.marker([S.myLat,S.myLon],{icon:dotIcon('#007AFF',11)}).bindPopup('<b>Your position</b>').addTo(S.leafMap);
+  S.leafMap.on('click',e=>placeTarget(e.latlng.lat,e.latlng.lng));
+  updateRangeRing();
+  if(S.targetLat)placeTarget(S.targetLat,S.targetLon);
+}
+
+function placeTarget(lat,lon){
+  if(!S.leafMap)return;
+  S.targetLat=lat;S.targetLon=lon;
+  if(S.leafTgtM)S.leafMap.removeLayer(S.leafTgtM);
+  S.leafTgtM=L.marker([lat,lon],{icon:pinIcon('#007AFF',22)}).bindPopup('<b>🎯 Target</b>').addTo(S.leafMap);
+  S.leafMap.flyTo([lat,lon],13,{duration:.7});
+  const myLat=S.myLat||HOME.lat,myLon=S.myLon||HOME.lon;
+  const dKm=hav(myLat,myLon,lat,lon)/1000,idealKm=idealRangeM()/1000,pct=Math.round(dKm/idealKm*100);
+  const pill=el('map-hint');
+  if(pct>140){pill.textContent=`⚠ ${dKm.toFixed(1)} km — ${pct}% of ideal.`;pill.style.cssText='background:rgba(255,59,48,.15);border-color:rgba(255,59,48,.4);color:var(--red)';}
+  else if(pct<50){pill.textContent=`⚠ ${dKm.toFixed(1)} km — too close (${pct}%).`;pill.style.cssText='background:rgba(255,159,10,.15);border-color:rgba(255,159,10,.4);color:var(--orange)';}
+  else{pill.textContent=`Target set · ${dKm.toFixed(1)} km · ${pct}% of ideal`;pill.style.cssText='';}
+  set('map-info',`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+  el('btn-confirm').disabled=false;
+}
+
+/* ── SMART TARGET FINDER ─────────────────────────────────── */
+async function findSmartTarget(myLat,myLon,idealKm){
+  const minKm=idealKm*0.82,maxKm=idealKm*1.12;
+  for(let a=0;a<5;a++){
+    const bear=Math.random()*360,rad=bear*Math.PI/180;
+    const cLat=myLat+(idealKm/111)*Math.cos(rad);
+    const cLon=myLon+(idealKm/(111*Math.cos(myLat*Math.PI/180)))*Math.sin(rad);
+    const q=`[out:json][timeout:14];(way[highway~"^(residential|service|unclassified|living_street)$"][access!~"^(private|no|customers|permit|military|restricted)$"][motor_vehicle!~"^(no|private)$"](around:1200,${cLat.toFixed(5)},${cLon.toFixed(5)});way[highway="tertiary"][access!~"^(private|no|customers|permit|military|restricted)$"](around:1200,${cLat.toFixed(5)},${cLon.toFixed(5)}););out geom 40;`;
+    try{
+      const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),signal:AbortSignal.timeout(12000)});
+      if(!res.ok)continue;
+      const data=await res.json();
+      const ways=(data.elements||[]).filter(w=>{const t=w.tags||{};return!t.barrier&&(!t.access||!/private|no|customers|permit|military|restricted/i.test(t.access));});
+      if(!ways.length)continue;
+      const tp={service:0,living_street:1,residential:2,unclassified:3,tertiary:4};
+      ways.sort((a,b)=>(tp[a.tags?.highway]??9)-(tp[b.tags?.highway]??9));
+      const pool=[];
+      for(const w of ways.slice(0,6)){const g=w.geometry||[];if(!g.length)continue;pool.push({lat:g[g.length-1].lat,lon:g[g.length-1].lon,s:0});pool.push({lat:g[0].lat,lon:g[0].lon,s:1});if(g.length>2){const m=g[Math.floor(g.length/2)];pool.push({lat:m.lat,lon:m.lon,s:2});}}
+      const valid=pool.filter(n=>{const d=hav(myLat,myLon,n.lat,n.lon)/1000;return d>=minKm&&d<=maxKm;});
+      if(valid.length){valid.sort((a,b)=>a.s-b.s);return valid[0];}
+    }catch(_){}
+  }
+  const bear=Math.random()*360,r=bear*Math.PI/180;
+  return{lat:myLat+(idealKm/111)*Math.cos(r),lon:myLon+(idealKm/(111*Math.cos(myLat*Math.PI/180)))*Math.sin(r)};
+}
+
+async function smartPick(){
+  const btn=el('smart-btn');btn.textContent='⟳';btn.disabled=true;
+  set('map-hint','Finding road near ideal distance…');
+  const picked=await findSmartTarget(S.myLat||HOME.lat,S.myLon||HOME.lon,idealRangeM()/1000);
+  placeTarget(picked.lat,picked.lon);
+  btn.textContent='✦ Smart';btn.disabled=false;
+}
+
+/* ── CREATE GAME (Firebase) ──────────────────────────────── */
+async function createGameFB(){
+  let code=randCode();
+  // Ensure unique
+  const snap=await db.ref(`games/${code}`).once('value');
+  if(snap.exists())code=randCode();
+  S.gameCode=code; S.noiseSeed=Math.random();
+  S.timeLimitSec=Math.round(S.idealMin*DIFF.mult[S.diff]*60);
+  await gRef().set({
+    status:'lobby',idealMin:S.idealMin,diff:S.diff,arrRadius:S.arrRadius,
+    timeLimitSec:S.timeLimitSec,noiseSeed:S.noiseSeed,hostRole:S.hostRole,
+    targetLat:null,targetLon:null,startedAt:null,createdAt:SV.TIMESTAMP
+  });
+  S.isHost=true;
+}
+
+async function goMap(){
+  const hostName=(el('host-name')?.value||'Host').trim()||'Host';
+  S.myName=hostName;
+
+  // Create game in Firebase
+  const btn=el('btn-go-map');btn.disabled=true;btn.textContent='Creating…';
+  try{ await createGameFB(); }
+  catch(e){ toast('Firebase error: '+e.message); btn.disabled=false;updateGoMapBtn();return; }
+  btn.disabled=false;updateGoMapBtn();
+
+  // Smart + navigator: find target silently → lobby
+  if(S.mode==='smart'&&S.hostRole==='navigator'){
+    goScreen('hlobby'); renderHLobby(); set('hl-target','Finding target…');
+    const myLat=S.myLat||HOME.lat,myLon=S.myLon||HOME.lon;
+    const picked=await findSmartTarget(myLat,myLon,idealRangeM()/1000);
+    S.targetLat=picked.lat;S.targetLon=picked.lon;
+    await gRef().update({targetLat:picked.lat,targetLon:picked.lon});
+    set('hl-target','✓ Set'); return;
+  }
+  if(S.mode==='smart'){goScreen('map');setTimeout(()=>{initLeafMap();smartPick();},150);}
+  else goScreen('map');
+}
+
+async function confirmTarget(){
+  if(!S.targetLat){toast('Place a target first');return;}
+  const btn=el('btn-confirm');btn.disabled=true;btn.textContent='Saving…';
+  await gRef().update({targetLat:S.targetLat,targetLon:S.targetLon});
+  btn.textContent='Confirm →';
+  goScreen('hlobby');renderHLobby();
+}
+
+/* ── HOST LOBBY ──────────────────────────────────────────── */
+function renderHLobby(){
+  set('hl-code',S.gameCode||'——');
+  set('hl-tlim',fmtTime(S.timeLimitSec));
+  set('hl-diff',DIFF.labels[S.diff]);
+  set('hl-radius',S.arrRadius+'m');
+  startPlayersListener();
+}
+
+function copyLink(){
+  const url=`${location.origin}${location.pathname}?join=${S.gameCode}`;
+  navigator.clipboard?.writeText(url).then(()=>toast('Link copied!')).catch(()=>prompt('Copy link:',url));
+}
+
+async function lockStart(){
+  if(!S.targetLat){toast('Set a target first');return;}
+  const btn=el('btn-lock');if(btn){btn.disabled=true;btn.textContent='Starting…';}
+  // Lock game in Firebase
+  await gRef().update({status:'active',startedAt:SV.TIMESTAMP});
+  if(btn){btn.disabled=false;btn.textContent='Lock & Start';}
+  // Auto-join host as player
+  const tok=randToken();S.myToken=tok;S.hostPlayerToken=tok;
+  await pRef(tok).set({name:S.myName,role:S.hostRole,lat:null,lon:null,speedKmh:0,arrived:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+  // Fetch actual startedAt from Firebase (server timestamp)
+  const snap=await gRef().once('value');
+  const g=snap.val();
+  S.startedAt=g.startedAt;
+  showCountdown(()=>{
+    S.status='active';
+    launchHostActive();
+    if(S.hostRole==='navigator') startGPS();
+  });
+}
+
+/* ── FIREBASE LISTENERS ──────────────────────────────────── */
+function startPlayersListener(){
+  if(S.playersListener) return; // already running
+  S.playersListener=true;
+  db.ref(`games/${S.gameCode}/players`).on('value',snap=>{
+    const raw=snap.val()||{};
+    const players=Object.entries(raw).map(([id,p])=>({id,...p}));
+    const navs=players.filter(p=>p.role==='navigator');
+    // Lobby
+    if(S.screen==='hlobby'){
+      const newHtml=navs.length||players.filter(p=>p.role==='spectator').length
+        ? players.map((p,i)=>`<div class="player-row"><div class="p-dot" style="background:${PCOLS[i%PCOLS.length]}">${p.name[0].toUpperCase()}</div><span class="p-name">${escHtml(p.name)}</span><span class="p-role-tag">${p.role==='spectator'?'👁 Spectator':'🧭 Navigator'}</span></div>`).join('')
+        : '<div class="empty-state">Waiting for players…</div>';
+      if(newHtml!==S._lastLobbyHtml){const l=el('hl-players');if(l){l.innerHTML=newHtml;S._lastLobbyHtml=newHtml;}}
+      set('hl-badge',players.length+' joined');
+    }
+    // Nav wait
+    if(S.screen==='nwait'){
+      const newHtml=`<div class="player-row"><div class="p-dot" style="background:#007AFF">${S.myName[0].toUpperCase()}</div><span class="p-name">${escHtml(S.myName)} <span style="color:var(--t3)">(you)</span></span></div>${players.length>1?`<div class="nw-others">+${players.length-1} other${players.length>2?'s':''}</div>`:''}`;
+      if(newHtml!==S._lastNWaitHtml){const l=el('nw-players');if(l){l.innerHTML=newHtml;S._lastNWaitHtml=newHtml;}}
+    }
+    // Host active
+    if(S.screen==='hactive'||S.hostViewActive===false&&S.isHost){
+      set('ha-nbadge',navs.length);
+      renderNavCards('ha-cards',navs);
+      updateHostMapDots(navs);
+    }
+    // Spectator
+    if(S.screen==='spectator'){
+      set('sp-nbadge',navs.length);
+      renderNavCards('sp-cards',navs);
+      if(S.specMap&&S.targetLat) updateSpecMap({players:navs,target_lat:S.targetLat,target_lon:S.targetLon,arr_radius:S.arrRadius});
+    }
+  });
+  // Game state listener
+  gRef().on('value',snap=>{
+    if(!snap.exists())return;
+    const g=snap.val();
+    if(g.status==='active'&&S.status!=='active'){
+      S.status='active';S.startedAt=g.startedAt;
+      S.targetLat=g.targetLat;S.targetLon=g.targetLon;
+      S.noiseSeed=g.noiseSeed;S.arrRadius=g.arrRadius;
+      if(S.screen==='nwait'){
+        showCountdown(()=>{
+          if(S.role==='spectator'){goScreen('spectator');startClientTimer();}
+          else{goScreen('nactive');startGPS();startClientTimer();}
+        });
+      }
+    }
+    if(g.status==='finished'&&S.status==='active'&&!S.arrived){
+      S.status='finished'; clearInterval(S.timerIv);
+      // Show results — need player data
+      db.ref(`games/${S.gameCode}/players`).once('value').then(s=>{
+        const raw=s.val()||{};
+        const players=Object.entries(raw).map(([id,p])=>({id,...p}));
+        fillResults(players);goScreen('results');
+      });
+    }
+    if(g.status==='aborted'){clearInterval(S.timerIv);if(!S.isHost){toast('Host aborted');goHome();}}
+  });
+}
+
+/* ── HOST ACTIVE ─────────────────────────────────────────── */
+function launchHostActive(){
+  S.hostViewActive=true;
+  goScreen('hactive');setTimeout(initHostMap,80);
+  startClientTimer();
+  const btn=el('btn-role-toggle');
+  if(btn) btn.textContent=S.hostRole==='navigator'?'🧭 My Nav View':'👁 My Spec View';
+}
+
+function toggleMyView(){
+  const btn=el('btn-role-toggle');
+  if(S.hostViewActive){
+    S.hostViewActive=false;
+    if(S.hostRole==='spectator'){goScreen('spectator');setTimeout(initSpecMap,80);}
+    else{goScreen('nactive');}
+    if(btn)btn.textContent='📡 Host View';
+  } else {
+    S.hostViewActive=true;
+    goScreen('hactive');setTimeout(initHostMap,80);
+    if(btn)btn.textContent=S.hostRole==='navigator'?'🧭 My Nav View':'👁 My Spec View';
+  }
+}
+
+function leaveOrHostView(){
+  if(S.isHost)toggleMyView(); else leaveGame();
+}
+
+function initHostMap(){
+  if(!el('hostmap'))return;
+  if(S.hostMap){S.hostMap.invalidateSize();return;}
+  const c=S.targetLat?[((S.myLat||HOME.lat)+S.targetLat)/2,((S.myLon||HOME.lon)+S.targetLon)/2]:[HOME.lat,HOME.lon];
+  S.hostMap=L.map('hostmap',{center:c,zoom:9,zoomControl:false});
+  addTiles(S.hostMap);L.control.zoom({position:'bottomright'}).addTo(S.hostMap);
+  if(S.targetLat){
+    L.marker([S.targetLat,S.targetLon],{icon:pinIcon('#007AFF',20)}).bindPopup('<b>🎯 Target</b>').addTo(S.hostMap);
+    L.circle([S.targetLat,S.targetLon],{radius:S.arrRadius,color:'#007AFF',fillColor:'#007AFF',fillOpacity:.07,weight:1,dashArray:'4 4'}).addTo(S.hostMap);
+  }
+}
+
+function renderNavCards(elId,players){
+  const cards=el(elId);if(!cards||!players)return;
+  cards.innerHTML=players.map((p,i)=>{
+    const arr=p.arrived;const d=p.distance_m;
+    return`<div class="nav-card${arr?' arrived':''}"><div class="nc-dot" style="background:${PCOLS[i%PCOLS.length]}"></div><div><div class="nc-name">${escHtml(p.name)}</div><div class="nc-dist${arr?' arrived':''}">${arr?'🏁 In!':p.lat?(fmtDist(computeDist(p))+' '+distUnit(computeDist(p))):'—'}</div></div></div>`;
+  }).join('');
+}
+
+function computeDist(p){
+  if(!p.lat||!S.targetLat)return null;
+  return noiseDist(hav(+p.lat,+p.lon,S.targetLat,S.targetLon),S.noiseSeed);
+}
+
+function updateHostMapDots(players){
+  if(!S.hostMap||!players)return;
+  Object.values(S.hostDots).forEach(m=>S.hostMap.removeLayer(m));S.hostDots={};
+  players.forEach((p,i)=>{
+    if(!p.lat||!p.lon)return;
+    if(!S.playerTrails[p.id])S.playerTrails[p.id]=[];
+    const trail=S.playerTrails[p.id],pt=[+p.lat,+p.lon];
+    const last=trail[trail.length-1];
+    if(!last||hav(last[0],last[1],pt[0],pt[1])>5)trail.push(pt);
+    if(trail.length>1){if(S.hostTrails[p.id])S.hostMap.removeLayer(S.hostTrails[p.id]);S.hostTrails[p.id]=L.polyline(trail,{color:PCOLS[i%PCOLS.length],weight:2,opacity:.55,dashArray:'5 4'}).addTo(S.hostMap);}
+    S.hostDots[p.id]=L.marker(pt,{icon:dotIcon(PCOLS[i%PCOLS.length],13,true)}).bindTooltip(p.name,{permanent:false,direction:'top'}).addTo(S.hostMap);
+  });
+}
+
+async function abortGame(){
+  if(!confirm('Abort game for all players?'))return;
+  await gRef().update({status:'aborted'});
+  clearInterval(S.timerIv);goHome();toast('Game aborted');
+}
+
+/* ── JOIN ────────────────────────────────────────────────── */
+async function joinGame(){
+  const code=(el('inp-code')?.value||'').trim().toUpperCase();
+  const name=(el('inp-name')?.value||'').trim()||'Navigator';
+  if(!code){toast('Enter a game code');return;}
+  const btn=document.querySelector('#sc-join .btn-primary');
+  btn.disabled=true;btn.textContent='Joining…';
+  hide('join-err');
+  try{
+    const snap=await db.ref(`games/${code}`).once('value');
+    if(!snap.exists())throw new Error('Game not found.');
+    const g=snap.val();
+    if(g.status==='aborted')throw new Error('This game has ended.');
+    if(g.status==='finished')throw new Error('Game already finished.');
+    S.gameCode=code;S.myName=name;
+    S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;
+    S.noiseSeed=g.noiseSeed;
+    const tok=randToken();S.myToken=tok;
+    await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:S.role,lat:null,lon:null,speedKmh:0,arrived:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+    btn.disabled=false;btn.textContent='Join →';
+    startPlayersListener();
+    if(g.status==='active'){
+      S.status='active';S.startedAt=g.startedAt;S.targetLat=g.targetLat;S.targetLon=g.targetLon;
+      if(S.role==='spectator'){goScreen('spectator');setTimeout(initSpecMap,80);startClientTimer();}
+      else{goScreen('nactive');startGPS();startClientTimer();}
+    } else {
+      set('nw-title','Game '+code);set('nw-name',name);
+      set('nw-role',S.role==='spectator'?'Spectator':'Navigator');
+      goScreen('nwait');
+    }
+  } catch(e){
+    btn.disabled=false;btn.textContent='Join →';
+    const err=el('join-err');if(err){err.textContent=e.message;err.classList.remove('hidden');}
+  }
+}
+
+function leaveGame(){ goHome(); }
+
+/* ── SPECTATOR MAP ───────────────────────────────────────── */
+function initSpecMap(){
+  if(!el('specmap'))return;
+  if(S.specMap){S.specMap.invalidateSize();return;}
+  S.specMap=L.map('specmap',{center:[HOME.lat,HOME.lon],zoom:10,zoomControl:false});
+  addTiles(S.specMap);L.control.zoom({position:'bottomright'}).addTo(S.specMap);
+}
+
+function updateSpecMap({players,target_lat,target_lon,arr_radius}){
+  if(!S.specMap||!players)return;
+  if(target_lat&&!S.specTgtM){
+    S.specTgtM=L.marker([target_lat,target_lon],{icon:pinIcon('#007AFF',22)}).bindPopup('<b>🎯 Target</b>').addTo(S.specMap);
+    S.specArrCircle=L.circle([target_lat,target_lon],{radius:arr_radius,color:'#007AFF',fillColor:'#007AFF',fillOpacity:.1,weight:1.5,dashArray:'4 4'}).addTo(S.specMap);
+    S.specMap.setView([target_lat,target_lon],11);
+  }
+  Object.entries(S.specDots).forEach(([,m])=>S.specMap.removeLayer(m));S.specDots={};
+  players.forEach((p,i)=>{
+    if(!p.lat||!p.lon)return;
+    const col=PCOLS[i%PCOLS.length],pt=[+p.lat,+p.lon];
+    const dist=computeDist(p);
+    S.specDots[p.id]=L.marker(pt,{icon:dotIcon(col,14,true)}).bindTooltip(`<b>${escHtml(p.name)}</b><br>${p.arrived?'🏁 Arrived':dist!=null?fmtDist(dist)+' '+distUnit(dist):'—'}`,{permanent:false,direction:'top'}).addTo(S.specMap);
+    if(target_lat&&!p.arrived){
+      const lastPos=S._lastRoutePos[p.id];
+      const moved=!lastPos||hav(lastPos[0],lastPos[1],pt[0],pt[1])>30;
+      if((moved||!S.specRoutes[p.id])&&!S._routePending[p.id]){
+        S._routePending[p.id]=true;
+        fetchRoute(p.id,pt,target_lat,target_lon,col);
+      }
+    }
+  });
+}
+
+async function fetchRoute(playerId,fromPt,toLat,toLon,col){
+  if(!S.specMap){S._routePending[playerId]=false;return;}
+  const url=`https://router.project-osrm.org/route/v1/driving/${fromPt[1]},${fromPt[0]};${toLon},${toLat}?overview=full&geometries=geojson`;
+  const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),10000);
+  try{
+    const res=await fetch(url,{signal:ctrl.signal});clearTimeout(timer);
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    if(data.code!=='Ok'||!data.routes?.[0])throw new Error(data.code||'NoRoute');
+    const latlngs=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+    if(!S.specMap){S._routePending[playerId]=false;return;}
+    if(S.specRoutes[playerId])S.specMap.removeLayer(S.specRoutes[playerId]);
+    S.specRoutes[playerId]=L.polyline(latlngs,{color:col,weight:3.5,opacity:.75}).addTo(S.specMap);
+    S.specRoutes[playerId].bringToBack();
+    S._lastRoutePos[playerId]=fromPt;
+  }catch(_){clearTimeout(timer);}
+  finally{S._routePending[playerId]=false;}
+}
+
+/* ── GPS ─────────────────────────────────────────────────── */
+function startGPS(){
+  if(!navigator.geolocation){showGPSWarn('GPS not supported','Your browser does not support geolocation.');return;}
+  if(!window.isSecureContext){showGPSWarn('HTTPS required','Open the page via HTTPS for GPS to work.');return;}
+  const opts={enableHighAccuracy:true,maximumAge:0,timeout:10000};
+  S.gpsWatch=navigator.geolocation.watchPosition(handleGPSPos,handleGPSErr,opts);
+  S.gpsInterval=setInterval(()=>navigator.geolocation.getCurrentPosition(handleGPSPos,()=>{},{enableHighAccuracy:true,maximumAge:0,timeout:6000}),3000);
+}
+function stopGPS(){
+  if(S.gpsWatch!=null){navigator.geolocation.clearWatch(S.gpsWatch);S.gpsWatch=null;}
+  if(S.gpsInterval!=null){clearInterval(S.gpsInterval);S.gpsInterval=null;}
+}
+
+function handleGPSPos(pos){
+  hide('gps-warn');
+  const lat=pos.coords.latitude,lon=pos.coords.longitude,acc=pos.coords.accuracy,now=Date.now();
+  if(S.prevLat!=null){
+    const d=hav(S.prevLat,S.prevLon,lat,lon),dt=(now-S.prevGPSTime)/1000;
+    if(dt>0)S.speedKmh=(d/dt)*3.6;
+    if(S.speedKmh>80&&!S.speedWarnShown){el('ov-speed').classList.remove('hidden');S.speedWarnShown=true;}
+  }
+  S.prevLat=lat;S.prevLon=lon;S.prevGPSTime=now;S.myLat=lat;S.myLon=lon;S.lastAccuracy=acc;
+  const t=S.myTrail,last=t[t.length-1];
+  if(!last||hav(last[0],last[1],lat,lon)>5)t.push([lat,lon]);
+  const pill=el('na-gps');
+  if(pill){
+    if(acc>50){pill.className='na-gps lost';set('na-gps-txt','~'+Math.round(acc)+'m');}
+    else{pill.className='na-gps live';set('na-gps-txt','Live');}
+  }
+  spawnRipple(acc>50?'warn':'auto');
+  sendPosUpdate(false);
+}
+function handleGPSErr(err){
+  spawnRipple('error');
+  if(err.code===1)showGPSWarn('Location access denied','Tap the 🔒 in your browser bar → Allow Location → refresh.');
+  else if(err.code===2)showGPSWarn('GPS signal lost','Move outside or near a window.');
+  else set('na-upd','GPS slow — retrying…');
+}
+function showGPSWarn(title,body){
+  show('gps-warn');set('gps-warn-title',title);set('gps-warn-body',body);
+  const pill=el('na-gps');if(pill){pill.className='na-gps lost';set('na-gps-txt','Blocked');}
+}
+
+async function sendPosUpdate(manual=false){
+  const token=S.myToken;
+  if(!token||!S.myLat||S.status!=='active')return;
+  if(!S.targetLat)return;
+  const dist=hav(S.myLat,S.myLon,S.targetLat,S.targetLon);
+  const noised=noiseDist(dist,S.noiseSeed);
+  if(manual){spawnRipple(S.myLat?'success':'error');}
+  const upd={lat:S.myLat,lon:S.myLon,speedKmh:S.speedKmh,lastSeen:SV.TIMESTAMP};
+  if(!S.startDist){upd.startDist=dist;S.startDist=dist;}
+  if(!S.arrived&&dist<=S.arrRadius){
+    const elapsed=(Date.now()-S.startedAt)/1000;
+    upd.arrived=true;upd.arrSec=Math.round(elapsed);
+    S.arrived=true;S.arrivalElapsed=Math.round(elapsed);
+    await pRef(token).update(upd);
+    // Mark game finished
+    await gRef().update({status:'finished'});
+    triggerArrival(Math.round(elapsed),S.startDist);
+    return;
+  }
+  await pRef(token).update(upd);
+  updateNavDisplay(noised);
+}
+
+async function manualRefresh(){
+  const btn=el('refresh-btn');btn.classList.add('spinning');btn.disabled=true;
+  if(!S.myLat)spawnRipple('error');
+  else await sendPosUpdate(true);
+  setTimeout(()=>{btn.classList.remove('spinning');btn.disabled=false;},600);
+}
+
+/* ── NAV DISPLAY ─────────────────────────────────────────── */
+function updateNavDisplay(distM){
+  if(distM==null)return;S.lastDist=distM;
+  const nd=el('na-dist'),nu=el('na-unit');
+  if(nd){
+    nd.textContent=fmtDist(distM);nd.classList.remove('close','very-close','updating');
+    void nd.offsetWidth;nd.classList.add('updating');
+    if(distM<500)nd.classList.add('very-close');else if(distM<2000)nd.classList.add('close');
+  }
+  if(nu)nu.textContent=distUnit(distM);
+  const prog=S.startDist?Math.min(100,(distM/S.startDist)*100):100;
+  const fill=el('na-fill'),thumb=el('na-thumb'),pctEl=el('na-pct');
+  if(fill)fill.style.width=prog+'%';
+  if(thumb)thumb.style.left=prog+'%';
+  if(pctEl){const g=100-prog;pctEl.textContent=g<1?'Almost there!':g.toFixed(0)+'% of the way';}
+  set('na-upd','Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
+  show('na-noise');
+}
+
+function spawnRipple(type='auto'){
+  const w=el('na-ripples');if(!w)return;
+  const r=document.createElement('div');r.className='rip rip-'+type;
+  w.appendChild(r);setTimeout(()=>r.remove(),900);
+  const nd=el('na-dist');if(!nd)return;
+  nd.classList.remove('flash-auto','flash-success','flash-error','flash-warn');
+  void nd.offsetWidth;nd.classList.add('flash-'+type);
+  setTimeout(()=>nd.classList.remove('flash-auto','flash-success','flash-error','flash-warn'),700);
+}
+
+/* ── ARRIVAL ─────────────────────────────────────────────── */
+function triggerArrival(arrSec,startDist){
+  stopGPS();S.status='finished';
+  el('ov-arrive').classList.remove('hidden');
+  set('arr-time','Time: '+fmtTime(arrSec));
+  const d=startDist||(S.startDist||0);
+  set('arr-dist',d?(d/1000).toFixed(1)+' km straight-line':'');
+}
+function dismissSpeed(){el('ov-speed').classList.add('hidden');}
+function showResults(){
+  el('ov-arrive').classList.add('hidden');
+  db.ref(`games/${S.gameCode}/players`).once('value').then(snap=>{
+    const raw=snap.val()||{};
+    fillResults(Object.entries(raw).map(([id,p])=>({id,...p})));
+    goScreen('results');
+  });
+}
+
+/* ── RESULTS ─────────────────────────────────────────────── */
+function fillResults(players){
+  const elapsed=S.arrivalElapsed??(S.timeLimitSec-currentTimeRemaining());
+  set('res-name',S.myName+' — '+(S.arrived?'Arrived!':'Game Over'));
+  set('res-time',fmtTime(elapsed));set('stat-time',fmtTime(elapsed));
+  set('stat-dist',S.startDist?(S.startDist/1000).toFixed(1)+' km':'—');
+  set('stat-players',players?players.filter(p=>p.role==='navigator').length:'—');
+  const rows=el('result-rows');
+  if(rows&&players){
+    const navs=players.filter(p=>p.role==='navigator');
+    const sorted=[...navs].sort((a,b)=>{if(a.arrived&&!b.arrived)return -1;if(!a.arrived&&b.arrived)return 1;return(a.arrSec||9999)-(b.arrSec||9999);});
+    rows.innerHTML=sorted.map((p,i)=>`<div class="rr-row"><span class="rr-pos">${['🥇','🥈','🥉'][i]||i+1}</span><span class="rr-name">${escHtml(p.name)}</span><span class="rr-time">${p.arrived?fmtTime(p.arrSec):'DNF'}</span></div>`).join('');
+  }
+}
+
+/* ── RESULTS MAP ─────────────────────────────────────────── */
+function initResMap(){
+  if(!el('resultmap')||S.resMap){S.resMap?.invalidateSize();return;}
+  const myLat=S.myTrail.length?S.myTrail[0][0]:(S.myLat||HOME.lat);
+  const myLon=S.myTrail.length?S.myTrail[0][1]:(S.myLon||HOME.lon);
+  const c=S.targetLat?[(myLat+S.targetLat)/2,(myLon+S.targetLon)/2]:[myLat,myLon];
+  S.resMap=L.map('resultmap',{center:c,zoom:9,zoomControl:false});addTiles(S.resMap);
+  if(!S.targetLat)return;
+  L.marker([S.targetLat,S.targetLon],{icon:pinIcon('#007AFF',20)}).bindPopup('<b>🎯 Target</b>').addTo(S.resMap);
+  L.marker([myLat,myLon],{icon:dotIcon('#8e8e93',10)}).bindPopup('<b>Start</b>').addTo(S.resMap);
+  L.polyline([[myLat,myLon],[S.targetLat,S.targetLon]],{color:'#007AFF',weight:1.5,dashArray:'6 5',opacity:.35}).addTo(S.resMap);
+  if(S.myTrail.length>1)L.polyline(S.myTrail,{color:'#34C759',weight:2.5,opacity:.8}).addTo(S.resMap);
+  Object.entries(S.playerTrails).forEach(([,trail],i)=>{if(trail.length>1)L.polyline(trail,{color:PCOLS[i%PCOLS.length],weight:2,opacity:.5}).addTo(S.resMap);});
+  try{S.resMap.fitBounds([[myLat,myLon],[S.targetLat,S.targetLon]],{padding:[50,50]});}catch(_){}
+}
+
+/* ── COUNTDOWN ───────────────────────────────────────────── */
+function showCountdown(cb){
+  const ov=el('ov-cd'),numEl=el('cd-num'),arc=el('cd-arc');
+  const circ=2*Math.PI*52;ov.classList.remove('hidden');let n=3;
+  (function tick(){numEl.textContent=n;arc.style.strokeDashoffset=circ*(1-n/3);n--;
+    if(n<0){ov.classList.add('hidden');cb();}else setTimeout(tick,1000);})();
+}
+
+/* ── INIT ────────────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded',()=>{
+  if(window.matchMedia?.('(prefers-color-scheme:dark)').matches){
+    document.documentElement.setAttribute('data-theme','dark');set('theme-label','☀ Light Mode');
+  }
+  el('sl-time')?.addEventListener('input',upSetup);upSetup();
+  // Check Firebase config
+  if(FIREBASE_CONFIG.apiKey==='YOUR_API_KEY'){
+    setTimeout(()=>toast('⚠️ Fill in FIREBASE_CONFIG in the source file',6000),800);
+  }
+  // Pre-fetch GPS
+  if(navigator.geolocation&&window.isSecureContext){
+    navigator.geolocation.getCurrentPosition(p=>{S.myLat=p.coords.latitude;S.myLon=p.coords.longitude;},()=>{},{enableHighAccuracy:false,timeout:8000,maximumAge:60000});
+  }
+  // Handle ?join= in URL
+  const jc=new URLSearchParams(location.search).get('join');
+  if(jc){const inp=el('inp-code');if(inp)inp.value=jc;goScreen('join');return;}
+  goScreen('land');
+});
+
+/* ── EXPOSE ──────────────────────────────────────────────── */
+window.toggleTheme=toggleTheme;
+const App={
+  setMode,setDiff,setRadius,setRole,setHostRole,updateGoMapBtn,upSetup,
+  goMap,smartPick,confirmTarget,
+  copyLink,lockStart,toggleMyView,leaveOrHostView,abortGame,
+  joinGame,leaveGame,
+  manualRefresh,dismissSpeed,showResults,
+  goHome,
+};
+const Nav={go:goScreen};
+</script>
+
+</body>
+</html>
+HTMLEOF
