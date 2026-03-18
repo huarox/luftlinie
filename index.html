@@ -305,6 +305,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 /* ── SOUND BUTTON ────────────────────────────────────────── */
 .sound-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:3px;opacity:.35;transition:opacity .2s;line-height:1}
 .sound-btn.active{opacity:1}
+.compass-btn.sound-btn{opacity:.5}
+.compass-btn.sound-btn.active{opacity:1}
 /* ── BLIND START DISPLAY ─────────────────────────────────── */
 .blind-num{font-family:var(--mono);font-size:clamp(72px,21vw,114px);font-weight:700;line-height:.9;letter-spacing:-2px;color:var(--t3);font-variant-numeric:tabular-nums}
 /* ── REPLAY BUTTON ───────────────────────────────────────── */
@@ -542,7 +544,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <div style="display:flex;gap:6px;align-items:center">
       <span class="elim-countdown hidden" id="ha-elim-cd"></span>
-      <button class="sound-btn active" id="sound-btn-host" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
+      <button class="compass-btn sound-btn active" id="sound-btn-host" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
       <button class="compass-btn" id="compass-btn-host" onclick="App.toggleMapOrientation('host')" title="Toggle heading up">🧭</button>
       <button class="role-toggle-btn" id="btn-role-toggle" onclick="App.toggleMyView()">👁 My View</button>
       <button class="btn-destruct sm" onclick="App.abortGame()">Abort</button>
@@ -569,7 +571,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <div style="display:flex;gap:6px;align-items:center">
       <span class="elim-countdown hidden" id="sp-elim-cd"></span>
-      <button class="sound-btn active" id="sound-btn-spec" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
+      <button class="compass-btn sound-btn active" id="sound-btn-spec" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
       <button class="compass-btn" id="compass-btn-spec" onclick="App.toggleMapOrientation('spec')" title="Toggle heading up">🧭</button>
       <button class="btn-destruct sm" onclick="App.leaveOrHostView()">Leave</button>
     </div>
