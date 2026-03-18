@@ -53,7 +53,7 @@
 [data-theme="dark"] #bg{background:#05080f}
 html,body{height:100%;font-family:var(--font);-webkit-font-smoothing:antialiased;overflow:hidden}
 body{background:var(--bg);color:var(--t1);transition:background .3s}
-#bg{position:fixed;inset:0;z-index:0;background:linear-gradient(155deg,#c8e6ff 0%,#ddf0fb 30%,#e8f4f0 60%,#fffbe8 100%);overflow:hidden;transition:background .4s ease}
+#bg{position:fixed;inset:0;z-index:0;background:linear-gradient(155deg,#c8e6ff 0%,#ddf0fb 30%,#e8f4f0 60%,#eef4f0 100%);overflow:hidden;transition:background .4s ease}
 .bg-blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.8;animation:blob-drift 20s ease-in-out infinite alternate}
 .b1{width:70vw;height:70vw;top:-20vw;left:-10vw;background:radial-gradient(ellipse,rgba(130,200,255,.7) 0%,transparent 65%);animation-duration:18s}
 .b2{width:60vw;height:60vw;top:20vh;right:-15vw;background:radial-gradient(ellipse,rgba(100,220,180,.55) 0%,transparent 65%);animation-duration:24s;animation-direction:alternate-reverse}
@@ -439,9 +439,17 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
     </div>
   </div>
+  <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+    <div>
+      <div class="setup-toggle-label">🏁 Blind Finish</div>
+      <div class="setup-toggle-sub">Others keep playing after first arrival</div>
+    </div>
+    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blindfinish">
+      <button class="seg" data-v="off" onclick="App.setBlindFinish(false)">Off</button>
+      <button class="seg active" data-v="on" onclick="App.setBlindFinish(true)">On</button>
+    </div>
+  </div>
 </div>
-
-<div class="section-label" style="margin-top:22px">Your Name</div>
 <div class="card">
   <div style="padding:10px 14px">
     <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host">
@@ -502,6 +510,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="list-row"><span class="row-label">Arrival radius</span><span class="row-val" id="hl-radius">—</span></div>
       <div class="list-row"><span class="row-label">Elimination</span><span class="row-val" id="hl-elim">—</span></div>
       <div class="list-row"><span class="row-label">Blind start</span><span class="row-val" id="hl-blind">—</span></div>
+      <div class="list-row"><span class="row-label">Blind finish</span><span class="row-val" id="hl-blindfinish">—</span></div>
       <div class="list-row"><span class="row-label">Target</span><span class="row-val green" id="hl-target">✓ Set</span></div>
     </div>
     <button class="btn-green btn-lg btn-full" style="margin-top:20px" id="btn-lock" onclick="App.lockStart()">
@@ -626,10 +635,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <span id="na-pcount">—</span>
     </div>
     <div class="na-timer" id="na-timer">—</div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <button class="sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
-      <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
-    </div>
+    <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
   </div>
   <div class="gps-warn hidden" id="gps-warn">
     <span>⚠️</span>
@@ -655,6 +661,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="na-track"><div class="na-fill" id="na-fill"></div><div class="na-thumb" id="na-thumb"></div></div>
   </div>
   <div class="na-foot">
+    <button class="sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
     <div class="na-upd" id="na-upd">Acquiring GPS…</div>
     <div class="na-noise hidden" id="na-noise">🔒 Protected</div>
   </div>
@@ -779,7 +786,7 @@ const DIFF  = {
 const S = {
   /* setup */
   idealMin:30, diff:3, arrRadius:50, mode:'manual', hostRole:'spectator', role:'navigator',
-  elimMode:false, blindStart:false,
+  elimMode:false, blindStart:false, blindFinish:true,
   /* identity */
   gameCode:null, isHost:false, myToken:null, myName:'You',
   hostPlayerToken:null, hostViewActive:true,
@@ -980,6 +987,10 @@ function setBlindStart(on){
   S.blindStart=!!on;
   document.querySelectorAll('#seg-blind .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
 }
+function setBlindFinish(on){
+  S.blindFinish=!!on;
+  document.querySelectorAll('#seg-blindfinish .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
+}
 function updateGoMapBtn(){
   const btn=el('btn-go-map'); if(!btn)return;
   btn.textContent=(S.mode==='smart'&&S.hostRole==='navigator')?'Find Smart Target →':'Place Target on Map →';
@@ -1084,7 +1095,7 @@ async function createGameFB(){
   await gRef().set({
     status:'lobby',idealMin:S.idealMin,diff:S.diff,arrRadius:S.arrRadius,
     timeLimitSec:S.timeLimitSec,noiseSeed:S.noiseSeed,hostRole:S.hostRole,
-    elimMode:S.elimMode,blindStart:S.blindStart,
+    elimMode:S.elimMode,blindStart:S.blindStart,blindFinish:S.blindFinish,
     targetLat:null,targetLon:null,startedAt:null,createdAt:SV.TIMESTAMP
   });
   S.isHost=true;
@@ -1129,6 +1140,7 @@ function renderHLobby(){
   set('hl-radius',S.arrRadius+'m');
   set('hl-elim',S.elimMode?'⚡ On':'Off');
   set('hl-blind',S.blindStart?'🙈 On':'Off');
+  set('hl-blindfinish',S.blindFinish?'🏁 On':'Off');
   startPlayersListener();
 }
 
@@ -1213,7 +1225,7 @@ function startPlayersListener(){
       S.status='active';S.startedAt=g.startedAt;
       S.targetLat=g.targetLat;S.targetLon=g.targetLon;
       S.noiseSeed=g.noiseSeed;S.arrRadius=g.arrRadius;
-      S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;
+      S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;
       if(S.screen==='nwait'){
         showCountdown(()=>{
           if(S.role==='spectator'){goScreen('spectator');startClientTimer();}
@@ -1366,7 +1378,7 @@ async function joinGame(){
     if(g.status==='finished')throw new Error('Game already finished.');
     S.gameCode=code;S.myName=name;
     S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;
-    S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;
+    S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;
     const tok=randToken();S.myToken=tok;
     await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:S.role,lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
     btn.disabled=false;btn.textContent='Join →';
@@ -1499,9 +1511,10 @@ async function sendPosUpdate(manual=false){
     await pRef(token).update(upd);
     playArrivalSound();
     triggerArrival(Math.round(elapsed),S.startDist);
-    // In elimination mode: first arrival ends game for all (competitive finish)
-    // In standard mode: blind finish — game keeps running, others don't know
-    if(S.elimMode){
+    // Elimination mode always ends on first arrival.
+    // Blind Finish ON (default): game keeps running silently after first arrival.
+    // Blind Finish OFF: first arrival ends game for everyone immediately.
+    if(S.elimMode||!S.blindFinish){
       await gRef().update({status:'finished'});
     } else {
       // Check if ALL navigators have now arrived
@@ -1874,7 +1887,7 @@ function playProximitySound(distM){
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
-  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,updateGoMapBtn,upSetup,
+  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,updateGoMapBtn,upSetup,
   goMap,smartPick,confirmTarget,
   copyLink,lockStart,toggleMyView,leaveOrHostView,abortGame,
   joinGame,leaveGame,
