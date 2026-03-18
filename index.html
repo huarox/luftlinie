@@ -449,6 +449,16 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <button class="seg active" data-v="on" onclick="App.setBlindFinish(true)">On</button>
     </div>
   </div>
+  <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+    <div>
+      <div class="setup-toggle-label">👻 Exclude Host</div>
+      <div class="setup-toggle-sub">Host hidden from leaderboard &amp; results</div>
+    </div>
+    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-excludehost">
+      <button class="seg" data-v="off" onclick="App.setExcludeHost(false)">Off</button>
+      <button class="seg active" data-v="on" onclick="App.setExcludeHost(true)">On</button>
+    </div>
+  </div>
 </div>
 <div class="card">
   <div style="padding:10px 14px">
@@ -511,6 +521,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="list-row"><span class="row-label">Elimination</span><span class="row-val" id="hl-elim">—</span></div>
       <div class="list-row"><span class="row-label">Blind start</span><span class="row-val" id="hl-blind">—</span></div>
       <div class="list-row"><span class="row-label">Blind finish</span><span class="row-val" id="hl-blindfinish">—</span></div>
+      <div class="list-row"><span class="row-label">Exclude host</span><span class="row-val" id="hl-excludehost">—</span></div>
       <div class="list-row"><span class="row-label">Target</span><span class="row-val green" id="hl-target">✓ Set</span></div>
     </div>
     <button class="btn-green btn-lg btn-full" style="margin-top:20px" id="btn-lock" onclick="App.lockStart()">
@@ -531,6 +542,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <div style="display:flex;gap:6px;align-items:center">
       <span class="elim-countdown hidden" id="ha-elim-cd"></span>
+      <button class="sound-btn active" id="sound-btn-host" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
       <button class="compass-btn" id="compass-btn-host" onclick="App.toggleMapOrientation('host')" title="Toggle heading up">🧭</button>
       <button class="role-toggle-btn" id="btn-role-toggle" onclick="App.toggleMyView()">👁 My View</button>
       <button class="btn-destruct sm" onclick="App.abortGame()">Abort</button>
@@ -557,6 +569,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <div style="display:flex;gap:6px;align-items:center">
       <span class="elim-countdown hidden" id="sp-elim-cd"></span>
+      <button class="sound-btn active" id="sound-btn-spec" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
       <button class="compass-btn" id="compass-btn-spec" onclick="App.toggleMapOrientation('spec')" title="Toggle heading up">🧭</button>
       <button class="btn-destruct sm" onclick="App.leaveOrHostView()">Leave</button>
     </div>
@@ -786,7 +799,7 @@ const DIFF  = {
 const S = {
   /* setup */
   idealMin:30, diff:3, arrRadius:50, mode:'manual', hostRole:'spectator', role:'navigator',
-  elimMode:false, blindStart:false, blindFinish:true,
+  elimMode:false, blindStart:false, blindFinish:true, excludeHost:true,
   /* identity */
   gameCode:null, isHost:false, myToken:null, myName:'You',
   hostPlayerToken:null, hostViewActive:true,
@@ -991,6 +1004,10 @@ function setBlindFinish(on){
   S.blindFinish=!!on;
   document.querySelectorAll('#seg-blindfinish .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
 }
+function setExcludeHost(on){
+  S.excludeHost=!!on;
+  document.querySelectorAll('#seg-excludehost .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
+}
 function updateGoMapBtn(){
   const btn=el('btn-go-map'); if(!btn)return;
   btn.textContent=(S.mode==='smart'&&S.hostRole==='navigator')?'Find Smart Target →':'Place Target on Map →';
@@ -1095,7 +1112,7 @@ async function createGameFB(){
   await gRef().set({
     status:'lobby',idealMin:S.idealMin,diff:S.diff,arrRadius:S.arrRadius,
     timeLimitSec:S.timeLimitSec,noiseSeed:S.noiseSeed,hostRole:S.hostRole,
-    elimMode:S.elimMode,blindStart:S.blindStart,blindFinish:S.blindFinish,
+    elimMode:S.elimMode,blindStart:S.blindStart,blindFinish:S.blindFinish,excludeHost:S.excludeHost,
     targetLat:null,targetLon:null,startedAt:null,createdAt:SV.TIMESTAMP
   });
   S.isHost=true;
@@ -1141,6 +1158,7 @@ function renderHLobby(){
   set('hl-elim',S.elimMode?'⚡ On':'Off');
   set('hl-blind',S.blindStart?'🙈 On':'Off');
   set('hl-blindfinish',S.blindFinish?'🏁 On':'Off');
+  set('hl-excludehost',S.excludeHost?'👻 On':'Off');
   startPlayersListener();
 }
 
@@ -1225,7 +1243,7 @@ function startPlayersListener(){
       S.status='active';S.startedAt=g.startedAt;
       S.targetLat=g.targetLat;S.targetLon=g.targetLon;
       S.noiseSeed=g.noiseSeed;S.arrRadius=g.arrRadius;
-      S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;
+      S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;
       if(S.screen==='nwait'){
         showCountdown(()=>{
           if(S.role==='spectator'){goScreen('spectator');startClientTimer();}
@@ -1378,7 +1396,7 @@ async function joinGame(){
     if(g.status==='finished')throw new Error('Game already finished.');
     S.gameCode=code;S.myName=name;
     S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;
-    S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;
+    S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;
     const tok=randToken();S.myToken=tok;
     await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:S.role,lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
     btn.disabled=false;btn.textContent='Join →';
@@ -1596,10 +1614,14 @@ function fillResults(players){
   set('res-name',S.myName+' — '+(S.arrived?'Arrived!':'Game Over'));
   set('res-time',fmtTime(elapsed));set('stat-time',fmtTime(elapsed));
   set('stat-dist',S.startDist?(S.startDist/1000).toFixed(1)+' km':'—');
-  set('stat-players',players?players.filter(p=>p.role==='navigator').length:'—');
   const rows=el('result-rows');
   if(rows&&players){
-    const navs=players.filter(p=>p.role==='navigator');
+    let navs=players.filter(p=>p.role==='navigator');
+    // Exclude host player from leaderboard if the flag is set
+    if(S.excludeHost&&S.hostPlayerToken){
+      navs=navs.filter(p=>p.id!==S.hostPlayerToken);
+    }
+    set('stat-players',navs.length);
     const sorted=[...navs].sort((a,b)=>{if(a.arrived&&!b.arrived)return -1;if(!a.arrived&&b.arrived)return 1;return(a.arrSec||9999)-(b.arrSec||9999);});
     rows.innerHTML=sorted.map((p,i)=>`<div class="rr-row"><span class="rr-pos">${['🥇','🥈','🥉'][i]||i+1}</span><span class="rr-name">${escHtml(p.name)}</span><span class="rr-time">${p.arrived?fmtTime(p.arrSec):'DNF'}</span></div>`).join('');
   }
@@ -1706,12 +1728,14 @@ function playElimSound(){
 }
 function toggleSound(){
   S.soundEnabled=!S.soundEnabled;
-  const btn=el('sound-btn');
-  if(btn){btn.textContent=S.soundEnabled?'🔊':'🔇';btn.classList.toggle('active',S.soundEnabled);}
+  const ico=S.soundEnabled?'🔊':'🔇';
+  ['sound-btn','sound-btn-host','sound-btn-spec'].forEach(id=>{
+    const btn=el(id);
+    if(btn){btn.textContent=ico;btn.classList.toggle('active',S.soundEnabled);}
+  });
   if(S.soundEnabled){
-    // Unlock AudioContext on first user interaction (iOS requires this)
     try{getAudioCtx().resume();}catch(_){}
-    playTone(440,0.06,0.08); // brief confirm beep
+    playTone(440,0.06,0.08);
   }
 }
 
@@ -1887,7 +1911,7 @@ function playProximitySound(distM){
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
-  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,updateGoMapBtn,upSetup,
+  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,updateGoMapBtn,upSetup,
   goMap,smartPick,confirmTarget,
   copyLink,lockStart,toggleMyView,leaveOrHostView,abortGame,
   joinGame,leaveGame,
