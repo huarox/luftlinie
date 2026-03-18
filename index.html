@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <!--
 ╔══════════════════════════════════════════════════════════════╗
 ║  LUFTLINIE — Firebase Edition  (single HTML file)            ║
@@ -12,7 +11,6 @@
 ║  5. Open the URL in Chrome on your iPhone — done.            ║
 ╚══════════════════════════════════════════════════════════════╝
 -->
-
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -318,7 +316,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div id="app">
 
 <!-- ══ LANDING ══ -->
-
 <div class="sc active" id="sc-land">
   <div class="land-glass">
     <div class="land-icon">
@@ -350,7 +347,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ SETUP ══ -->
-
 <div class="sc" id="sc-setup">
   <div class="top-bar">
     <button class="back-btn" onclick="Nav.go('land')">
@@ -367,94 +363,90 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <p class="mode-hint" id="mode-hint">You'll tap the map to drop the secret target. A range ring shows the ideal distance.</p>
 
-```
-<div class="section-label" style="margin-top:22px">Difficulty</div>
-<div class="card">
-  <div class="stars-row" id="stars">
-    <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
-    <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
-    <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
-    <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
-    <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
-  </div>
-  <p class="diff-text" id="diff-txt">Medium — navigators get 2× the ideal drive time</p>
-</div>
-
-<div class="section-label" style="margin-top:22px">Drive Time</div>
-<div class="card">
-  <div class="card-row"><span class="row-label">Ideal duration</span><span class="row-val" id="sv-time">30 min</span></div>
-  <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
-  <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90 min</span></div>
-  <div class="timelimit-row">
-    <span class="tl-lbl">Navigator time limit</span><span class="tl-val" id="sv-limit">60 min</span>
-  </div>
-</div>
-
-<div class="section-label" style="margin-top:22px">Arrival Radius</div>
-<div class="card">
-  <p class="radius-hint">How close navigators must get to trigger arrival.</p>
-  <div class="radius-row">
-    <div class="mini-seg" id="seg-radius">
-      <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
-      <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
-      <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
-      <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
+    <div class="section-label" style="margin-top:22px">Difficulty</div>
+    <div class="card">
+      <div class="stars-row" id="stars">
+        <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
+        <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
+        <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
+        <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
+        <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
+      </div>
+      <p class="diff-text" id="diff-txt">Medium — navigators get 2× the ideal drive time</p>
     </div>
-  </div>
-</div>
 
-<div class="section-label" style="margin-top:22px">Your Role</div>
-<div class="card">
-  <p class="radius-hint">Navigate alongside your players, or watch as spectator?</p>
-  <div class="radius-row">
-    <div class="seg-ctrl" id="seg-host-role">
-      <button class="seg" data-v="navigator" onclick="App.setHostRole('navigator')">🧭 Navigator</button>
-      <button class="seg active" data-v="spectator" onclick="App.setHostRole('spectator')">👁 Spectator</button>
+    <div class="section-label" style="margin-top:22px">Drive Time</div>
+    <div class="card">
+      <div class="card-row"><span class="row-label">Ideal duration</span><span class="row-val" id="sv-time">30 min</span></div>
+      <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
+      <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90 min</span></div>
+      <div class="timelimit-row">
+        <span class="tl-lbl">Navigator time limit</span><span class="tl-val" id="sv-limit">60 min</span>
+      </div>
     </div>
-  </div>
-</div>
 
-<div class="section-label" style="margin-top:22px">Extras</div>
-<div class="card">
-  <div class="setup-toggle-row">
-    <div>
-      <div class="setup-toggle-label">⚡ Elimination</div>
-      <div class="setup-toggle-sub">Furthest player knocked out every 5 min</div>
+    <div class="section-label" style="margin-top:22px">Arrival Radius</div>
+    <div class="card">
+      <p class="radius-hint">How close navigators must get to trigger arrival.</p>
+      <div class="radius-row">
+        <div class="mini-seg" id="seg-radius">
+          <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
+          <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
+          <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
+          <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
+        </div>
+      </div>
     </div>
-    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-elim">
-      <button class="seg active" data-v="off" onclick="App.setElimMode(false)">Off</button>
-      <button class="seg" data-v="on" onclick="App.setElimMode(true)">On</button>
-    </div>
-  </div>
-  <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-    <div>
-      <div class="setup-toggle-label">🙈 Blind Start</div>
-      <div class="setup-toggle-sub">Distance hidden until you've moved 500m</div>
-    </div>
-    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blind">
-      <button class="seg active" data-v="off" onclick="App.setBlindStart(false)">Off</button>
-      <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
-    </div>
-  </div>
-</div>
 
-<div class="section-label" style="margin-top:22px">Your Name</div>
-<div class="card">
-  <div style="padding:10px 14px">
-    <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host">
-  </div>
-</div>
+    <div class="section-label" style="margin-top:22px">Your Role</div>
+    <div class="card">
+      <p class="radius-hint">Navigate alongside your players, or watch as spectator?</p>
+      <div class="radius-row">
+        <div class="seg-ctrl" id="seg-host-role">
+          <button class="seg" data-v="navigator" onclick="App.setHostRole('navigator')">🧭 Navigator</button>
+          <button class="seg active" data-v="spectator" onclick="App.setHostRole('spectator')">👁 Spectator</button>
+        </div>
+      </div>
+    </div>
 
-<button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="App.goMap()">
-  Place Target on Map →
-</button>
-```
+    <div class="section-label" style="margin-top:22px">Extras</div>
+    <div class="card">
+      <div class="setup-toggle-row">
+        <div>
+          <div class="setup-toggle-label">⚡ Elimination</div>
+          <div class="setup-toggle-sub">Furthest player knocked out every 5 min</div>
+        </div>
+        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-elim">
+          <button class="seg active" data-v="off" onclick="App.setElimMode(false)">Off</button>
+          <button class="seg" data-v="on" onclick="App.setElimMode(true)">On</button>
+        </div>
+      </div>
+      <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+        <div>
+          <div class="setup-toggle-label">🙈 Blind Start</div>
+          <div class="setup-toggle-sub">Distance hidden until you've moved 500m</div>
+        </div>
+        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blind">
+          <button class="seg active" data-v="off" onclick="App.setBlindStart(false)">Off</button>
+          <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
+        </div>
+      </div>
+    </div>
 
+    <div class="section-label" style="margin-top:22px">Your Name</div>
+    <div class="card">
+      <div style="padding:10px 14px">
+        <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host">
+      </div>
+    </div>
+
+    <button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="App.goMap()">
+      Place Target on Map →
+    </button>
   </div>
 </div>
 
 <!-- ══ MAP (target placement) ══ -->
-
 <div class="sc map-sc" id="sc-map">
   <div class="map-topbar">
     <button class="map-back-btn" onclick="Nav.go('setup')">
@@ -471,7 +463,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ HOST LOBBY ══ -->
-
 <div class="sc" id="sc-hlobby">
   <div class="top-bar">
     <button class="back-btn" onclick="Nav.go('map')">
@@ -509,7 +500,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ HOST ACTIVE ══ -->
-
 <div class="sc map-sc" id="sc-hactive">
   <div class="host-bar">
     <div class="live-badge"><span class="live-dot"></span>LIVE</div>
@@ -533,7 +523,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ SPECTATOR MAP ══ -->
-
 <div class="sc map-sc" id="sc-spectator">
   <div class="host-bar">
     <div class="live-badge spec-badge"><span class="live-dot" style="background:#BF5AF2"></span>WATCHING</div>
@@ -554,7 +543,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ JOIN ══ -->
-
 <div class="sc" id="sc-join">
   <div class="center-glass">
     <button class="back-btn" onclick="Nav.go('land')" style="align-self:flex-start">
@@ -585,7 +573,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ NAV WAIT ══ -->
-
 <div class="sc" id="sc-nwait">
   <div class="top-bar">
     <button class="back-btn" onclick="App.leaveGame()">
@@ -609,7 +596,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ NAV ACTIVE ══ -->
-
 <div class="sc nav-active-sc" id="sc-nactive">
   <div class="na-bar">
     <div class="na-players">
@@ -652,7 +638,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ RESULTS ══ -->
-
 <div class="sc map-sc" id="sc-results">
   <div class="map-topbar" style="justify-content:center">
     <div class="map-pill green-pill">🏁 Route Revealed</div>
@@ -681,7 +666,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div><!-- #app -->
 
 <!-- OVERLAYS -->
-
 <div class="overlay hidden" id="ov-cd">
   <div class="cd-wrap">
     <svg class="cd-svg" viewBox="0 0 120 120">
@@ -727,13 +711,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div id="toast" class="toast hidden"></div>
 
 <!-- ══ SCRIPTS ══ -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
 'use strict';
 /* ═══════════════════════════════════════════════════════════
@@ -1696,6 +1676,5 @@ const App={
 };
 const Nav={go:goScreen};
 </script>
-
 </body>
 </html>
