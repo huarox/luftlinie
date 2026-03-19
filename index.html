@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <!--
 ╔══════════════════════════════════════════════════════════════╗
 ║  LUFTLINIE — Firebase Edition  (single HTML file)            ║
@@ -12,7 +11,6 @@
 ║  5. Open the URL in Chrome on your iPhone — done.            ║
 ╚══════════════════════════════════════════════════════════════╝
 -->
-
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -204,14 +202,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .na-gps.live{color:var(--green);background:rgba(52,199,89,.1);border-color:rgba(52,199,89,.2)}
 .na-gps.lost{color:var(--orange)}
 .gps-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-.na-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:16px}
+.na-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:16px;transition:background .8s ease}
 .na-eyebrow{font-size:10px;font-weight:700;letter-spacing:3px;color:var(--t3);margin-bottom:12px}
 .na-dist-row{display:flex;align-items:flex-end;gap:8px;position:relative;z-index:2}
 .na-dist{font-family:var(--mono);font-size:clamp(72px,21vw,114px);font-weight:700;line-height:.9;letter-spacing:-2px;color:var(--t1);transition:color .5s ease;font-variant-numeric:tabular-nums}
 .na-dist.updating{animation:dist-flash .3s ease}
 @keyframes dist-flash{0%,100%{opacity:1}50%{opacity:.35}}
-.na-dist.close{color:var(--orange)}.na-dist.very-close{color:var(--green)}
-[data-theme="dark"] .na-dist.very-close{text-shadow:0 0 50px rgba(52,199,89,.4)}
+/* proximity feedback is background tint only — number color never changes */
 .na-unit{font-family:var(--mono);font-size:clamp(18px,5.5vw,30px);font-weight:400;color:var(--t3);letter-spacing:2px;margin-bottom:5px}
 .na-ripples{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
 @keyframes rip-out{0%{transform:translate(-50%,-50%) scale(0.25);opacity:1}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
@@ -259,7 +256,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .rr-pos{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t3);width:20px}
 .rr-name{flex:1;font-size:13px;font-weight:600;color:var(--t1)}.rr-time{font-family:var(--mono);font-size:12px;color:var(--t2)}
 .overlay{position:fixed;inset:0;z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .3s;background:rgba(0,0,0,.55);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
-.overlay.hidden{opacity:0;pointer-events:none}
+.hidden{display:none!important}
+.overlay.hidden{display:flex!important;opacity:0;pointer-events:none}
+.toast.hidden{display:block!important;opacity:0;transform:translateX(-50%) translateY(10px);pointer-events:none}
 .cd-wrap{position:relative;width:138px;height:138px;display:flex;align-items:center;justify-content:center}
 .cd-svg{position:absolute;inset:0;transform:rotate(-90deg)}
 .cd-ring-bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:3}
@@ -289,7 +288,12 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .radius-row{padding:6px 14px 14px}
 .ring-lbl{font-size:11px;font-weight:600;color:#007AFF;background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.25);padding:2px 7px;border-radius:10px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)}
 [data-theme=dark] .ring-lbl{background:rgba(0,122,255,.2);border-color:rgba(0,122,255,.4)}
-.spec-badge{background:rgba(191,90,242,.12)!important}
+.spec-badge{background:rgba(191,90,242,.12)!important;color:var(--purple)!important}
+.spec-badge .live-dot{background:var(--purple)!important;animation:spec-pulse 1.8s ease-in-out infinite}
+@keyframes spec-pulse{0%,100%{box-shadow:0 0 0 0 rgba(191,90,242,.4)}60%{box-shadow:0 0 0 5px rgba(191,90,242,0)}}
+/* Host-back button shown on navigator screen when user is host */
+.host-back-btn{padding:5px 11px;font-size:12px;font-weight:700;background:rgba(0,122,255,.1);border:1.5px solid rgba(0,122,255,.25);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap;line-height:1.3}
+.host-back-btn:hover{background:rgba(0,122,255,.18)}
 .role-toggle-btn{padding:6px 13px;font-size:12px;font-weight:700;background:var(--surf2);border:1.5px solid var(--border);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap}
 .role-toggle-btn:hover{background:var(--surf1);box-shadow:var(--sh-sm)}
 .gps-warn{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,59,48,.08);border-bottom:1px solid rgba(255,59,48,.18);flex-shrink:0}
@@ -302,6 +306,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .setup-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:14px}
 .setup-toggle-label{font-size:15px;color:var(--t1);font-weight:500}
 .setup-toggle-sub{font-size:12px;color:var(--t3);margin-top:2px;line-height:1.4}
+/* ── PROXIMITY BACKGROUND TINT ───────────────────────────── */
+.na-center.prox-close{background:rgba(255,159,10,.07)!important}
+.na-center.prox-very-close{background:rgba(52,199,89,.09)!important}
+[data-theme="dark"] .na-center.prox-close{background:rgba(255,159,10,.10)!important}
+[data-theme="dark"] .na-center.prox-very-close{background:rgba(52,199,89,.12)!important}
 /* ── SOUND BUTTON ────────────────────────────────────────── */
 .sound-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:3px;opacity:.35;transition:opacity .2s;line-height:1}
 .sound-btn.active{opacity:1}
@@ -323,7 +332,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div id="app">
 
 <!-- ══ LANDING ══ -->
-
 <div class="sc active" id="sc-land">
   <div class="land-glass">
     <div class="land-icon">
@@ -355,7 +363,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ SETUP ══ -->
-
 <div class="sc" id="sc-setup">
   <div class="top-bar">
     <button class="back-btn" onclick="Nav.go('land')">
@@ -372,112 +379,108 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <p class="mode-hint" id="mode-hint">You'll tap the map to drop the secret target. A range ring shows the ideal distance.</p>
 
-```
-<div class="section-label" style="margin-top:22px">Difficulty</div>
-<div class="card">
-  <div class="stars-row" id="stars">
-    <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
-    <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
-    <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
-    <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
-    <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
-  </div>
-  <p class="diff-text" id="diff-txt">Medium — navigators get 2× the ideal drive time</p>
-</div>
+    <div class="section-label" style="margin-top:22px">Difficulty</div>
+    <div class="card">
+      <div class="stars-row" id="stars">
+        <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
+        <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
+        <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
+        <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
+        <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
+      </div>
+      <p class="diff-text" id="diff-txt">Medium — navigators get 2× the ideal drive time</p>
+    </div>
 
-<div class="section-label" style="margin-top:22px">Drive Time</div>
-<div class="card">
-  <div class="card-row"><span class="row-label">Ideal duration</span><span class="row-val" id="sv-time">30 min</span></div>
-  <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
-  <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90 min</span></div>
-  <div class="timelimit-row">
-    <span class="tl-lbl">Navigator time limit</span><span class="tl-val" id="sv-limit">60 min</span>
-  </div>
-</div>
+    <div class="section-label" style="margin-top:22px">Drive Time</div>
+    <div class="card">
+      <div class="card-row"><span class="row-label">Ideal duration</span><span class="row-val" id="sv-time">30 min</span></div>
+      <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
+      <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90 min</span></div>
+      <div class="timelimit-row">
+        <span class="tl-lbl">Navigator time limit</span><span class="tl-val" id="sv-limit">60 min</span>
+      </div>
+    </div>
 
-<div class="section-label" style="margin-top:22px">Arrival Radius</div>
-<div class="card">
-  <p class="radius-hint">How close navigators must get to trigger arrival.</p>
-  <div class="radius-row">
-    <div class="mini-seg" id="seg-radius">
-      <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
-      <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
-      <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
-      <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
+    <div class="section-label" style="margin-top:22px">Arrival Radius</div>
+    <div class="card">
+      <p class="radius-hint">How close navigators must get to trigger arrival.</p>
+      <div class="radius-row">
+        <div class="mini-seg" id="seg-radius">
+          <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
+          <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
+          <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
+          <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<div class="section-label" style="margin-top:22px">Your Role</div>
-<div class="card">
-  <p class="radius-hint">Navigate alongside your players, or watch as spectator?</p>
-  <div class="radius-row">
-    <div class="seg-ctrl" id="seg-host-role">
-      <button class="seg" data-v="navigator" onclick="App.setHostRole('navigator')">🧭 Navigator</button>
-      <button class="seg active" data-v="spectator" onclick="App.setHostRole('spectator')">👁 Spectator</button>
+    <div class="section-label" style="margin-top:22px">Your Role</div>
+    <div class="card">
+      <p class="radius-hint">Navigate alongside your players, or watch as spectator?</p>
+      <div class="radius-row">
+        <div class="seg-ctrl" id="seg-host-role">
+          <button class="seg" data-v="navigator" onclick="App.setHostRole('navigator')">🧭 Navigator</button>
+          <button class="seg active" data-v="spectator" onclick="App.setHostRole('spectator')">👁 Spectator</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<div class="section-label" style="margin-top:22px">Extras</div>
-<div class="card">
-  <div class="setup-toggle-row">
-    <div>
-      <div class="setup-toggle-label">⚡ Elimination</div>
-      <div class="setup-toggle-sub">Furthest player knocked out every 5 min</div>
+    <div class="section-label" style="margin-top:22px">Extras</div>
+    <div class="card">
+      <div class="setup-toggle-row">
+        <div>
+          <div class="setup-toggle-label">⚡ Elimination</div>
+          <div class="setup-toggle-sub">Furthest player knocked out every 5 min</div>
+        </div>
+        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-elim">
+          <button class="seg active" data-v="off" onclick="App.setElimMode(false)">Off</button>
+          <button class="seg" data-v="on" onclick="App.setElimMode(true)">On</button>
+        </div>
+      </div>
+      <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+        <div>
+          <div class="setup-toggle-label">🙈 Blind Start</div>
+          <div class="setup-toggle-sub">Distance hidden until you've moved 500m</div>
+        </div>
+        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blind">
+          <button class="seg active" data-v="off" onclick="App.setBlindStart(false)">Off</button>
+          <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
+        </div>
+      </div>
+      <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+        <div>
+          <div class="setup-toggle-label">🏁 Blind Finish</div>
+          <div class="setup-toggle-sub">Others keep playing after first arrival</div>
+        </div>
+        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blindfinish">
+          <button class="seg" data-v="off" onclick="App.setBlindFinish(false)">Off</button>
+          <button class="seg active" data-v="on" onclick="App.setBlindFinish(true)">On</button>
+        </div>
+      </div>
+      <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+        <div>
+          <div class="setup-toggle-label">👻 Exclude Host</div>
+          <div class="setup-toggle-sub">Host hidden from leaderboard &amp; results</div>
+        </div>
+        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-excludehost">
+          <button class="seg" data-v="off" onclick="App.setExcludeHost(false)">Off</button>
+          <button class="seg active" data-v="on" onclick="App.setExcludeHost(true)">On</button>
+        </div>
+      </div>
     </div>
-    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-elim">
-      <button class="seg active" data-v="off" onclick="App.setElimMode(false)">Off</button>
-      <button class="seg" data-v="on" onclick="App.setElimMode(true)">On</button>
+    <div class="card">
+      <div style="padding:10px 14px">
+        <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host">
+      </div>
     </div>
-  </div>
-  <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-    <div>
-      <div class="setup-toggle-label">🙈 Blind Start</div>
-      <div class="setup-toggle-sub">Distance hidden until you've moved 500m</div>
-    </div>
-    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blind">
-      <button class="seg active" data-v="off" onclick="App.setBlindStart(false)">Off</button>
-      <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
-    </div>
-  </div>
-  <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-    <div>
-      <div class="setup-toggle-label">🏁 Blind Finish</div>
-      <div class="setup-toggle-sub">Others keep playing after first arrival</div>
-    </div>
-    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blindfinish">
-      <button class="seg" data-v="off" onclick="App.setBlindFinish(false)">Off</button>
-      <button class="seg active" data-v="on" onclick="App.setBlindFinish(true)">On</button>
-    </div>
-  </div>
-  <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-    <div>
-      <div class="setup-toggle-label">👻 Exclude Host</div>
-      <div class="setup-toggle-sub">Host hidden from leaderboard &amp; results</div>
-    </div>
-    <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-excludehost">
-      <button class="seg" data-v="off" onclick="App.setExcludeHost(false)">Off</button>
-      <button class="seg active" data-v="on" onclick="App.setExcludeHost(true)">On</button>
-    </div>
-  </div>
-</div>
-<div class="card">
-  <div style="padding:10px 14px">
-    <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host">
-  </div>
-</div>
 
-<button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="App.goMap()">
-  Place Target on Map →
-</button>
-```
-
+    <button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="App.goMap()">
+      Place Target on Map →
+    </button>
   </div>
 </div>
 
 <!-- ══ MAP (target placement) ══ -->
-
 <div class="sc map-sc" id="sc-map">
   <div class="map-topbar">
     <button class="map-back-btn" onclick="Nav.go('setup')">
@@ -494,7 +497,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ HOST LOBBY ══ -->
-
 <div class="sc" id="sc-hlobby">
   <div class="top-bar">
     <button class="back-btn" onclick="Nav.go('map')">
@@ -534,7 +536,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ HOST ACTIVE ══ -->
-
 <div class="sc map-sc" id="sc-hactive">
   <div class="host-bar">
     <div class="live-badge"><span class="live-dot"></span>LIVE</div>
@@ -561,10 +562,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ SPECTATOR MAP ══ -->
-
 <div class="sc map-sc" id="sc-spectator">
   <div class="host-bar">
-    <div class="live-badge spec-badge"><span class="live-dot" style="background:#BF5AF2"></span>WATCHING</div>
+    <div class="live-badge spec-badge"><span class="live-dot"></span>WATCHING</div>
     <div class="host-timer-block">
       <div class="htb-lbl">Time Left</div>
       <div class="htb-val" id="sp-timer">00:00</div>
@@ -573,7 +573,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <span class="elim-countdown hidden" id="sp-elim-cd"></span>
       <button class="compass-btn sound-btn active" id="sound-btn-spec" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
       <button class="compass-btn" id="compass-btn-spec" onclick="App.toggleMapOrientation('spec')" title="Toggle heading up">🧭</button>
-      <button class="btn-destruct sm" onclick="App.leaveOrHostView()">Leave</button>
+      <button class="btn-destruct sm" id="spec-leave-btn" onclick="App.leaveOrHostView()">Leave</button>
     </div>
   </div>
   <div id="specmap"></div>
@@ -587,7 +587,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ JOIN ══ -->
-
 <div class="sc" id="sc-join">
   <div class="center-glass">
     <button class="back-btn" onclick="Nav.go('land')" style="align-self:flex-start">
@@ -618,7 +617,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ NAV WAIT ══ -->
-
 <div class="sc" id="sc-nwait">
   <div class="top-bar">
     <button class="back-btn" onclick="App.leaveGame()">
@@ -642,7 +640,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ NAV ACTIVE ══ -->
-
 <div class="sc nav-active-sc" id="sc-nactive">
   <div class="na-bar">
     <div class="na-players">
@@ -650,7 +647,10 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <span id="na-pcount">—</span>
     </div>
     <div class="na-timer" id="na-timer">—</div>
-    <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="host-back-btn hidden" id="btn-host-back" onclick="App.goHostView()" title="Return to host overview">📡 Host</button>
+      <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
+    </div>
   </div>
   <div class="gps-warn hidden" id="gps-warn">
     <span>⚠️</span>
@@ -683,7 +683,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ RESULTS ══ -->
-
 <div class="sc map-sc" id="sc-results">
   <div class="map-topbar" style="justify-content:center">
     <div class="map-pill green-pill">🏁 Route Revealed</div>
@@ -712,7 +711,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div><!-- #app -->
 
 <!-- OVERLAYS -->
-
 <div class="overlay hidden" id="ov-cd">
   <div class="cd-wrap">
     <svg class="cd-svg" viewBox="0 0 120 120">
@@ -758,13 +756,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div id="toast" class="toast hidden"></div>
 
 <!-- ══ SCRIPTS ══ -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
 'use strict';
 /* ═══════════════════════════════════════════════════════════
@@ -833,7 +827,7 @@ const S = {
   soundEnabled:true, audioCtx:null, lastProximityBeep:0, _lastProxBand:null,
   _lastUrgentBeep:-1, _lastElimBeep:-1,
   /* wake lock */
-  wakeLock:null,
+  wakeLock:null, _noSleepVideo:null, _noSleepActive:false,
   /* map orientation */
   mapOrientMode:{host:false,spec:false}, _compassHeading:0, _orientListener:null,
   /* anti-flash */
@@ -863,8 +857,16 @@ const escHtml = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 function gRef(){ return db.ref(`games/${S.gameCode}`); }
 function pRef(tok){ return db.ref(`games/${S.gameCode}/players/${tok||S.myToken}`); }
 
+// Haptic feedback — light/medium/heavy. Silent no-op on unsupported devices.
+function haptic(style='light'){
+  if(!window.navigator?.vibrate) return;
+  const patterns={light:10,medium:20,heavy:[30,10,30]};
+  navigator.vibrate(patterns[style]||10);
+}
+
 function toast(msg,dur=2800){
   const t=el('toast'); t.textContent=msg; t.classList.remove('hidden');
+  haptic('light');
   clearTimeout(t._tid); t._tid=setTimeout(()=>t.classList.add('hidden'),dur);
 }
 
@@ -1199,6 +1201,9 @@ function startPlayersListener(){
     S.latestPlayers=raw; // cache for elimination check
     const navs=players.filter(p=>p.role==='navigator'&&!p.eliminated);
     const allNavs=players.filter(p=>p.role==='navigator');
+    // Show how many navigators are still racing (not arrived, not eliminated)
+    const stillRacing=navs.filter(p=>!p.arrived).length;
+    set('na-pcount', allNavs.length ? String(allNavs.length) : '—');
     // Lobby — show everyone including spectators
     if(S.screen==='hlobby'){
       const newHtml=players.length
@@ -1214,6 +1219,7 @@ function startPlayersListener(){
         S.eliminated=true;
         stopGPS();
         playElimSound();
+        haptic('heavy');
         const remaining=navs.filter(p=>p.id!==S.myToken).length;
         set('elim-rank',remaining>0?remaining+' player'+(remaining>1?'s':'')+' still in':'Last one out');
         el('ov-eliminated').classList.remove('hidden');
@@ -1273,7 +1279,7 @@ function launchHostActive(){
   goScreen('hactive');setTimeout(initHostMap,80);
   startClientTimer();
   const btn=el('btn-role-toggle');
-  if(btn) btn.textContent=S.hostRole==='navigator'?'🧭 My Nav View':'👁 My Spec View';
+  if(btn) btn.textContent=S.hostRole==='navigator'?'🧭 My Nav':'👁 My View';
   if(S.elimMode&&S.isHost){
     if(S.elimIv)clearInterval(S.elimIv);
     S.nextElimTime=Date.now()+5*60*1000;
@@ -1289,19 +1295,35 @@ function launchHostActive(){
 function toggleMyView(){
   const btn=el('btn-role-toggle');
   if(S.hostViewActive){
+    // Host is leaving the overview map → go to personal view
     S.hostViewActive=false;
-    if(S.hostRole==='spectator'){goScreen('spectator');setTimeout(initSpecMap,80);}
-    else{goScreen('nactive');}
+    if(S.hostRole==='spectator'){
+      goScreen('spectator');setTimeout(initSpecMap,80);
+      // Update spectator Leave button to say "Host View"
+      const lb=el('spec-leave-btn');if(lb)lb.textContent='📡 Host View';
+    } else {
+      // Host is navigator — go to navigator screen, show return button
+      goScreen('nactive');
+      show('btn-host-back');
+    }
     if(btn)btn.textContent='📡 Host View';
   } else {
-    S.hostViewActive=true;
-    goScreen('hactive');setTimeout(initHostMap,80);
-    if(btn)btn.textContent=S.hostRole==='navigator'?'🧭 My Nav View':'👁 My Spec View';
+    goHostView();
   }
 }
 
+function goHostView(){
+  S.hostViewActive=true;
+  goScreen('hactive');setTimeout(initHostMap,80);
+  hide('btn-host-back');
+  // Restore spectator Leave button label
+  const lb=el('spec-leave-btn');if(lb)lb.textContent='Leave';
+  const btn=el('btn-role-toggle');
+  if(btn)btn.textContent=S.hostRole==='navigator'?'🧭 My Nav':'👁 My View';
+}
+
 function leaveOrHostView(){
-  if(S.isHost)toggleMyView(); else leaveGame();
+  if(S.isHost) goHostView(); else leaveGame();
 }
 
 function initHostMap(){
@@ -1530,6 +1552,7 @@ async function sendPosUpdate(manual=false){
     S.arrived=true;S.arrivalElapsed=Math.round(elapsed);
     await pRef(token).update(upd);
     playArrivalSound();
+    haptic('heavy');
     triggerArrival(Math.round(elapsed),S.startDist);
     // Elimination mode always ends on first arrival.
     // Blind Finish ON (default): game keeps running silently after first arrival.
@@ -1567,11 +1590,16 @@ async function manualRefresh(){
 /* ── NAV DISPLAY ─────────────────────────────────────────── */
 function updateNavDisplay(distM){
   if(distM==null)return;S.lastDist=distM;
-  const nd=el('na-dist'),nu=el('na-unit');
+  const nd=el('na-dist'),nu=el('na-unit'),nc=el('na-center');
   if(nd){
-    nd.textContent=fmtDist(distM);nd.classList.remove('close','very-close','updating');
+    nd.textContent=fmtDist(distM);nd.classList.remove('updating');
     void nd.offsetWidth;nd.classList.add('updating');
-    if(distM<500)nd.classList.add('very-close');else if(distM<2000)nd.classList.add('close');
+  }
+  // Background tint instead of number color change
+  if(nc){
+    nc.classList.remove('prox-close','prox-very-close');
+    if(distM<200)nc.classList.add('prox-very-close');
+    else if(distM<1000)nc.classList.add('prox-close');
   }
   if(nu)nu.textContent=distUnit(distM);
   const prog=S.startDist?Math.min(100,(distM/S.startDist)*100):100;
@@ -1656,6 +1684,7 @@ function showCountdown(cb){
     n--;
     if(n<0){
       ov.classList.add('hidden');
+      haptic('medium');
       // Game start chord: C4-E4-G4 quick arpeggio
       playTone(523,0.12,0.20);
       setTimeout(()=>playTone(659,0.12,0.20),80);
@@ -1803,19 +1832,38 @@ function playReplay(){
 }
 
 /* ── WAKE LOCK ───────────────────────────────────────────── */
-// Uses Screen Wake Lock API only — zero audio session interaction,
-// music keeps playing uninterrupted. No silent video fallback.
+// Screen Wake Lock API for Android Chrome + Safari 16.4+
+// For older iOS Chrome: hidden autoplay video trick
 async function startWakeLock(){
-  if(S.wakeLock) return; // already held
-  if(!('wakeLock' in navigator)) return; // not supported — screen may dim, that's fine
+  if(S.wakeLock||S._noSleepActive) return;
+  // Try native Wake Lock first
+  if('wakeLock' in navigator){
+    try{
+      S.wakeLock=await navigator.wakeLock.request('screen');
+      S.wakeLock.addEventListener('release',()=>{ S.wakeLock=null; });
+      return;
+    }catch(_){}
+  }
+  // Fallback: tiny hidden looping video (works on iOS Chrome)
   try{
-    S.wakeLock = await navigator.wakeLock.request('screen');
-    S.wakeLock.addEventListener('release',()=>{ S.wakeLock=null; });
-  } catch(_){} // user or OS denied — silent fail
+    if(!S._noSleepVideo){
+      const v=document.createElement('video');
+      v.setAttribute('playsinline','');v.setAttribute('muted','');
+      v.setAttribute('loop','');v.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1;top:0;left:0';
+      // 1-frame black mp4 encoded as base64
+      const src='data:video/mp4;base64,AAAAIGZ0eXBtcDQyAAAAAG1wNDJpc29tAAADCG1vb3YAAABsbXZoZAAAAADaBlwX2gZcFwAAA+gAAAPoAAEAAAEAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAIUdHJhawAAAFx0a2hkAAAAA9oGXBfaBlwXAAAABAAAAAAAAAPoAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAACidWR0YQAAAJptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAAAAAAADuaWxzdAAAACepdG9vAAAAH2RhdGEAAAABAAAAAExhdmY1Ny44My4xMDA=';
+      v.src=src;
+      document.body.appendChild(v);
+      S._noSleepVideo=v;
+    }
+    await S._noSleepVideo.play();
+    S._noSleepActive=true;
+  }catch(_){}
 }
 function stopWakeLock(){
   try{ S.wakeLock?.release(); }catch(_){}
   S.wakeLock=null;
+  if(S._noSleepVideo){ try{S._noSleepVideo.pause();}catch(_){} S._noSleepActive=false; }
 }
 // Re-acquire if tab becomes visible again (wake lock auto-releases on page hide)
 document.addEventListener('visibilitychange',()=>{
@@ -1915,7 +1963,7 @@ window.toggleTheme=toggleTheme;
 const App={
   setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,updateGoMapBtn,upSetup,
   goMap,smartPick,confirmTarget,
-  copyLink,lockStart,toggleMyView,leaveOrHostView,abortGame,
+  copyLink,lockStart,toggleMyView,goHostView,leaveOrHostView,abortGame,
   joinGame,leaveGame,
   manualRefresh,dismissSpeed,showResults,
   toggleSound,playReplay,watchAfterElim,
@@ -1924,6 +1972,5 @@ const App={
 };
 const Nav={go:goScreen};
 </script>
-
 </body>
 </html>
