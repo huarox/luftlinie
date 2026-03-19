@@ -128,7 +128,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 .land-title{font-size:38px;font-weight:800;letter-spacing:-1px;color:var(--t1);margin-bottom:10px}
 .land-sub{font-size:15px;color:var(--t2);line-height:1.65;margin-bottom:28px}
-.land-actions{display:flex;flex-direction:column;gap:9px;width:100%}
+.land-actions{display:flex;flex-direction:column;gap:9px;width:100%;align-items:stretch}
+.land-actions .btn-text{align-self:center}
 .land-foot{position:absolute;bottom:max(24px,env(safe-area-inset-bottom,24px));font-size:13px;color:var(--t3);letter-spacing:.3px;text-align:center}
 .map-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
 .map-back-btn{width:44px;height:44px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--blue);cursor:pointer;transition:all .14s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
@@ -158,8 +159,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .p-name{flex:1;font-size:15px;font-weight:500;color:var(--t1)}
 .p-role-tag{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px}
 .empty-state{font-size:14px;color:var(--t3);text-align:center;padding:16px}
-.host-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
-.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:2px;color:var(--red)}
+.host-bar{display:flex;flex-direction:column;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
+.host-bar-top{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 2px}
+.host-bar-bot{display:flex;align-items:center;justify-content:flex-end;gap:6px;padding:0 14px 8px}
+.land-actions .btn-text{align-self:center}
+.live-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--red);flex-shrink:0}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:live-pulse 1.4s ease-in-out infinite}
 @keyframes live-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.5)}60%{box-shadow:0 0 0 5px rgba(255,59,48,0)}}
 .host-timer-block{text-align:center}
@@ -249,8 +253,12 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .compass-btn:active{transform:scale(.92);opacity:.75}
 .compass-btn.active{background:rgba(0,122,255,.12);border-color:rgba(0,122,255,.35)}
 /* map container rotation for heading-up mode */
-.map-rotate-wrap{flex:1;min-height:0;overflow:hidden;position:relative}
-.map-rotate-wrap .leaflet-container{transition:transform .3s ease}
+.map-rotate-container{flex:1;min-height:0;overflow:hidden;position:relative;background:#d4e8f0}
+[data-theme="dark"] .map-rotate-container{background:#0f1a2a}
+/* The inner map is 150% wide/tall, offset so it's centered, with transform-origin at center */
+#hostmap,#specmap{position:absolute!important;top:-25%!important;left:-25%!important;width:150%!important;height:150%!important;transform-origin:33.33% 33.33%;transition:transform .12s linear}
+/* Counter-rotate zoom controls to stay upright */
+.map-rotate-container .leaflet-control-zoom{transition:transform .12s linear}
 /* ── ELIM COUNTDOWN (host/spec panel) ────────────────────── */
 .elim-countdown{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--orange);padding:4px 10px;border-radius:20px;background:rgba(255,159,10,.1);border:1px solid rgba(255,159,10,.2)}
 .results-panel{background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--border);padding:14px 14px max(28px,calc(env(safe-area-inset-bottom,0px) + 14px));flex-shrink:0;overflow-y:auto;max-height:55vh}
@@ -306,8 +314,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 /* Host-back button shown on navigator screen when user is host */
 .host-back-btn{padding:5px 11px;font-size:12px;font-weight:700;background:rgba(0,122,255,.1);border:1.5px solid rgba(0,122,255,.25);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap;line-height:1.3}
 .host-back-btn:hover{background:rgba(0,122,255,.18)}
-.role-toggle-btn{padding:6px 13px;font-size:12px;font-weight:700;background:var(--surf2);border:1.5px solid var(--border);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap}
-.role-toggle-btn:hover{background:var(--surf1);box-shadow:var(--sh-sm)}
+.role-toggle-btn{padding:6px 10px;font-size:12px;font-weight:700;background:var(--surf2);border:1.5px solid var(--border);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.role-toggle-btn:active{opacity:.6;transform:scale(.95)}
 .gps-warn{display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,59,48,.08);border-bottom:1px solid rgba(255,59,48,.18);flex-shrink:0}
 .gps-warn.hidden{display:none!important}
 .gps-warn>span{font-size:18px;flex-shrink:0}
@@ -361,11 +369,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .code-big:active{opacity:.6}
 .code-copied{font-size:18px;font-weight:700;color:var(--green);letter-spacing:2px;transition:all .3s}
 /* ── QR SHEET ────────────────────────────────────────────── */
-.qr-sheet{position:fixed;inset:0;z-index:6000;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:var(--blur)}
+.qr-sheet{position:fixed;inset:0;z-index:6000;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:var(--blur)}
 .qr-sheet.hidden{display:none!important}
-.qr-box{background:var(--surf1);border-radius:24px 24px 0 0;padding:20px 24px 40px;width:100%;max-width:400px;text-align:center}
-.qr-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 18px}
-.qr-title{font-size:16px;font-weight:700;color:var(--t1);margin-bottom:4px}
+.qr-box{background:var(--surf1);border-radius:0 0 24px 24px;padding:max(48px,env(safe-area-inset-top,48px)) 24px 24px;width:100%;max-width:400px;text-align:center}
+.qr-handle{width:36px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.qr-title{font-size:17px;font-weight:700;color:var(--t1);margin-bottom:4px}
 .qr-sub{font-size:13px;color:var(--t3);margin-bottom:18px}
 #qr-canvas{margin:0 auto;border-radius:12px;overflow:hidden;display:inline-block}
 #qr-canvas canvas,#qr-canvas img{border-radius:10px}
@@ -435,11 +443,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <h1 class="land-title">Luftlinie</h1>
     <p class="land-sub">You know how far.<br>You don't know where.</p>
     <div class="land-actions">
-      <button class="btn-primary btn-lg btn-full" onclick="Nav.go('setup')">
+      <button class="btn-primary btn-lg btn-full" onclick="haptic('light');Nav.go('setup')">
         <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
         Host a Game
       </button>
-      <button class="btn-secondary btn-lg btn-full" onclick="Nav.go('join')">
+      <button class="btn-secondary btn-lg btn-full" onclick="haptic('light');Nav.go('join')">
         <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Join as Player
       </button>
@@ -452,7 +460,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <!-- ══ SETUP ══ -->
 <div class="sc" id="sc-setup">
   <div class="top-bar">
-    <button class="back-btn" onclick="Nav.go('land')">
+    <button class="back-btn" onclick="haptic('light');Nav.go('land')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
     </button>
     <span class="top-title">New Game</span>
@@ -576,7 +584,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       </div>
     </div>
 
-    <button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="App.goMap()">
+    <button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="haptic('medium');App.goMap()">
       Place Target on Map →
     </button>
   </div>
@@ -585,23 +593,23 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <!-- ══ MAP (target placement) ══ -->
 <div class="sc map-sc" id="sc-map">
   <div class="map-topbar">
-    <button class="map-back-btn" onclick="Nav.go('setup')">
+    <button class="map-back-btn" onclick="haptic('light');Nav.go('setup')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
     </button>
     <div class="map-pill" id="map-hint">Tap map to place target</div>
-    <button class="smart-btn" id="smart-btn" onclick="App.smartPick()">✦ Smart</button>
+    <button class="smart-btn" id="smart-btn" onclick="haptic('light');App.smartPick()">✦ Smart</button>
   </div>
   <div id="leafmap"></div>
   <div class="map-foot">
     <span class="map-foot-info" id="map-info">No target set</span>
-    <button class="btn-primary" id="btn-confirm" disabled onclick="App.confirmTarget()">Confirm →</button>
+    <button class="btn-primary" id="btn-confirm" disabled onclick="haptic('medium');App.confirmTarget()">Confirm →</button>
   </div>
 </div>
 
 <!-- ══ HOST LOBBY ══ -->
 <div class="sc" id="sc-hlobby">
   <div class="top-bar">
-    <button class="back-btn" onclick="Nav.go('map')">
+    <button class="back-btn" onclick="haptic('light');Nav.go('map')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
     </button>
     <span class="top-title">Lobby</span>
@@ -613,11 +621,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="code-big" id="hl-code" onclick="App.copyCodeTap()" title="Tap to copy">——</div>
       <div class="code-sub" id="hl-code-sub">Tap to copy</div>
       <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
-        <button class="btn-secondary btn-sm" onclick="App.copyLink()">
+        <button class="btn-secondary btn-sm" onclick="haptic('light');App.copyLink()">
           <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Copy Link
         </button>
-        <button class="btn-secondary btn-sm" onclick="App.showQR()">
+        <button class="btn-secondary btn-sm" onclick="haptic('light');App.showQR()">
           <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
           QR Code
         </button>
@@ -636,7 +644,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="list-row"><span class="row-label">Exclude host</span><span class="row-val" id="hl-excludehost">—</span></div>
       <div class="list-row"><span class="row-label">Target</span><span class="row-val green" id="hl-target">✓ Set</span></div>
     </div>
-    <button class="btn-green btn-lg btn-full" style="margin-top:20px" id="btn-lock" onclick="App.lockStart()">
+    <button class="btn-green btn-lg btn-full" style="margin-top:20px" id="btn-lock" onclick="haptic('medium');App.lockStart()">
       <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       Lock &amp; Start
     </button>
@@ -646,20 +654,22 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <!-- ══ HOST ACTIVE ══ -->
 <div class="sc map-sc" id="sc-hactive">
   <div class="host-bar">
-    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
-    <div class="host-timer-block">
-      <div class="htb-lbl">Time Left</div>
-      <div class="htb-val" id="ha-timer">00:00</div>
+    <div class="host-bar-top">
+      <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+      <div class="host-timer-block">
+        <div class="htb-lbl">Time Left</div>
+        <div class="htb-val" id="ha-timer">00:00</div>
+      </div>
+      <button class="compass-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
     </div>
-    <div style="display:flex;gap:6px;align-items:center">
+    <div class="host-bar-bot">
       <span class="elim-countdown hidden" id="ha-elim-cd"></span>
-      <button class="compass-btn sound-btn active" id="sound-btn-host" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
-      <button class="compass-btn" id="compass-btn-host" onclick="App.toggleMapOrientation('host')" title="Toggle heading up">🧭</button>
-      <button class="role-toggle-btn" id="btn-role-toggle" onclick="App.toggleMyView()">👁 My View</button>
-      <button class="btn-destruct sm" onclick="App.abortGame()">Abort</button>
+      <button class="compass-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="North-up">🧭</button>
+      <button class="role-toggle-btn hidden" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()">🧭 My View</button>
+      <button class="btn-destruct sm" onclick="haptic('medium');App.abortGame()">Abort</button>
     </div>
   </div>
-  <div id="hostmap"></div>
+  <div class="map-rotate-container" id="hostmap-wrap"><div id="hostmap"></div></div>
   <div class="host-panel">
     <div class="hp-row">
       <span class="section-label" style="margin:0">Navigators</span>
@@ -672,19 +682,21 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <!-- ══ SPECTATOR MAP ══ -->
 <div class="sc map-sc" id="sc-spectator">
   <div class="host-bar">
-    <div class="live-badge spec-badge"><span class="live-dot"></span>WATCHING</div>
-    <div class="host-timer-block">
-      <div class="htb-lbl">Time Left</div>
-      <div class="htb-val" id="sp-timer">00:00</div>
+    <div class="host-bar-top">
+      <div class="live-badge spec-badge"><span class="live-dot"></span>WATCHING</div>
+      <div class="host-timer-block">
+        <div class="htb-lbl">Time Left</div>
+        <div class="htb-val" id="sp-timer">00:00</div>
+      </div>
+      <button class="compass-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
     </div>
-    <div style="display:flex;gap:6px;align-items:center">
+    <div class="host-bar-bot">
       <span class="elim-countdown hidden" id="sp-elim-cd"></span>
-      <button class="compass-btn sound-btn active" id="sound-btn-spec" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
-      <button class="compass-btn" id="compass-btn-spec" onclick="App.toggleMapOrientation('spec')" title="Toggle heading up">🧭</button>
-      <button class="btn-destruct sm" id="spec-leave-btn" onclick="App.leaveOrHostView()">Leave</button>
+      <button class="compass-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="North-up">🧭</button>
+      <button class="btn-destruct sm" id="spec-leave-btn" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
     </div>
   </div>
-  <div id="specmap"></div>
+  <div class="map-rotate-container" id="specmap-wrap"><div id="specmap"></div></div>
   <div class="host-panel">
     <div class="hp-row">
       <span class="section-label" style="margin:0">Navigators</span>
@@ -697,7 +709,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <!-- ══ JOIN ══ -->
 <div class="sc" id="sc-join">
   <div class="top-bar">
-    <button class="back-btn" onclick="Nav.go('land')">
+    <button class="back-btn" onclick="haptic('light');Nav.go('land')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
     </button>
     <span class="top-title">Join Game</span>
@@ -723,7 +735,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
           <button class="seg" data-v="spectator" onclick="App.setRole('spectator')">👁 Spectator</button>
         </div>
       </div>
-      <button class="btn-primary btn-lg btn-full" onclick="App.joinGame()">Join →</button>
+      <button class="btn-primary btn-lg btn-full" onclick="haptic('medium');App.joinGame()">Join →</button>
       <div class="err-msg hidden" id="join-err"></div>
     </div>
   </div>
@@ -733,7 +745,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <!-- ══ NAV WAIT ══ -->
 <div class="sc" id="sc-nwait">
   <div class="top-bar">
-    <button class="back-btn" onclick="App.leaveGame()">
+    <button class="back-btn" onclick="haptic('light');App.leaveGame()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Leave
     </button>
     <span class="top-title" id="nw-title">Game ——</span>
@@ -785,7 +797,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="na-ripples" id="na-ripples">
       <div class="acc-ring hidden" id="acc-ring"></div>
     </div>
-    <button class="refresh-btn" onclick="App.manualRefresh()" id="refresh-btn">
+    <button class="refresh-btn" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       Refresh Distance
     </button>
@@ -827,12 +839,12 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="rs"><div class="rs-v" id="rs-rank">—</div><div class="rs-l">Your rank</div></div>
     </div>
     <div id="result-rows" class="result-rows"></div>
-    <button class="share-btn" onclick="App.shareResult()">
+    <button class="share-btn" onclick="haptic('light');App.shareResult()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
       Share Result Card
     </button>
-    <button class="replay-btn" id="replay-btn" onclick="App.playReplay()">▶ Replay Routes</button>
-    <button class="btn-primary btn-lg btn-full" onclick="App.goHome()">New Game</button>
+    <button class="replay-btn" id="replay-btn" onclick="haptic('light');App.playReplay()">▶ Replay Routes</button>
+    <button class="btn-primary btn-lg btn-full" onclick="haptic('light');App.goHome()">New Game</button>
   </div>
 </div>
 
@@ -843,7 +855,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="as-msg">This ends the game for all players immediately.</div>
     <div class="as-actions">
       <button class="btn-primary btn-full" style="background:var(--red);box-shadow:0 2px 8px rgba(255,59,48,.3)" onclick="App.confirmAbort()">End Game for Everyone</button>
-      <button class="btn-secondary btn-full" onclick="App.cancelAbort()">Cancel</button>
+      <button class="btn-secondary btn-full" onclick="haptic('light');App.cancelAbort()">Cancel</button>
     </div>
   </div>
 </div>
@@ -851,13 +863,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div><!-- #app -->
 
 <!-- QR SHEET -->
-<div class="qr-sheet hidden" id="qr-sheet" onclick="App.hideQR()">
+<div class="qr-sheet hidden" id="qr-sheet" onclick="haptic('light');App.hideQR()">
   <div class="qr-box" onclick="event.stopPropagation()">
-    <div class="qr-handle"></div>
     <div class="qr-title">Scan to Join</div>
     <div class="qr-sub" id="qr-sub">Game Code: ——</div>
     <div id="qr-canvas"></div>
-    <button class="btn-secondary btn-full" style="margin-top:16px" onclick="App.hideQR()">Close</button>
+    <button class="btn-secondary btn-full" style="margin-top:16px" onclick="haptic('light');App.hideQR()">Done</button>
+    <div class="qr-handle" style="margin-top:16px"></div>
   </div>
 </div>
 
@@ -878,7 +890,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="warn-ico">⚠️</div>
     <div class="warn-title">Passenger Mode Only</div>
     <p class="warn-body">Do not interact with this app while driving.</p>
-    <button class="btn-primary" onclick="App.dismissSpeed()">Understood</button>
+    <button class="btn-primary" onclick="haptic('light');App.dismissSpeed()">Understood</button>
   </div>
 </div>
 
@@ -889,7 +901,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="arrive-title" style="color:var(--red)">Eliminated</div>
     <div class="arrive-time">You were furthest from the target</div>
     <div class="arrive-dist" id="elim-rank"></div>
-    <button class="btn-primary btn-lg" onclick="App.watchAfterElim()">👁 Watch Game</button>
+    <button class="btn-primary btn-lg" onclick="haptic('medium');App.watchAfterElim()">👁 Watch Game</button>
   </div>
 </div>
 
@@ -900,7 +912,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="arrive-title">Target Reached!</div>
     <div class="arrive-time" id="arr-time">—</div>
     <div class="arrive-dist" id="arr-dist"></div>
-    <button class="btn-primary btn-lg" onclick="App.showResults()">View Results →</button>
+    <button class="btn-primary btn-lg" onclick="haptic('medium');App.showResults()">View Results →</button>
   </div>
 </div>
 
@@ -1427,7 +1439,17 @@ function startPlayersListener(){
         fillResults(players);goScreen('results');
       });
     }
-    if(g.status==='aborted'){clearInterval(S.timerIv);if(!S.isHost){toast('Host aborted');goHome();}}
+    if(g.status==='aborted'){
+      clearInterval(S.timerIv);
+      if(!S.isHost){
+        db.ref(`games/${S.gameCode}/players`).once('value').then(snap=>{
+          const raw=snap.val()||{};
+          fillResults(Object.entries(raw).map(([id,p])=>({id,...p})));
+          toast('Host ended the game',2000);
+          goScreen('results');
+        }).catch(()=>{toast('Host ended the game');goHome();});
+      }
+    }
   });
 }
 
@@ -1437,14 +1459,22 @@ function launchHostActive(){
   S._lastUrgentBeep=-1;S._lastElimBeep=-1;
   goScreen('hactive');setTimeout(initHostMap,80);
   startClientTimer();
+  // Role toggle only makes sense if host is also a navigator
   const btn=el('btn-role-toggle');
-  if(btn) btn.textContent=S.hostRole==='navigator'?'🧭 My Nav':'👁 My View';
+  if(btn){
+    if(S.hostRole==='navigator'){
+      btn.classList.remove('hidden');
+      btn.textContent='🧭 Nav';
+    } else {
+      btn.classList.add('hidden');
+    }
+  }
   if(S.elimMode&&S.isHost){
     if(S.elimIv)clearInterval(S.elimIv);
     S.nextElimTime=Date.now()+5*60*1000;
     S.elimIv=setInterval(()=>{
       runElimCheck();
-      S.nextElimTime=Date.now()+5*60*1000; // reset after each elim
+      S.nextElimTime=Date.now()+5*60*1000;
       S._lastElimBeep=-1;
     },5*60*1000);
   }
@@ -1452,20 +1482,14 @@ function launchHostActive(){
 }
 
 function toggleMyView(){
+  // Only meaningful when host is a navigator — toggles between host overview and personal nav screen
+  if(S.hostRole!=='navigator') return;
   const btn=el('btn-role-toggle');
   if(S.hostViewActive){
-    // Host is leaving the overview map → go to personal view
     S.hostViewActive=false;
-    if(S.hostRole==='spectator'){
-      goScreen('spectator');setTimeout(initSpecMap,80);
-      // Update spectator Leave button to say "Host View"
-      const lb=el('spec-leave-btn');if(lb)lb.textContent='📡 Host View';
-    } else {
-      // Host is navigator — go to navigator screen, show return button
-      goScreen('nactive');
-      show('btn-host-back');
-    }
-    if(btn)btn.textContent='📡 Host View';
+    goScreen('nactive');
+    show('btn-host-back');
+    if(btn)btn.textContent='📡 Host';
   } else {
     goHostView();
   }
@@ -1475,10 +1499,9 @@ function goHostView(){
   S.hostViewActive=true;
   goScreen('hactive');setTimeout(initHostMap,80);
   hide('btn-host-back');
-  // Restore spectator Leave button label
   const lb=el('spec-leave-btn');if(lb)lb.textContent='Leave';
   const btn=el('btn-role-toggle');
-  if(btn)btn.textContent=S.hostRole==='navigator'?'🧭 My Nav':'👁 My View';
+  if(btn)btn.textContent='🧭 Nav';
 }
 
 function leaveOrHostView(){
@@ -1487,14 +1510,16 @@ function leaveOrHostView(){
 
 function initHostMap(){
   if(!el('hostmap'))return;
-  if(S.hostMap){S.hostMap.invalidateSize();return;}
+  if(S.hostMap){setTimeout(()=>S.hostMap.invalidateSize(),50);return;}
   const c=S.targetLat?[((S.myLat||HOME.lat)+S.targetLat)/2,((S.myLon||HOME.lon)+S.targetLon)/2]:[HOME.lat,HOME.lon];
   S.hostMap=L.map('hostmap',{center:c,zoom:9,zoomControl:false});
-  addTiles(S.hostMap);L.control.zoom({position:'bottomright'}).addTo(S.hostMap);
+  addTiles(S.hostMap);
+  L.control.zoom({position:'bottomright'}).addTo(S.hostMap);
   if(S.targetLat){
     L.marker([S.targetLat,S.targetLon],{icon:pinIcon('#007AFF',20)}).bindPopup('<b>🎯 Target</b>').addTo(S.hostMap);
     L.circle([S.targetLat,S.targetLon],{radius:S.arrRadius,color:'#007AFF',fillColor:'#007AFF',fillOpacity:.07,weight:1,dashArray:'4 4'}).addTo(S.hostMap);
   }
+  setTimeout(()=>S.hostMap.invalidateSize(),100);
 }
 
 function renderNavCards(elId,players){
@@ -1611,9 +1636,11 @@ function leaveGame(){ goHome(); }
 /* ── SPECTATOR MAP ───────────────────────────────────────── */
 function initSpecMap(){
   if(!el('specmap'))return;
-  if(S.specMap){S.specMap.invalidateSize();return;}
+  if(S.specMap){setTimeout(()=>S.specMap.invalidateSize(),50);return;}
   S.specMap=L.map('specmap',{center:[HOME.lat,HOME.lon],zoom:10,zoomControl:false});
-  addTiles(S.specMap);L.control.zoom({position:'bottomright'}).addTo(S.specMap);
+  addTiles(S.specMap);
+  L.control.zoom({position:'bottomright'}).addTo(S.specMap);
+  setTimeout(()=>S.specMap.invalidateSize(),100);
 }
 
 function updateSpecMap({players,target_lat,target_lon,arr_radius}){
@@ -2020,46 +2047,57 @@ document.addEventListener('visibilitychange',()=>{
 function toggleMapOrientation(which){
   const btn=el(which==='host'?'compass-btn-host':'compass-btn-spec');
   const map=which==='host'?S.hostMap:S.specMap;
-  if(!map) return;
+  const wrap=el(which==='host'?'hostmap-wrap':'specmap-wrap');
+  if(!map||!wrap) return;
 
   S.mapOrientMode[which]=!S.mapOrientMode[which];
   const on=S.mapOrientMode[which];
   if(btn) btn.classList.toggle('active',on);
 
   if(!on){
-    // Reset rotation
-    const container=map.getContainer();
-    container.style.transform='';
-    container.style.transformOrigin='';
     stopMapOrientation();
+    // Reset the map div transform
+    map.getContainer().style.transform='';
+    map.getContainer().style.transformOrigin='';
+    // Reset counter-rotated controls
+    const zoom=wrap.querySelector('.leaflet-control-zoom');
+    if(zoom) zoom.style.transform='';
+    setTimeout(()=>map.invalidateSize(),50);
     return;
   }
 
-  // iOS 13+ requires explicit permission for DeviceOrientationEvent
   if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
     DeviceOrientationEvent.requestPermission()
-      .then(state=>{ if(state==='granted') startMapOrientation(which,map); else toast('Compass permission denied'); })
-      .catch(()=>toast('Compass not available'));
+      .then(state=>{
+        if(state==='granted') startMapOrientation(which,map,wrap);
+        else { toast('Compass permission denied'); S.mapOrientMode[which]=false; if(btn)btn.classList.remove('active'); }
+      })
+      .catch(()=>{ toast('Compass not available'); S.mapOrientMode[which]=false; if(btn)btn.classList.remove('active'); });
   } else {
-    startMapOrientation(which,map);
+    startMapOrientation(which,map,wrap);
   }
 }
 
-function startMapOrientation(which,map){
-  stopMapOrientation(); // clear any previous listener
+function startMapOrientation(which,map,wrap){
+  stopMapOrientation();
   const container=map.getContainer();
-  container.style.transformOrigin='50% 50%';
 
   S._orientListener=(e)=>{
-    // webkitCompassHeading: 0=North, clockwise, iOS only
-    // For Android: use 360-alpha (alpha counts anti-clockwise from North)
     const heading = e.webkitCompassHeading != null
       ? e.webkitCompassHeading
       : (360 - (e.alpha||0));
     S._compassHeading=heading;
-    // Rotate map container opposite to heading so map stays north-up relative to device
+
+    // Rotate the oversized map div inside its clipping container
+    // transform-origin is at 33.33%/33.33% because the div is offset -25%/-25%
+    // so 33.33% of 150% = 50% of the visible area = center of viewport
+    container.style.transformOrigin='33.33% 33.33%';
     container.style.transform=`rotate(${-heading}deg)`;
-    // Show a compass rose bearing label
+
+    // Counter-rotate zoom controls so they stay screen-aligned
+    const zoom=wrap.querySelector('.leaflet-control-zoom');
+    if(zoom) zoom.style.transform=`rotate(${heading}deg)`;
+
     const n=el('compass-btn-'+(which==='host'?'host':'spec'));
     if(n) n.title=Math.round(heading)+'° '+headingLabel(heading);
   };
