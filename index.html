@@ -163,13 +163,24 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .p-name{flex:1;font-size:15px;font-weight:500;color:var(--t1)}
 .p-role-tag{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px}
 .empty-state{font-size:14px;color:var(--t3);text-align:center;padding:16px}
-.host-bar{display:flex;align-items:center;justify-content:space-between;padding:0 12px;height:52px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
-.host-bar-end{display:flex;align-items:center;gap:5px;flex-shrink:0}
+/* ── UNIFIED GAME BAR (nav + host + spec) ────────────────── */
+/* Same height and structure across all active screens.
+   Left: status badge (LIVE/WATCHING) or player count
+   Center: timer (absolute, always centered)
+   Right: controls cluster */
+.game-bar{display:flex;align-items:center;height:52px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border);padding:0 12px}
+.game-bar-left{display:flex;align-items:center;gap:5px;min-width:80px;flex-shrink:0}
+.game-bar-center{position:absolute;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none}
+.game-bar-right{margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.gbar-timer{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1}
+.gbar-timer.urgent{color:var(--red);animation:blink 1s ease infinite}
+.gbar-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);font-weight:700;margin-bottom:1px}
 .live-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--red);flex-shrink:0}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:live-pulse 1.4s ease-in-out infinite}
 @keyframes live-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.5)}60%{box-shadow:0 0 0 5px rgba(255,59,48,0)}}
-.host-timer-block{text-align:center}
-.htb-lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);font-weight:700}
+.host-bar{display:flex;align-items:center;height:52px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border);padding:0 12px}
+.host-bar-end{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.htb-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);font-weight:700}
 .htb-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
 .htb-val.urgent{color:var(--red);animation:blink 1s ease infinite}
 @keyframes blink{50%{opacity:.3}}
@@ -209,22 +220,25 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .nwait-list{display:flex;flex-direction:column;gap:5px;width:100%;max-width:280px}
 .role-pill{font-size:12px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:5px 16px;border-radius:20px;background:rgba(0,122,255,.1);color:var(--blue);border:1px solid rgba(0,122,255,.18)}
 .nw-others{text-align:center;font-size:13px;color:var(--t3);padding:6px}
-.na-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 10px;flex-shrink:0;border-bottom:1px solid var(--border2)}
 .na-players{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--t2);font-weight:500}
 .na-players svg{width:13px;height:13px}
-.na-timer{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--t2);font-variant-numeric:tabular-nums}
-.na-timer.urgent{color:var(--red);animation:blink 1s ease infinite}
 .na-gps{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--t3);padding:4px 10px;border-radius:20px;background:var(--surf2);border:1px solid var(--border2);transition:all .3s}
 .na-gps.live{color:var(--green);background:rgba(52,199,89,.1);border-color:rgba(52,199,89,.2)}
 .na-gps.lost{color:var(--orange)}
 .gps-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
-.na-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;isolation:isolate;padding:16px;transition:background .8s ease}
+.na-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;isolation:isolate;padding:24px 16px;transition:background .8s ease}
+/* Subtle glass card feel behind the distance number */
+.na-dist-wrapper{display:flex;flex-direction:column;align-items:center;background:var(--surf1);border:1px solid var(--border2);border-radius:var(--r20);padding:28px 36px 20px;box-shadow:var(--sh-md);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);position:relative;z-index:2;min-width:220px;transition:background .8s ease,border-color .5s ease}
 /* na-eyebrow is BELOW the number — status messages only (blind start, whisper) */
 .na-dist-row{display:flex;align-items:flex-end;gap:8px;position:relative;z-index:3}
 .na-dist{font-family:var(--mono);font-size:clamp(72px,21vw,114px);font-weight:700;line-height:.9;letter-spacing:-2px;color:var(--t1);transition:color .5s ease;font-variant-numeric:tabular-nums}
 .na-dist.updating{animation:dist-flash .3s ease}
 @keyframes dist-flash{0%,100%{opacity:1}50%{opacity:.35}}
-/* proximity feedback is background tint only — number color never changes */
+/* proximity tint on the card wrapper */
+.na-dist-wrapper.prox-close{background:rgba(255,159,10,.08)!important;border-color:rgba(255,159,10,.20)!important}
+.na-dist-wrapper.prox-very-close{background:rgba(52,199,89,.08)!important;border-color:rgba(52,199,89,.22)!important}
+[data-theme="dark"] .na-dist-wrapper.prox-close{background:rgba(255,159,10,.11)!important;border-color:rgba(255,159,10,.25)!important}
+[data-theme="dark"] .na-dist-wrapper.prox-very-close{background:rgba(52,199,89,.11)!important;border-color:rgba(52,199,89,.28)!important}
 .na-unit{font-family:var(--mono);font-size:clamp(18px,5.5vw,30px);font-weight:400;color:var(--t3);letter-spacing:2px;margin-bottom:5px}
 .na-ripples{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:1}
 @keyframes rip-out{0%{transform:translate(-50%,-50%) scale(0.25);opacity:1}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
@@ -283,12 +297,15 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .hidden{display:none!important}
 .overlay.hidden{display:flex!important;opacity:0;pointer-events:none}
 .toast.hidden{display:block!important;opacity:0;transform:translateX(-50%) translateY(10px);pointer-events:none}
-.cd-wrap{position:relative;width:138px;height:138px;display:flex;align-items:center;justify-content:center}
+/* ── COUNTDOWN ───────────────────────────────────────────── */
+.cd-wrap{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center}
 .cd-svg{position:absolute;inset:0;transform:rotate(-90deg)}
-.cd-ring-bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:3}
-.cd-ring-fg{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-dasharray:326.7;stroke-dashoffset:0;transition:stroke-dashoffset .9s linear}
-.cd-num{font-family:var(--mono);font-size:58px;font-weight:700;color:white;position:relative;z-index:1}
-.cd-lbl{color:rgba(255,255,255,.6);font-size:16px;font-weight:500;margin-top:18px;letter-spacing:.5px}
+.cd-ring-bg{fill:none;stroke:rgba(255,255,255,.12);stroke-width:3}
+.cd-ring-fg{fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-dasharray:452;stroke-dashoffset:0;transition:stroke-dashoffset .85s cubic-bezier(.4,0,.2,1)}
+.cd-inner{position:absolute;width:120px;height:120px;border-radius:50%;background:var(--surf1);backdrop-filter:var(--blur);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--sh-lg)}
+.cd-num{font-family:var(--mono);font-size:60px;font-weight:800;color:var(--t1);line-height:1;animation:cd-pop .3s cubic-bezier(.17,.67,.35,1.3) both}
+@keyframes cd-pop{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+.cd-lbl{color:rgba(255,255,255,.5);font-size:14px;font-weight:500;margin-top:20px;letter-spacing:1.5px;text-transform:uppercase}
 .warn-box{background:var(--surf1);border:1px solid var(--border);border-radius:var(--r16);padding:28px 24px;max-width:300px;text-align:center;box-shadow:var(--sh-lg)}
 .warn-ico{font-size:44px;margin-bottom:12px}
 .warn-title{font-size:20px;font-weight:700;color:var(--red);margin-bottom:10px}
@@ -329,11 +346,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .setup-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:14px}
 .setup-toggle-label{font-size:15px;color:var(--t1);font-weight:500}
 .setup-toggle-sub{font-size:12px;color:var(--t3);margin-top:2px;line-height:1.4}
-/* ── PROXIMITY BACKGROUND TINT ───────────────────────────── */
-.na-center.prox-close{background:rgba(255,159,10,.07)!important}
-.na-center.prox-very-close{background:rgba(52,199,89,.09)!important}
-[data-theme="dark"] .na-center.prox-close{background:rgba(255,159,10,.10)!important}
-[data-theme="dark"] .na-center.prox-very-close{background:rgba(52,199,89,.12)!important}
+/* proximity tint handled by na-dist-wrapper now */
 /* ── SOUND BUTTON ────────────────────────────────────────── */
 .sound-btn{background:none;border:none;font-size:16px;cursor:pointer;padding:3px;opacity:.35;transition:opacity .2s;line-height:1}
 .sound-btn.active{opacity:1}
@@ -652,17 +665,19 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
 <!-- ══ HOST ACTIVE ══ -->
 <div class="sc map-sc" id="sc-hactive">
-  <div class="host-bar">
-    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
-    <div class="host-timer-block">
-      <div class="htb-lbl">Time Left</div>
-      <div class="htb-val" id="ha-timer">00:00</div>
-    </div>
-    <div class="host-bar-end">
+  <div class="game-bar">
+    <div class="game-bar-left">
+      <div class="live-badge"><span class="live-dot"></span>LIVE</div>
       <span class="elim-countdown hidden" id="ha-elim-cd"></span>
+    </div>
+    <div class="game-bar-center">
+      <div class="gbar-lbl">Time Left</div>
+      <div class="gbar-timer" id="ha-timer">00:00</div>
+    </div>
+    <div class="game-bar-right">
       <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
       <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="North-up">🧭</button>
-      <button class="role-toggle-btn" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()">🧭 My View</button>
+      <button class="role-toggle-btn" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()">🧭 Nav</button>
       <button class="btn-destruct sm" onclick="haptic('medium');App.abortGame()">Abort</button>
     </div>
   </div>
@@ -679,14 +694,16 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
 <!-- ══ SPECTATOR MAP ══ -->
 <div class="sc map-sc" id="sc-spectator">
-  <div class="host-bar">
-    <div class="live-badge spec-badge"><span class="live-dot"></span>WATCHING</div>
-    <div class="host-timer-block">
-      <div class="htb-lbl">Time Left</div>
-      <div class="htb-val" id="sp-timer">00:00</div>
-    </div>
-    <div class="host-bar-end">
+  <div class="game-bar">
+    <div class="game-bar-left">
+      <div class="live-badge spec-badge"><span class="live-dot"></span>WATCHING</div>
       <span class="elim-countdown hidden" id="sp-elim-cd"></span>
+    </div>
+    <div class="game-bar-center">
+      <div class="gbar-lbl">Time Left</div>
+      <div class="gbar-timer" id="sp-timer">00:00</div>
+    </div>
+    <div class="game-bar-right">
       <button class="toolbar-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
       <button class="toolbar-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="North-up">🧭</button>
       <button class="btn-destruct sm" id="spec-leave-btn" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
@@ -762,16 +779,21 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
 <!-- ══ NAV ACTIVE ══ -->
 <div class="sc nav-active-sc" id="sc-nactive">
-  <div class="na-bar">
-    <div class="na-players">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span id="na-pcount">—</span>
-    </div>
-    <div class="na-timer" id="na-timer">—</div>
-    <div style="display:flex;align-items:center;gap:8px">
+  <div class="game-bar">
+    <div class="game-bar-left">
+      <div class="na-players">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span id="na-pcount">—</span>
+      </div>
       <span class="whisper-cd hidden" id="na-whisper-cd">👂 —:——</span>
-      <button class="host-back-btn hidden" id="btn-host-back" onclick="haptic('medium');App.goHostView()">📡 Host</button>
-      <button class="sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Sound">🔊</button>
+      <button class="host-back-btn hidden" id="btn-host-back" onclick="haptic('medium');App.goHostView()">📡</button>
+    </div>
+    <div class="game-bar-center">
+      <div class="gbar-lbl">Time Left</div>
+      <div class="gbar-timer" id="na-timer">—</div>
+    </div>
+    <div class="game-bar-right">
+      <button class="toolbar-btn sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Sound">🔊</button>
       <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
     </div>
   </div>
@@ -785,12 +807,14 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
   </div>
   <div class="na-center" id="na-center">
-    <div class="na-dist-row">
-      <div class="na-dist" id="na-dist">—</div>
-      <div class="na-unit" id="na-unit">KM</div>
+    <div class="na-dist-wrapper" id="na-dist-wrapper">
+      <div class="na-dist-row">
+        <div class="na-dist" id="na-dist">—</div>
+        <div class="na-unit" id="na-unit">KM</div>
+      </div>
+      <div class="na-ripples" id="na-ripples"></div>
+      <div class="na-eyebrow" id="na-eyebrow"></div>
     </div>
-    <div class="na-ripples" id="na-ripples"></div>
-    <div class="na-eyebrow" id="na-eyebrow"></div>
     <button class="refresh-btn" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       Refresh
@@ -865,11 +889,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <!-- OVERLAYS -->
 <div class="overlay hidden" id="ov-cd">
   <div class="cd-wrap">
-    <svg class="cd-svg" viewBox="0 0 120 120">
-      <circle class="cd-ring-bg" cx="60" cy="60" r="52"/>
-      <circle class="cd-ring-fg" id="cd-arc" cx="60" cy="60" r="52"/>
+    <svg class="cd-svg" viewBox="0 0 160 160">
+      <circle class="cd-ring-bg" cx="80" cy="80" r="72"/>
+      <circle class="cd-ring-fg" id="cd-arc" cx="80" cy="80" r="72"/>
     </svg>
-    <div class="cd-num" id="cd-num">3</div>
+    <div class="cd-inner">
+      <div class="cd-num" id="cd-num">3</div>
+    </div>
   </div>
   <div class="cd-lbl">Get Ready</div>
 </div>
@@ -1041,7 +1067,7 @@ function startClientTimer(){
       const e=el(id); if(e){e.textContent=txt;e.classList.toggle('urgent',rem<300);}
     });
     // Urgent timer beeps: single beep at 60s, rapid double-beep at 10s
-    if(rem<=60&&rem>59.5) playTone(440,0.06,0.10);
+    if(rem<=60&&rem>59.5){ playTimerWarningSound(); haptic('light'); }
     if(rem<=10&&rem>0&&Math.floor(rem)!==S._lastUrgentBeep){
       S._lastUrgentBeep=Math.floor(rem);
       playTone(880,0.05,0.12);
@@ -1614,12 +1640,13 @@ async function approveSpec(token){
   if(!S.gameCode)return;
   await db.ref(`games/${S.gameCode}/players/${token}`).update({specApproved:true});
   await db.ref(`games/${S.gameCode}/specRequests/${token}`).remove();
-  haptic('medium');
+  playApproveSound();haptic('medium');
 }
 async function denySpec(token){
   if(!S.gameCode)return;
   await db.ref(`games/${S.gameCode}/players/${token}`).remove();
   await db.ref(`games/${S.gameCode}/specRequests/${token}`).remove();
+  playDenySound();haptic('light');
 }
 
 // Listen for incoming spectator requests (host only)
@@ -1662,6 +1689,7 @@ async function joinGame(){
     }
     saveSession();
     btn.disabled=false;btn.textContent='Join →';
+    playJoinSound();haptic('medium');
     startPlayersListener();
     if(S.role==='spectator'){
       // Watch own node for approval
@@ -1847,15 +1875,15 @@ async function manualRefresh(){
 /* ── NAV DISPLAY ─────────────────────────────────────────── */
 function updateNavDisplay(distM){
   if(distM==null)return;S.lastDist=distM;
-  const nd=el('na-dist'),nu=el('na-unit'),nc=el('na-center');
+  const nd=el('na-dist'),nu=el('na-unit'),nw=el('na-dist-wrapper');
   if(nd){
     nd.textContent=fmtDist(distM);nd.classList.remove('updating');
     void nd.offsetWidth;nd.classList.add('updating');
   }
-  if(nc){
-    nc.classList.remove('prox-close','prox-very-close');
-    if(distM<200)nc.classList.add('prox-very-close');
-    else if(distM<1000)nc.classList.add('prox-close');
+  if(nw){
+    nw.classList.remove('prox-close','prox-very-close');
+    if(distM<200)nw.classList.add('prox-very-close');
+    else if(distM<1000)nw.classList.add('prox-close');
   }
   if(nu)nu.textContent=distUnit(distM);
   set('na-upd','Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
@@ -1909,20 +1937,26 @@ function initResMap(){
 /* ── COUNTDOWN ───────────────────────────────────────────── */
 function showCountdown(cb){
   const ov=el('ov-cd'),numEl=el('cd-num'),arc=el('cd-arc');
-  const circ=2*Math.PI*52;ov.classList.remove('hidden');let n=3;
+  const circ=2*Math.PI*72; // r=72 → 452.4
+  ov.classList.remove('hidden');let n=3;
   (function tick(){
-    numEl.textContent=n;arc.style.strokeDashoffset=circ*(1-n/3);
-    // Beep: low tick for 3,2 — higher ping for 1 — chord for go
-    if(n>0) playTone(n===1?880:440,0.08,0.18);
+    // Pop animation on number
+    numEl.style.animation='none';void numEl.offsetWidth;
+    numEl.style.animation='cd-pop .3s cubic-bezier(.17,.67,.35,1.3) both';
+    numEl.textContent=n>0?String(n):'GO';
+    arc.style.strokeDashoffset=String(circ*(1-Math.max(0,n)/3));
+    if(n>0){
+      playTone(n===1?880:440,0.08,0.18);
+      haptic('light');
+    }
     n--;
     if(n<0){
-      ov.classList.add('hidden');
-      haptic('medium');
-      // Game start chord: C4-E4-G4 quick arpeggio
-      playTone(523,0.12,0.20);
-      setTimeout(()=>playTone(659,0.12,0.20),80);
-      setTimeout(()=>playTone(784,0.18,0.22),160);
-      cb();
+      setTimeout(()=>{
+        ov.classList.add('hidden');
+        haptic('medium');
+        playStartSound();
+        cb();
+      },400);
     } else setTimeout(tick,1000);
   })();
 }
@@ -1970,15 +2004,56 @@ function playTone(freq,dur=0.08,vol=0.18,type='sine'){
   }catch(_){}
 }
 function playArrivalSound(){
-  // Rising three-note chime — C5, E5, G5 with slight delay each
-  playTone(523,0.18,0.22);
-  setTimeout(()=>playTone(659,0.18,0.22),120);
-  setTimeout(()=>playTone(784,0.28,0.25),240);
+  // Triumphant rising arpeggio: C5-E5-G5-C6
+  playTone(523,0.20,0.22);
+  setTimeout(()=>playTone(659,0.20,0.22),110);
+  setTimeout(()=>playTone(784,0.20,0.24),220);
+  setTimeout(()=>playTone(1047,0.35,0.26),340);
 }
 function playElimSound(){
-  // Low descending tone — dull thud
-  playTone(220,0.25,0.20,'triangle');
-  setTimeout(()=>playTone(150,0.35,0.15,'triangle'),180);
+  // Deep descending thud
+  playTone(220,0.30,0.22,'triangle');
+  setTimeout(()=>playTone(150,0.40,0.18,'triangle'),180);
+  setTimeout(()=>playTone(100,0.50,0.14,'triangle'),360);
+}
+function playJoinSound(){
+  // Soft two-tone confirm
+  playTone(587,0.10,0.12);
+  setTimeout(()=>playTone(880,0.12,0.14),120);
+}
+function playLeaveSound(){
+  // Descending two-tone
+  playTone(440,0.10,0.10);
+  setTimeout(()=>playTone(330,0.14,0.12),120);
+}
+function playStartSound(){
+  // Game start chord: C4-E4-G4 arpeggio (already used in countdown end)
+  playTone(523,0.12,0.20);
+  setTimeout(()=>playTone(659,0.12,0.20),80);
+  setTimeout(()=>playTone(784,0.18,0.22),160);
+}
+function playApproveSound(){
+  playTone(784,0.08,0.14);
+  setTimeout(()=>playTone(1047,0.12,0.16),100);
+}
+function playDenySound(){
+  playTone(330,0.12,0.14,'square');
+}
+function playTimerWarningSound(){
+  // Single clear bell at 60s
+  playTone(880,0.12,0.16);
+}
+function playProxEnterSound(band){
+  // Distinct sound per band — ascending pitches as you get closer
+  const tones=[
+    null,                          // band 0: >2km — silent
+    ()=>playTone(440,0.06,0.08),   // band 1: 1-2km — soft A4
+    ()=>playTone(523,0.07,0.10),   // band 2: 500m-1km — C5
+    ()=>{ playTone(659,0.07,0.12); haptic('light'); },       // band 3: 250-500m
+    ()=>{ playTone(784,0.08,0.14); haptic('light'); },       // band 4: 100-250m
+    ()=>{ playTone(988,0.10,0.16); haptic('medium'); },      // band 5: <100m — hot
+  ];
+  tones[band]?.();
 }
 function toggleSound(){
   S.soundEnabled=!S.soundEnabled;
@@ -1991,6 +2066,7 @@ function toggleSound(){
     try{getAudioCtx().resume();}catch(_){}
     playTone(440,0.06,0.08);
   }
+  haptic('light');
 }
 
 /* ── BLIND START ─────────────────────────────────────────── */
@@ -2176,11 +2252,18 @@ const PROX_BANDS=[
 ];
 function playProximitySound(distM){
   if(!S.soundEnabled) return;
-  const band=PROX_BANDS.find(b=>distM<b.max&&distM>=b.min);
-  if(!band) return;
+  const bandIdx=PROX_BANDS.findIndex(b=>distM<b.max&&distM>=b.min);
+  if(bandIdx<0) return;
+  const band=PROX_BANDS[bandIdx];
   const now=Date.now();
-  // Reset cooldown if we changed band (moved closer)
-  if(band!==S._lastProxBand){ S._lastProxBand=band; S.lastProximityBeep=0; }
+  const bandChanged=band!==S._lastProxBand;
+  if(bandChanged){
+    S._lastProxBand=band;
+    S.lastProximityBeep=0;
+    // Play a distinct entry sound when crossing into a closer band
+    playProxEnterSound(bandIdx+1);
+    return;
+  }
   if(now-S.lastProximityBeep<band.cooldown) return;
   S.lastProximityBeep=now;
   playTone(band.freq,0.07,band.vol);
