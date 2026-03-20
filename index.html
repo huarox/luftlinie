@@ -219,7 +219,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .na-gps.lost{color:var(--orange)}
 .gps-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 .na-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;isolation:isolate;padding:16px;transition:background .8s ease}
-.na-eyebrow{font-size:11px;font-weight:700;letter-spacing:2.5px;color:var(--t3);margin-bottom:12px}
+/* na-eyebrow is BELOW the number — status messages only (blind start, whisper) */
 .na-dist-row{display:flex;align-items:flex-end;gap:8px;position:relative;z-index:3}
 .na-dist{font-family:var(--mono);font-size:clamp(72px,21vw,114px);font-weight:700;line-height:.9;letter-spacing:-2px;color:var(--t1);transition:color .5s ease;font-variant-numeric:tabular-nums}
 .na-dist.updating{animation:dist-flash .3s ease}
@@ -228,7 +228,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .na-unit{font-family:var(--mono);font-size:clamp(18px,5.5vw,30px);font-weight:400;color:var(--t3);letter-spacing:2px;margin-bottom:5px}
 .na-ripples{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:1}
 @keyframes rip-out{0%{transform:translate(-50%,-50%) scale(0.25);opacity:1}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
-.na-eyebrow{font-size:11px;font-weight:700;letter-spacing:2.5px;color:var(--t3);margin-bottom:12px;position:relative;z-index:3}
+.na-eyebrow{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--t3);margin-top:10px;min-height:16px;text-align:center;position:relative;z-index:3}
 .refresh-btn{display:flex;align-items:center;gap:6px;margin-top:16px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r20);padding:11px 18px;min-height:44px;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-sm);-webkit-tap-highlight-color:transparent;position:relative;z-index:3}
 .rip{position:absolute;left:50%;top:50%;width:72px;height:72px;border-radius:50%;border:2.5px solid transparent;transform:translate(-50%,-50%);pointer-events:none;animation:rip-out 0.85s cubic-bezier(.2,.8,.35,1) forwards}
 .rip-auto{border-color:rgba(0,122,255,.55);box-shadow:0 0 10px rgba(0,122,255,.20)}
@@ -255,13 +255,14 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .compass-btn{width:44px;height:44px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all .14s;flex-shrink:0;position:relative;z-index:500;-webkit-tap-highlight-color:transparent}
 .compass-btn:active{transform:scale(.92);opacity:.75}
 .compass-btn.active{background:rgba(0,122,255,.12);border-color:rgba(0,122,255,.35)}
-/* map container rotation for heading-up mode */
+/* map rotation — frame sits between clip container and Leaflet div.
+   Leaflet container is NEVER transformed → panning/tiles work normally.
+   The frame is 160%×160%, centered via negative margin, and rotates.
+   Clip container is overflow:hidden and stays screen-sized. */
 .map-rotate-container{flex:1;min-height:0;overflow:hidden;position:relative;background:#d4e8f0}
 [data-theme="dark"] .map-rotate-container{background:#0f1a2a}
-/* The inner map is 150% wide/tall, offset so it's centered, with transform-origin at center */
-#hostmap,#specmap{position:absolute!important;top:-25%!important;left:-25%!important;width:150%!important;height:150%!important;transform-origin:33.33% 33.33%;transition:transform .12s linear}
-/* Counter-rotate zoom controls to stay upright */
-.map-rotate-container .leaflet-control-zoom{transition:transform .12s linear}
+.map-rotate-frame{position:absolute;top:-30%;left:-30%;width:160%;height:160%;transform-origin:50% 50%;will-change:transform}
+#hostmap,#specmap{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;transform:none!important}
 /* ── ELIM COUNTDOWN (host/spec panel) ────────────────────── */
 .elim-countdown{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--orange);padding:4px 10px;border-radius:20px;background:rgba(255,159,10,.1);border:1px solid rgba(255,159,10,.2)}
 .results-panel{background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--border);padding:14px 14px max(28px,calc(env(safe-area-inset-bottom,0px) + 14px));flex-shrink:0;overflow-y:auto;max-height:55vh}
@@ -404,7 +405,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .as-title{font-size:13px;font-weight:600;color:var(--t2);text-align:center;margin-bottom:4px}
 .as-msg{font-size:13px;color:var(--t3);text-align:center;margin-bottom:16px;line-height:1.5}
 .as-actions{display:flex;flex-direction:column;gap:8px}
-.route-stats{display:flex;gap:6px;margin-bottom:10px}
+/* ── SPECTATOR APPROVAL ──────────────────────────────────── */
+.spec-req-card{background:var(--surf1);border:1px solid rgba(0,122,255,.25);border-radius:var(--r12);padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-md);backdrop-filter:var(--blur);margin-bottom:8px}
+.spec-req-info{flex:1}
+.spec-req-name{font-size:14px;font-weight:600;color:var(--t1)}
+.spec-req-sub{font-size:12px;color:var(--t2);margin-top:1px}
+.spec-req-btns{display:flex;gap:6px;flex-shrink:0}
+/* ── ROUTE STATS ─────────────────────────────────────────── */
 .rs{flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r8);padding:8px 10px;text-align:center}
 .rs-v{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--t1)}
 .rs-l{font-size:11px;color:var(--t3);margin-top:2px;letter-spacing:.3px;font-weight:600;text-transform:uppercase}
@@ -507,17 +514,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
           <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
           <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
           <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section-label" style="margin-top:22px">Your Role</div>
-    <div class="card">
-      <p class="radius-hint">Navigate alongside your players, or watch as spectator?</p>
-      <div class="radius-row">
-        <div class="seg-ctrl" id="seg-host-role">
-          <button class="seg" data-v="navigator" onclick="App.setHostRole('navigator')">🧭 Navigator</button>
-          <button class="seg active" data-v="spectator" onclick="App.setHostRole('spectator')">👁 Spectator</button>
         </div>
       </div>
     </div>
@@ -634,6 +630,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       </div>
     </div>
     <div class="section-label" style="margin-top:20px">Players</div>
+    <div id="spec-requests" class="hidden"></div>
     <div id="hl-players" class="player-list"><div class="empty-state">Waiting for players…</div></div>
     <div class="section-label" style="margin-top:20px">Game Details</div>
     <div class="card card-list">
@@ -665,12 +662,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <span class="elim-countdown hidden" id="ha-elim-cd"></span>
       <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
       <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="North-up">🧭</button>
-      <button class="role-toggle-btn hidden" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()">🧭 Nav</button>
+      <button class="role-toggle-btn" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()">🧭 My View</button>
       <button class="btn-destruct sm" onclick="haptic('medium');App.abortGame()">Abort</button>
     </div>
   </div>
-  <div class="map-rotate-container" id="hostmap-wrap"><div id="hostmap"></div></div>
+  <div class="map-rotate-container" id="hostmap-wrap"><div class="map-rotate-frame" id="hostmap-frame"><div id="hostmap"></div></div></div>
   <div class="host-panel">
+    <div id="spec-requests-active" class="hidden" style="margin-bottom:8px"></div>
     <div class="hp-row">
       <span class="section-label" style="margin:0">Navigators</span>
       <span class="badge blue" id="ha-nbadge">0</span>
@@ -694,8 +692,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <button class="btn-destruct sm" id="spec-leave-btn" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
     </div>
   </div>
-  <div class="map-rotate-container" id="specmap-wrap"><div id="specmap"></div></div>
+  <div class="map-rotate-container" id="specmap-wrap"><div class="map-rotate-frame" id="specmap-frame"><div id="specmap"></div></div></div>
   <div class="host-panel">
+    <div id="spec-requests-spec" class="hidden" style="margin-bottom:8px"></div>
     <div class="hp-row">
       <span class="section-label" style="margin:0">Navigators</span>
       <span class="badge" style="background:rgba(191,90,242,.15);color:#BF5AF2" id="sp-nbadge">0</span>
@@ -703,8 +702,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div id="sp-cards" class="nav-card-grid"></div>
   </div>
 </div>
-
-<!-- ══ JOIN ══ -->
 <div class="sc" id="sc-join">
   <div class="top-bar">
     <button class="back-btn" onclick="haptic('light');Nav.go('land')">
@@ -771,9 +768,10 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <span id="na-pcount">—</span>
     </div>
     <div class="na-timer" id="na-timer">—</div>
-    <div style="display:flex;align-items:center;gap:6px">
+    <div style="display:flex;align-items:center;gap:8px">
       <span class="whisper-cd hidden" id="na-whisper-cd">👂 —:——</span>
-      <button class="host-back-btn hidden" id="btn-host-back" onclick="App.goHostView()" title="Return to host overview">📡 Host</button>
+      <button class="host-back-btn hidden" id="btn-host-back" onclick="haptic('medium');App.goHostView()">📡 Host</button>
+      <button class="sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Sound">🔊</button>
       <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
     </div>
   </div>
@@ -787,23 +785,18 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
   </div>
   <div class="na-center" id="na-center">
-    <div class="na-eyebrow" id="na-eyebrow">DISTANCE TO TARGET</div>
     <div class="na-dist-row">
       <div class="na-dist" id="na-dist">—</div>
       <div class="na-unit" id="na-unit">KM</div>
     </div>
     <div class="na-ripples" id="na-ripples"></div>
+    <div class="na-eyebrow" id="na-eyebrow"></div>
     <button class="refresh-btn" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-      Refresh Distance
+      Refresh
     </button>
   </div>
-  <div class="na-progress">
-    <div class="na-prog-labels"><span>Start</span><span id="na-pct">—</span><span>Target</span></div>
-    <div class="na-track"><div class="na-fill" id="na-fill"></div><div class="na-thumb" id="na-thumb"></div></div>
-  </div>
   <div class="na-foot">
-    <button class="sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Toggle sound">🔊</button>
     <div class="na-upd" id="na-upd">Acquiring GPS…</div>
     <div class="na-noise hidden" id="na-noise">🔒 Protected</div>
   </div>
@@ -993,6 +986,7 @@ const S = {
   wakeLock:null, _noSleepVideo:null, _noSleepActive:false,
   /* map orientation */
   mapOrientMode:{host:false,spec:false}, _compassHeading:0, _orientListener:null,
+  _compassTarget:null, _compassFrame:null, _compassMap:null,
   /* anti-flash */
   _lastLobbyHtml:null, _lastNWaitHtml:null,
   /* screen */
@@ -1143,13 +1137,11 @@ function setMode(m){
   document.querySelectorAll('#seg-mode .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===m));
   set('mode-hint',m==='manual'
     ?"You'll tap the map to drop the secret target. A range ring shows the ideal distance."
-    :S.hostRole==='navigator'?"Target auto-placed on a real road — you won't see the map, keeping it fair."
     :"A target will be auto-placed on a real road at a realistic drive distance.");
   updateGoMapBtn();
 }
 function setHostRole(r){
-  S.hostRole=r;
-  document.querySelectorAll('#seg-host-role .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===r));
+  S.hostRole=r; // kept for backward compat but UI removed
   setMode(S.mode); updateGoMapBtn();
 }
 function setRadius(r){
@@ -1178,7 +1170,7 @@ function setExcludeHost(on){
 }
 function updateGoMapBtn(){
   const btn=el('btn-go-map'); if(!btn)return;
-  btn.textContent=(S.mode==='smart'&&S.hostRole==='navigator')?'Find Smart Target →':'Place Target on Map →';
+  btn.textContent=S.mode==='smart'?'Find Smart Target →':'Place Target on Map →';
 }
 
 /* ── MAP TILES ───────────────────────────────────────────── */
@@ -1290,24 +1282,20 @@ async function createGameFB(){
 async function goMap(){
   const hostName=(el('host-name')?.value||'Host').trim()||'Host';
   S.myName=hostName;
-
-  // Create game in Firebase
   const btn=el('btn-go-map');btn.disabled=true;btn.textContent='Creating…';
   try{ await createGameFB(); }
   catch(e){ toast('Firebase error: '+e.message); btn.disabled=false;updateGoMapBtn();return; }
   btn.disabled=false;updateGoMapBtn();
-
-  // Smart + navigator: find target silently → lobby
-  if(S.mode==='smart'&&S.hostRole==='navigator'){
-    goScreen('hlobby'); renderHLobby(); set('hl-target','Finding target…');
+  if(S.mode==='smart'){
+    goScreen('hlobby');renderHLobby();set('hl-target','Finding target…');
     const myLat=S.myLat||HOME.lat,myLon=S.myLon||HOME.lon;
     const picked=await findSmartTarget(myLat,myLon,idealRangeM()/1000);
     S.targetLat=picked.lat;S.targetLon=picked.lon;
     await gRef().update({targetLat:picked.lat,targetLon:picked.lon});
-    set('hl-target','✓ Set'); return;
+    set('hl-target','✓ Set');
+  } else {
+    goScreen('map');
   }
-  if(S.mode==='smart'){goScreen('map');setTimeout(()=>{initLeafMap();smartPick();},150);}
-  else goScreen('map');
 }
 
 async function confirmTarget(){
@@ -1330,6 +1318,7 @@ function renderHLobby(){
   set('hl-blindfinish',S.blindFinish?'🏁 On':'Off');
   set('hl-excludehost',S.excludeHost?'👻 On':'Off');
   startPlayersListener();
+  startSpecRequestsListener();
 }
 
 function copyLink(){
@@ -1345,16 +1334,15 @@ async function lockStart(){
   if(btn){btn.disabled=false;btn.textContent='Lock & Start';}
   // Auto-join host as player
   const tok=randToken();S.myToken=tok;S.hostPlayerToken=tok;
-  await pRef(tok).set({name:S.myName,role:S.hostRole,lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+  await pRef(tok).set({name:S.myName,role:'spectator',lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
   saveSession();
-  // Fetch actual startedAt from Firebase (server timestamp)
   const snap=await gRef().once('value');
   const g=snap.val();
   S.startedAt=g.startedAt;
+  S.hostRole='spectator'; // host starts in overview, can toggle to nav
   showCountdown(()=>{
     S.status='active';
     launchHostActive();
-    if(S.hostRole==='navigator') startGPS();
   });
 }
 
@@ -1455,16 +1443,9 @@ function launchHostActive(){
   S._lastUrgentBeep=-1;S._lastElimBeep=-1;
   goScreen('hactive');setTimeout(initHostMap,80);
   startClientTimer();
-  // Role toggle only makes sense if host is also a navigator
+  startSpecRequestsListener();
   const btn=el('btn-role-toggle');
-  if(btn){
-    if(S.hostRole==='navigator'){
-      btn.classList.remove('hidden');
-      btn.textContent='🧭 Nav';
-    } else {
-      btn.classList.add('hidden');
-    }
-  }
+  if(btn){btn.classList.remove('hidden');btn.textContent='🧭 My View';}
   if(S.elimMode&&S.isHost){
     if(S.elimIv)clearInterval(S.elimIv);
     S.nextElimTime=Date.now()+5*60*1000;
@@ -1478,16 +1459,16 @@ function launchHostActive(){
 }
 
 function toggleMyView(){
-  // Only meaningful when host is a navigator — toggles between host overview and personal nav screen
-  if(S.hostRole!=='navigator') return;
   const btn=el('btn-role-toggle');
   if(S.hostViewActive){
     S.hostViewActive=false;
     goScreen('nactive');
     show('btn-host-back');
     if(btn)btn.textContent='📡 Host';
+    startGPS();
   } else {
     goHostView();
+    stopGPS();
   }
 }
 
@@ -1495,9 +1476,9 @@ function goHostView(){
   S.hostViewActive=true;
   goScreen('hactive');setTimeout(initHostMap,80);
   hide('btn-host-back');
-  const lb=el('spec-leave-btn');if(lb)lb.textContent='Leave';
+  const lb=el('spec-leave-btn');if(lb)lb.textContent=S.isHost?'← Host':'Leave';
   const btn=el('btn-role-toggle');
-  if(btn)btn.textContent='🧭 Nav';
+  if(btn)btn.textContent='🧭 My View';
 }
 
 function leaveOrHostView(){
@@ -1514,14 +1495,14 @@ function initHostMap(){
   if(!el('hostmap'))return;
   if(S.hostMap){setTimeout(()=>S.hostMap.invalidateSize(),50);return;}
   const c=S.targetLat?[((S.myLat||HOME.lat)+S.targetLat)/2,((S.myLon||HOME.lon)+S.targetLon)/2]:[HOME.lat,HOME.lon];
-  S.hostMap=L.map('hostmap',{center:c,zoom:9,zoomControl:false});
+  S.hostMap=L.map('hostmap',{center:c,zoom:10,zoomControl:false});
   addTiles(S.hostMap);
   L.control.zoom({position:'bottomright'}).addTo(S.hostMap);
   if(S.targetLat){
     L.marker([S.targetLat,S.targetLon],{icon:pinIcon('#007AFF',20)}).bindPopup('<b>🎯 Target</b>').addTo(S.hostMap);
     L.circle([S.targetLat,S.targetLon],{radius:S.arrRadius,color:'#007AFF',fillColor:'#007AFF',fillOpacity:.07,weight:1,dashArray:'4 4'}).addTo(S.hostMap);
   }
-  setTimeout(()=>S.hostMap.invalidateSize(),100);
+  setTimeout(()=>S.hostMap.invalidateSize(),120);
 }
 
 function renderNavCards(elId,players){
@@ -1569,7 +1550,13 @@ async function abortGame(){
 async function confirmAbort(){
   el('as-abort').classList.add('hidden');
   await gRef().update({status:'aborted'});
-  clearInterval(S.timerIv);goHome();toast('Game aborted');
+  clearInterval(S.timerIv);
+  haptic('medium');
+  db.ref(`games/${S.gameCode}/players`).once('value').then(snap=>{
+    const raw=snap.val()||{};
+    fillResults(Object.entries(raw).map(([id,p])=>({id,...p})));
+    goScreen('results');
+  }).catch(()=>goHome());
 }
 function cancelAbort(){
   el('as-abort').classList.add('hidden');
@@ -1596,7 +1583,59 @@ function watchAfterElim(){
   goScreen('spectator');setTimeout(initSpecMap,80);
 }
 
-/* ── JOIN ────────────────────────────────────────────────── */
+/* ── SPECTATOR APPROVAL ──────────────────────────────────── */
+// When a player selects Spectator role and joins, their token is written
+// under games/{code}/specRequests/{token} = {name, ts}
+// The host sees approval cards and accepts/denies.
+// On accept: update player role to 'spectator' approved=true
+// On deny: remove the player node entirely
+
+function renderSpecRequests(requests, containerIds){
+  const html=requests.length?requests.map(r=>`
+    <div class="spec-req-card" id="sr-${r.token}">
+      <div class="spec-req-info">
+        <div class="spec-req-name">👁 ${escHtml(r.name)}</div>
+        <div class="spec-req-sub">Wants to join as spectator</div>
+      </div>
+      <div class="spec-req-btns">
+        <button class="btn-destruct sm" onclick="haptic('light');App.denySpec('${r.token}')">Deny</button>
+        <button class="btn-primary" style="font-size:12px;padding:6px 12px" onclick="haptic('medium');App.approveSpec('${r.token}')">Allow</button>
+      </div>
+    </div>`).join(''):'';
+  containerIds.forEach(id=>{
+    const c=el(id);
+    if(!c)return;
+    c.innerHTML=html;
+    c.classList.toggle('hidden',!requests.length);
+  });
+}
+
+async function approveSpec(token){
+  if(!S.gameCode)return;
+  await db.ref(`games/${S.gameCode}/players/${token}`).update({specApproved:true});
+  await db.ref(`games/${S.gameCode}/specRequests/${token}`).remove();
+  haptic('medium');
+}
+async function denySpec(token){
+  if(!S.gameCode)return;
+  await db.ref(`games/${S.gameCode}/players/${token}`).remove();
+  await db.ref(`games/${S.gameCode}/specRequests/${token}`).remove();
+}
+
+// Listen for incoming spectator requests (host only)
+function startSpecRequestsListener(){
+  if(!S.isHost||!S.gameCode)return;
+  db.ref(`games/${S.gameCode}/specRequests`).on('value',snap=>{
+    const raw=snap.val()||{};
+    const reqs=Object.entries(raw).map(([token,v])=>({token,...v}));
+    renderSpecRequests(reqs,['spec-requests','spec-requests-active','spec-requests-spec']);
+    // Badge on host bar
+    const badge=el('ha-nbadge');
+    if(badge&&reqs.length>0) haptic('light');
+  });
+}
+
+/* ── JOIN (modified to write specRequest if spectator) ──── */
 async function joinGame(){
   const code=(el('inp-code')?.value||'').trim().toUpperCase();
   const name=(el('inp-name')?.value||'').trim()||'Navigator';
@@ -1614,17 +1653,35 @@ async function joinGame(){
     S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;
     S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;S.gameMode=g.gameMode||'standard';S.whisperMode=!!g.whisperMode;S.elimMode=S.gameMode==='elimination';
     const tok=randToken();S.myToken=tok;
-    await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:S.role,lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+    if(S.role==='spectator'){
+      // Write pending request — host must approve
+      await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:'spectator',lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,specApproved:false,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+      await db.ref(`games/${code}/specRequests/${tok}`).set({name:name.slice(0,32),ts:SV.TIMESTAMP});
+    } else {
+      await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:'navigator',lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+    }
     saveSession();
     btn.disabled=false;btn.textContent='Join →';
     startPlayersListener();
-    if(g.status==='active'){
+    if(S.role==='spectator'){
+      // Watch own node for approval
+      set('nw-title','Waiting for host');set('nw-name',name);set('nw-role','Spectator');
+      goScreen('nwait');
+      db.ref(`games/${code}/players/${tok}/specApproved`).on('value',snap2=>{
+        if(snap2.val()===true){
+          db.ref(`games/${code}/players/${tok}/specApproved`).off();
+          if(g.status==='active'){
+            S.status='active';S.startedAt=g.startedAt;S.targetLat=g.targetLat;S.targetLon=g.targetLon;
+            goScreen('spectator');setTimeout(initSpecMap,80);startClientTimer();
+          }
+          // else wait for game start via game listener
+        }
+      });
+    } else if(g.status==='active'){
       S.status='active';S.startedAt=g.startedAt;S.targetLat=g.targetLat;S.targetLon=g.targetLon;
-      if(S.role==='spectator'){goScreen('spectator');setTimeout(initSpecMap,80);startClientTimer();}
-      else{goScreen('nactive');startGPS();startClientTimer();}
+      goScreen('nactive');startGPS();startClientTimer();
     } else {
-      set('nw-title','Game '+code);set('nw-name',name);
-      set('nw-role',S.role==='spectator'?'Spectator':'Navigator');
+      set('nw-title','Game '+code);set('nw-name',name);set('nw-role','Navigator');
       goScreen('nwait');
     }
   } catch(e){
@@ -1694,7 +1751,8 @@ function startGPS(){
   if(!window.isSecureContext){showGPSWarn('HTTPS required','Open the page via HTTPS for GPS to work.');return;}
   const opts={enableHighAccuracy:true,maximumAge:0,timeout:10000};
   S.gpsWatch=navigator.geolocation.watchPosition(handleGPSPos,handleGPSErr,opts);
-  S.gpsInterval=setInterval(()=>navigator.geolocation.getCurrentPosition(handleGPSPos,()=>{},{enableHighAccuracy:true,maximumAge:0,timeout:6000}),3000);
+  // 1s backup poll — watchPosition alone can stall on iOS when screen was off
+  S.gpsInterval=setInterval(()=>navigator.geolocation.getCurrentPosition(handleGPSPos,()=>{},{enableHighAccuracy:true,maximumAge:1000,timeout:5000}),1000);
   startWakeLock();
   if(S.whisperMode) startWhisperTimer();
 }
@@ -1794,18 +1852,12 @@ function updateNavDisplay(distM){
     nd.textContent=fmtDist(distM);nd.classList.remove('updating');
     void nd.offsetWidth;nd.classList.add('updating');
   }
-  // Background tint instead of number color change
   if(nc){
     nc.classList.remove('prox-close','prox-very-close');
     if(distM<200)nc.classList.add('prox-very-close');
     else if(distM<1000)nc.classList.add('prox-close');
   }
   if(nu)nu.textContent=distUnit(distM);
-  const prog=S.startDist?Math.min(100,(distM/S.startDist)*100):100;
-  const fill=el('na-fill'),thumb=el('na-thumb'),pctEl=el('na-pct');
-  if(fill)fill.style.width=prog+'%';
-  if(thumb)thumb.style.left=prog+'%';
-  if(pctEl){const g=100-prog;pctEl.textContent=g<1?'Almost there!':g.toFixed(0)+'% of the way';}
   set('na-upd','Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
   show('na-noise');
 }
@@ -1945,13 +1997,11 @@ function toggleSound(){
 function updateBlindDisplay(distM){
   const nd=el('na-dist'),nu=el('na-unit'),eyebrow=el('na-eyebrow');
   if(!S.blindStart||S.blindUnlocked){
-    // Normal display
-    if(eyebrow)eyebrow.textContent='DISTANCE TO TARGET';
+    if(eyebrow)eyebrow.textContent='';
     nd?.classList.remove('blind-num');
     updateNavDisplay(distM);
     return;
   }
-  // Still blind — show dashes, track distance moved from start
   if(S.myTrail.length>=2){
     const first=S.myTrail[0],last=S.myTrail[S.myTrail.length-1];
     S.blindStartDist=hav(first[0],first[1],last[0],last[1]);
@@ -1959,16 +2009,16 @@ function updateBlindDisplay(distM){
       S.blindUnlocked=true;
       playTone(523,0.1,0.15);
       setTimeout(()=>playTone(659,0.15,0.18),100);
-      toast('Blind start lifted — distance revealed',2500);
+      toast('Blind start lifted',2500);
+      if(eyebrow)eyebrow.textContent='';
       updateNavDisplay(distM);
       return;
     }
   }
-  const moved=Math.round(S.blindStartDist);
-  const remaining=Math.max(0,500-moved);
-  if(eyebrow)eyebrow.textContent='MOVE '+remaining+'m TO UNLOCK';
+  const remaining=Math.max(0,500-Math.round(S.blindStartDist));
+  if(eyebrow)eyebrow.textContent=`MOVE ${remaining}m TO UNLOCK`;
   if(nd){nd.textContent='—';nd.classList.add('blind-num');}
-  if(nu)nu.textContent='KM';
+  if(nu)nu.textContent='';
 }
 
 /* ── REPLAY ──────────────────────────────────────────────── */
@@ -2048,8 +2098,8 @@ document.addEventListener('visibilitychange',()=>{
 function toggleMapOrientation(which){
   const btn=el(which==='host'?'compass-btn-host':'compass-btn-spec');
   const map=which==='host'?S.hostMap:S.specMap;
-  const wrap=el(which==='host'?'hostmap-wrap':'specmap-wrap');
-  if(!map||!wrap) return;
+  const frame=el(which==='host'?'hostmap-frame':'specmap-frame');
+  if(!map||!frame) return;
 
   S.mapOrientMode[which]=!S.mapOrientMode[which];
   const on=S.mapOrientMode[which];
@@ -2057,12 +2107,7 @@ function toggleMapOrientation(which){
 
   if(!on){
     stopMapOrientation();
-    // Reset the map div transform
-    map.getContainer().style.transform='';
-    map.getContainer().style.transformOrigin='';
-    // Reset counter-rotated controls
-    const zoom=wrap.querySelector('.leaflet-control-zoom');
-    if(zoom) zoom.style.transform='';
+    frame.style.transform='';
     setTimeout(()=>map.invalidateSize(),50);
     return;
   }
@@ -2070,37 +2115,33 @@ function toggleMapOrientation(which){
   if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
     DeviceOrientationEvent.requestPermission()
       .then(state=>{
-        if(state==='granted') startMapOrientation(which,map,wrap);
-        else { toast('Compass permission denied'); S.mapOrientMode[which]=false; if(btn)btn.classList.remove('active'); }
+        if(state==='granted') startMapOrientation(which,map,frame);
+        else{ toast('Compass permission denied'); S.mapOrientMode[which]=false; if(btn)btn.classList.remove('active'); }
       })
       .catch(()=>{ toast('Compass not available'); S.mapOrientMode[which]=false; if(btn)btn.classList.remove('active'); });
   } else {
-    startMapOrientation(which,map,wrap);
+    startMapOrientation(which,map,frame);
   }
 }
 
-function startMapOrientation(which,map,wrap){
+function startMapOrientation(which,map,frame){
   stopMapOrientation();
-  const container=map.getContainer();
+  // Tell Leaflet the container is 160%×160% at its new position
+  map.invalidateSize();
+
+  S._compassTarget=which;
+  S._compassFrame=frame;
+  S._compassMap=map;
 
   S._orientListener=(e)=>{
     const heading = e.webkitCompassHeading != null
       ? e.webkitCompassHeading
-      : (360 - (e.alpha||0));
+      : (360-(e.alpha||0));
     S._compassHeading=heading;
-
-    // Rotate the oversized map div inside its clipping container
-    // transform-origin is at 33.33%/33.33% because the div is offset -25%/-25%
-    // so 33.33% of 150% = 50% of the visible area = center of viewport
-    container.style.transformOrigin='33.33% 33.33%';
-    container.style.transform=`rotate(${-heading}deg)`;
-
-    // Counter-rotate zoom controls so they stay screen-aligned
-    const zoom=wrap.querySelector('.leaflet-control-zoom');
-    if(zoom) zoom.style.transform=`rotate(${heading}deg)`;
-
+    // Rotate only the frame — Leaflet container itself is untouched
+    frame.style.transform=`rotate(${-heading}deg)`;
     const n=el('compass-btn-'+(which==='host'?'host':'spec'));
-    if(n) n.title=Math.round(heading)+'° '+headingLabel(heading);
+    if(n) n.title=Math.round(heading)+'°';
   };
   window.addEventListener('deviceorientation',S._orientListener,true);
 }
@@ -2110,6 +2151,11 @@ function stopMapOrientation(){
     window.removeEventListener('deviceorientation',S._orientListener,true);
     S._orientListener=null;
   }
+  // Clean up frame transforms
+  ['hostmap-frame','specmap-frame'].forEach(id=>{
+    const f=el(id);if(f)f.style.transform='';
+  });
+  S._compassFrame=null;S._compassMap=null;S._compassTarget=null;
 }
 
 function headingLabel(deg){
@@ -2443,6 +2489,7 @@ const App={
   toggleSound,playReplay,watchAfterElim,
   toggleMapOrientation,
   dismissRejoin,doRejoin,
+  approveSpec,denySpec,
   goHome,
 };
 const Nav={go:goScreen};
