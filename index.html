@@ -428,6 +428,32 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .rs{flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r8);padding:8px 10px;text-align:center}
 .rs-v{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--t1)}
 .rs-l{font-size:11px;color:var(--t3);margin-top:2px;letter-spacing:.3px;font-weight:600;text-transform:uppercase}
+/* ── HOT/COLD MODE ───────────────────────────────────────── */
+.hc-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--bg)}
+.hc-orb-wrap{position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center}
+.hc-orb-glow{position:absolute;inset:-30px;border-radius:50%;filter:blur(40px);opacity:.55;transition:background 0.6s ease,opacity 0.4s ease}
+.hc-orb{width:180px;height:180px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.5s ease,box-shadow 0.5s ease;box-shadow:0 0 0 0 transparent;position:relative;z-index:1}
+.hc-arrow{font-size:72px;line-height:1;transition:transform 0.3s cubic-bezier(.4,0,.2,1),opacity 0.3s ease;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3))}
+.hc-label{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:20px;transition:color 0.5s ease;color:var(--t2)}
+.hc-angle{font-family:var(--mono);font-size:28px;font-weight:700;margin-top:6px;transition:color 0.5s ease;color:var(--t1)}
+.hc-sub{font-size:12px;color:var(--t3);margin-top:4px}
+/* ── TEAMS MODE ──────────────────────────────────────────── */
+.team-pick{display:flex;gap:10px;margin-top:4px}
+.team-btn{flex:1;padding:12px 8px;border-radius:var(--r12);border:2px solid transparent;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:700;transition:all .16s;text-align:center;-webkit-tap-highlight-color:transparent}
+.team-btn:active{transform:scale(.96)}
+.team-btn.team-red{background:rgba(255,59,48,.1);color:var(--red);border-color:rgba(255,59,48,.2)}
+.team-btn.team-red.active{background:var(--red);color:white;border-color:var(--red);box-shadow:0 3px 12px rgba(255,59,48,.4)}
+.team-btn.team-blue{background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)}
+.team-btn.team-blue.active{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 3px 12px rgba(0,122,255,.4)}
+.team-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+/* ── PWA INSTALL BANNER ──────────────────────────────────── */
+.pwa-banner{position:absolute;bottom:max(70px,calc(env(safe-area-inset-bottom,0px)+60px));left:16px;right:16px;background:var(--surf1);border:1px solid var(--border);border-radius:var(--r12);padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh-md);backdrop-filter:var(--blur);animation:slide-up .4s cubic-bezier(.4,0,.2,1) both}
+.pwa-banner.hidden{display:none!important}
+@keyframes slide-up{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.pwa-ico{font-size:28px;flex-shrink:0}
+.pwa-info{flex:1}
+.pwa-title{font-size:14px;font-weight:700;color:var(--t1)}
+.pwa-sub{font-size:12px;color:var(--t2);margin-top:1px}
 </style>
 </head>
 <body>
@@ -477,6 +503,15 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
   </div>
   <div class="land-foot">No maps. No compass. Just a number.</div>
+  <div class="pwa-banner hidden" id="pwa-banner">
+    <div class="pwa-ico">📲</div>
+    <div class="pwa-info">
+      <div class="pwa-title">Add to Home Screen</div>
+      <div class="pwa-sub">Install Luftlinie for the best experience</div>
+    </div>
+    <button class="btn-primary" style="font-size:13px;padding:7px 14px;flex-shrink:0" onclick="App.pwaInstall()">Install</button>
+    <button class="btn-text" style="font-size:20px;padding:4px 6px;min-height:auto" onclick="App.pwaDismiss()">×</button>
+  </div>
 </div>
 
 <!-- ══ SETUP ══ -->
@@ -533,7 +568,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
     <div class="section-label" style="margin-top:22px">Game Mode</div>
     <div class="card">
-      <div class="mode-card-grid">
+      <div class="mode-card-grid" style="grid-template-columns:repeat(2,1fr)">
         <div class="mode-card active" id="mode-card-standard" onclick="App.setGameMode('standard')">
           <div class="mode-card-ico">🎯</div>
           <div class="mode-card-name">Standard</div>
@@ -549,6 +584,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
           <div class="mode-card-name">Whisper</div>
           <div class="mode-card-desc">Distance revealed once per minute</div>
         </div>
+        <div class="mode-card" id="mode-card-hotcold" onclick="App.setGameMode('hotcold')">
+          <div class="mode-card-ico">🌡️</div>
+          <div class="mode-card-name">Hot & Cold</div>
+          <div class="mode-card-desc">Face the target to feel warmer</div>
+        </div>
       </div>
       <div class="mode-warn hidden" id="mode-warn">
         <span>⚠️</span><span id="mode-warn-txt"></span>
@@ -557,6 +597,16 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
     <div class="section-label" style="margin-top:22px">Rules</div>
     <div class="card">
+      <div class="setup-toggle-row">
+        <div>
+          <div class="setup-toggle-label">👥 Teams</div>
+          <div class="setup-toggle-sub">Navigators split into Red &amp; Blue teams</div>
+        </div>
+        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-teams">
+          <button class="seg active" data-v="off" onclick="App.setTeamsMode(false)">Off</button>
+          <button class="seg" data-v="on" onclick="App.setTeamsMode(true)">On</button>
+        </div>
+      </div>
       <div class="setup-toggle-row">
         <div>
           <div class="setup-toggle-label">🙈 Blind Start</div>
@@ -747,6 +797,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
           <button class="seg" data-v="spectator" onclick="App.setRole('spectator')">👁 Spectator</button>
         </div>
       </div>
+      <div class="field hidden" id="team-pick-field">
+        <label class="field-lbl">Your Team</label>
+        <div class="team-pick">
+          <button class="team-btn team-red" id="team-btn-red" onclick="App.setTeam('red')">🔴 Red Team</button>
+          <button class="team-btn team-blue" id="team-btn-blue" onclick="App.setTeam('blue')">🔵 Blue Team</button>
+        </div>
+      </div>
       <button class="btn-primary btn-lg btn-full" onclick="haptic('medium');App.joinGame()">Join →</button>
       <div class="err-msg hidden" id="join-err"></div>
     </div>
@@ -807,6 +864,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
   </div>
   <div class="na-center" id="na-center">
+    <!-- Standard distance card -->
     <div class="na-dist-wrapper" id="na-dist-wrapper">
       <div class="na-dist-row">
         <div class="na-dist" id="na-dist">—</div>
@@ -814,6 +872,18 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       </div>
       <div class="na-ripples" id="na-ripples"></div>
       <div class="na-eyebrow" id="na-eyebrow"></div>
+    </div>
+    <!-- Hot/Cold compass orb — shown only in hotcold mode -->
+    <div class="hc-screen hidden" id="hc-screen">
+      <div class="hc-orb-wrap">
+        <div class="hc-orb-glow" id="hc-glow"></div>
+        <div class="hc-orb" id="hc-orb">
+          <span class="hc-arrow" id="hc-arrow">↑</span>
+        </div>
+      </div>
+      <div class="hc-label" id="hc-label">Calibrating…</div>
+      <div class="hc-angle" id="hc-angle"></div>
+      <div class="hc-sub">Face the direction you think the target is</div>
     </div>
     <button class="refresh-btn" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -975,7 +1045,7 @@ const S = {
   /* setup */
   idealMin:30, diff:3, arrRadius:50, mode:'manual', hostRole:'spectator', role:'navigator',
   elimMode:false, blindStart:false, blindFinish:true, excludeHost:true,
-  gameMode:'standard', whisperMode:false,
+  gameMode:'standard', whisperMode:false, teamsMode:false, myTeam:null,
   /* identity */
   gameCode:null, isHost:false, myToken:null, myName:'You',
   hostPlayerToken:null, hostViewActive:true,
@@ -993,12 +1063,15 @@ const S = {
   myLat:null, myLon:null, lastAccuracy:null,
   prevLat:null, prevLon:null, prevGPSTime:null,
   speedKmh:0, speedWarnShown:false, gpsWatch:null, gpsInterval:null,
+  /* offline queue */
+  _offlineQueue:[], _isOnline:true,
   /* maps */
   leafMap:null, leafTgtM:null, rangeRing:null, _ringLabel:null,
   hostMap:null, hostTgtM:null, hostDots:{}, hostTrails:{},
   specMap:null, specDots:{}, specRoutes:{}, specTgtM:null, specArrCircle:null,
   resMap:null, myTrail:[], playerTrails:{},
   _lastRoutePos:{}, _routePending:{},
+  _autoZoomIv:null,
   /* Firebase */
   gameListener:null, playersListener:null,
   /* timer */
@@ -1013,6 +1086,10 @@ const S = {
   /* map orientation */
   mapOrientMode:{host:false,spec:false}, _compassHeading:0, _orientListener:null,
   _compassTarget:null, _compassFrame:null, _compassMap:null,
+  /* hot/cold */
+  _hcListener:null, _hcPermitted:false,
+  /* pwa */
+  _pwaPrompt:null,
   /* anti-flash */
   _lastLobbyHtml:null, _lastNWaitHtml:null,
   /* screen */
@@ -1143,7 +1220,7 @@ function resetGameState(){
   stopMapOrientation();
   S.mapOrientMode={host:false,spec:false};S._lastUrgentBeep=-1;S._lastElimBeep=-1;S.nextElimTime=0;
 }
-function goHome(){ clearSession(); resetGameState(); goScreen('land'); }
+function goHome(){ stopAutoZoom(); clearSession(); resetGameState(); goScreen('land'); }
 
 /* ── SETUP ───────────────────────────────────────────────── */
 function upSetup(){
@@ -1290,7 +1367,6 @@ async function smartPick(){
 /* ── CREATE GAME (Firebase) ──────────────────────────────── */
 async function createGameFB(){
   let code=randCode();
-  // Ensure unique
   const snap=await db.ref(`games/${code}`).once('value');
   if(snap.exists())code=randCode();
   S.gameCode=code; S.noiseSeed=Math.random();
@@ -1299,7 +1375,7 @@ async function createGameFB(){
     status:'lobby',idealMin:S.idealMin,diff:S.diff,arrRadius:S.arrRadius,
     timeLimitSec:S.timeLimitSec,noiseSeed:S.noiseSeed,hostRole:S.hostRole,
     elimMode:S.elimMode,blindStart:S.blindStart,blindFinish:S.blindFinish,excludeHost:S.excludeHost,
-    gameMode:S.gameMode,whisperMode:S.whisperMode,
+    gameMode:S.gameMode,whisperMode:S.whisperMode,teamsMode:S.teamsMode,
     targetLat:null,targetLon:null,startedAt:null,createdAt:SV.TIMESTAMP
   });
   S.isHost=true;
@@ -1308,6 +1384,7 @@ async function createGameFB(){
 async function goMap(){
   const hostName=(el('host-name')?.value||'Host').trim()||'Host';
   S.myName=hostName;
+  localStorage.setItem('ll_nickname',hostName);
   const btn=el('btn-go-map');btn.disabled=true;btn.textContent='Creating…';
   try{ await createGameFB(); }
   catch(e){ toast('Firebase error: '+e.message); btn.disabled=false;updateGoMapBtn();return; }
@@ -1432,7 +1509,7 @@ function startPlayersListener(){
       S.status='active';S.startedAt=g.startedAt;
       S.targetLat=g.targetLat;S.targetLon=g.targetLon;
       S.noiseSeed=g.noiseSeed;S.arrRadius=g.arrRadius;
-      S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;S.gameMode=g.gameMode||'standard';S.whisperMode=!!g.whisperMode;S.elimMode=S.gameMode==='elimination';
+      S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;S.gameMode=g.gameMode||'standard';S.whisperMode=!!g.whisperMode;S.teamsMode=!!g.teamsMode;S.elimMode=S.gameMode==='elimination';
       if(S.screen==='nwait'){
         showCountdown(()=>{
           if(S.role==='spectator'){goScreen('spectator');startClientTimer();}
@@ -1482,9 +1559,8 @@ function launchHostActive(){
     },5*60*1000);
   }
   startWakeLock();
+  startAutoZoom();
 }
-
-function toggleMyView(){
   const btn=el('btn-role-toggle');
   if(S.hostViewActive){
     S.hostViewActive=false;
@@ -1667,6 +1743,8 @@ async function joinGame(){
   const code=(el('inp-code')?.value||'').trim().toUpperCase();
   const name=(el('inp-name')?.value||'').trim()||'Navigator';
   if(!code){toast('Enter a game code');return;}
+  // Teams: require team selection
+  if(S.teamsMode&&S.role==='navigator'&&!S.myTeam){toast('Pick a team first');return;}
   const btn=document.querySelector('#sc-join .btn-primary');
   btn.disabled=true;btn.textContent='Joining…';
   hide('join-err');
@@ -1677,22 +1755,24 @@ async function joinGame(){
     if(g.status==='aborted')throw new Error('This game has ended.');
     if(g.status==='finished')throw new Error('Game already finished.');
     S.gameCode=code;S.myName=name;
+    // Persist nickname
+    localStorage.setItem('ll_nickname',name);
     S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;
-    S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;S.gameMode=g.gameMode||'standard';S.whisperMode=!!g.whisperMode;S.elimMode=S.gameMode==='elimination';
+    S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;S.gameMode=g.gameMode||'standard';S.whisperMode=!!g.whisperMode;S.teamsMode=!!g.teamsMode;S.elimMode=S.gameMode==='elimination';
+    // Show team picker if teams mode
+    if(S.teamsMode&&S.role==='navigator') el('team-pick-field')?.classList.remove('hidden');
     const tok=randToken();S.myToken=tok;
     if(S.role==='spectator'){
-      // Write pending request — host must approve
       await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:'spectator',lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,specApproved:false,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
       await db.ref(`games/${code}/specRequests/${tok}`).set({name:name.slice(0,32),ts:SV.TIMESTAMP});
     } else {
-      await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:'navigator',lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
+      await db.ref(`games/${code}/players/${tok}`).set({name:name.slice(0,32),role:'navigator',team:S.myTeam||null,lat:null,lon:null,speedKmh:0,arrived:false,eliminated:false,arrSec:null,startDist:null,joinedAt:SV.TIMESTAMP,lastSeen:SV.TIMESTAMP});
     }
     saveSession();
     btn.disabled=false;btn.textContent='Join →';
     playJoinSound();haptic('medium');
     startPlayersListener();
     if(S.role==='spectator'){
-      // Watch own node for approval
       set('nw-title','Waiting for host');set('nw-name',name);set('nw-role','Spectator');
       goScreen('nwait');
       db.ref(`games/${code}/players/${tok}/specApproved`).on('value',snap2=>{
@@ -1702,7 +1782,6 @@ async function joinGame(){
             S.status='active';S.startedAt=g.startedAt;S.targetLat=g.targetLat;S.targetLon=g.targetLon;
             goScreen('spectator');setTimeout(initSpecMap,80);startClientTimer();
           }
-          // else wait for game start via game listener
         }
       });
     } else if(g.status==='active'){
@@ -1779,15 +1858,16 @@ function startGPS(){
   if(!window.isSecureContext){showGPSWarn('HTTPS required','Open the page via HTTPS for GPS to work.');return;}
   const opts={enableHighAccuracy:true,maximumAge:0,timeout:10000};
   S.gpsWatch=navigator.geolocation.watchPosition(handleGPSPos,handleGPSErr,opts);
-  // 1s backup poll — watchPosition alone can stall on iOS when screen was off
   S.gpsInterval=setInterval(()=>navigator.geolocation.getCurrentPosition(handleGPSPos,()=>{},{enableHighAccuracy:true,maximumAge:1000,timeout:5000}),1000);
   startWakeLock();
   if(S.whisperMode) startWhisperTimer();
+  if(S.gameMode==='hotcold') startHotCold();
 }
 function stopGPS(){
   if(S.gpsWatch!=null){navigator.geolocation.clearWatch(S.gpsWatch);S.gpsWatch=null;}
   if(S.gpsInterval!=null){clearInterval(S.gpsInterval);S.gpsInterval=null;}
   stopWhisperTimer();
+  stopHotCold();
 }
 
 function handleGPSPos(pos){
@@ -1807,7 +1887,7 @@ function handleGPSPos(pos){
     else{pill.className='na-gps live';set('na-gps-txt','Live');}
   }
   spawnRipple(acc>50?'warn':'auto');
-  sendPosUpdate(false);
+  sendPosUpdateQueued(false);
 }
 function handleGPSErr(err){
   spawnRipple('error');
@@ -1868,7 +1948,7 @@ async function sendPosUpdate(manual=false){
 async function manualRefresh(){
   const btn=el('refresh-btn');btn.classList.add('spinning');btn.disabled=true;
   if(!S.myLat)spawnRipple('error');
-  else await sendPosUpdate(true);
+  else await sendPosUpdateQueued(true);
   setTimeout(()=>{btn.classList.remove('spinning');btn.disabled=false;},600);
 }
 
@@ -1973,12 +2053,17 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(navigator.geolocation&&window.isSecureContext){
     navigator.geolocation.getCurrentPosition(p=>{S.myLat=p.coords.latitude;S.myLon=p.coords.longitude;},()=>{},{enableHighAccuracy:false,timeout:8000,maximumAge:60000});
   }
+  // Nickname persistence
+  const savedName=localStorage.getItem('ll_nickname');
+  if(savedName){
+    const hn=el('host-name');if(hn){hn.value=savedName;}
+    const jn=el('inp-name');if(jn){jn.value=savedName;}
+  }
   startOfflineDetection();
   checkBattery();
   const jc=new URLSearchParams(location.search).get('join');
   if(jc){const inp=el('inp-code');if(inp)inp.value=jc;goScreen('join');return;}
   goScreen('land');
-  // Check for rejoin after a brief delay so Firebase is ready
   setTimeout(checkRejoin, 800);
 });
 
@@ -2279,13 +2364,26 @@ function setGameMode(m){
   if(m==='whisper'){
     warnTxt.textContent='Distance only reveals once per minute. Blind Start is disabled in Whisper mode.';
     warn.classList.remove('hidden');
-    // Disable Blind Start in whisper mode — doesn't make sense
     setBlindStart(false);
     document.querySelectorAll('#seg-blind .seg').forEach(b=>{b.disabled=true;b.style.opacity='.4';});
+  } else if(m==='hotcold'){
+    warnTxt.textContent='Hot & Cold uses your compass bearing — no distance shown. Requires device orientation permission.';
+    warn.classList.remove('hidden');
+    document.querySelectorAll('#seg-blind .seg').forEach(b=>{b.disabled=false;b.style.opacity='';});
   } else {
     warn.classList.add('hidden');
     document.querySelectorAll('#seg-blind .seg').forEach(b=>{b.disabled=false;b.style.opacity='';});
   }
+}
+function setTeamsMode(on){
+  S.teamsMode=!!on;
+  document.querySelectorAll('#seg-teams .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
+}
+function setTeam(t){
+  S.myTeam=t;
+  el('team-btn-red')?.classList.toggle('active',t==='red');
+  el('team-btn-blue')?.classList.toggle('active',t==='blue');
+  haptic('light');
 }
 
 /* ── COPY CODE TAP ───────────────────────────────────────── */
@@ -2451,9 +2549,11 @@ function fillResults(players){
     return(a.arrSec||9999)-(b.arrSec||9999);
   });
 
-  // Winner row
+  // Winner row — teams override
   const winner=sorted[0];
-  if(winner){
+  if(S.teamsMode&&checkTeamArrival(players)){
+    // team win already set res-name in checkTeamArrival
+  } else if(winner){
     set('res-name',winner.arrived?winner.name:'—');
     const wrDiv=el('winner-row');
     if(wrDiv){
@@ -2466,7 +2566,7 @@ function fillResults(players){
 
   // Leaderboard rows with team color dots
   rows.innerHTML=sorted.map((p,i)=>{
-    const col=PCOLS[i%PCOLS.length];
+    const col=p.team==='red'?'#FF3B30':p.team==='blue'?'#007AFF':PCOLS[i%PCOLS.length];
     const medal=['🥇','🥈','🥉'][i]||'';
     const pos=medal||`<span style="font-size:12px;font-weight:700;color:var(--t3)">${i+1}</span>`;
     const time=p.arrived?fmtTime(p.arrSec):'<span style="color:var(--t3)">DNF</span>';
@@ -2561,10 +2661,312 @@ async function shareResult(){
   }catch(e){ toast('Could not generate share card'); }
 }
 
+/* ── HOT & COLD COMPASS ──────────────────────────────────── */
+// Bearing from (lat1,lon1) to (lat2,lon2) in degrees 0-360
+function bearingTo(lat1,lon1,lat2,lon2){
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const y=Math.sin(dLon)*Math.cos(lat2*Math.PI/180);
+  const x=Math.cos(lat1*Math.PI/180)*Math.sin(lat2*Math.PI/180)
+          -Math.sin(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.cos(dLon);
+  return((Math.atan2(y,x)*180/Math.PI)+360)%360;
+}
+
+function startHotCold(){
+  stopHotCold();
+  el('na-dist-wrapper')?.classList.add('hidden');
+  el('hc-screen')?.classList.remove('hidden');
+  el('refresh-btn')?.classList.add('hidden');
+
+  const request=()=>{
+    S._hcListener=(e)=>{
+      if(!S.targetLat||!S.myLat) return;
+      const heading=e.webkitCompassHeading!=null
+        ?e.webkitCompassHeading:(360-(e.alpha||0));
+      const targetBearing=bearingTo(S.myLat,S.myLon,S.targetLat,S.targetLon);
+      // angleDiff: 0=exactly facing target, 180=facing away
+      let diff=Math.abs(((heading-targetBearing)+540)%360-180);
+      updateHotColdOrb(diff,targetBearing-heading);
+    };
+    window.addEventListener('deviceorientation',S._hcListener,true);
+  };
+
+  if(typeof DeviceOrientationEvent!=='undefined'&&
+     typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission()
+      .then(s=>{ if(s==='granted') request(); else toast('Compass permission denied'); })
+      .catch(()=>toast('Compass not available'));
+  } else {
+    request();
+  }
+}
+
+function stopHotCold(){
+  if(S._hcListener){
+    window.removeEventListener('deviceorientation',S._hcListener,true);
+    S._hcListener=null;
+  }
+  el('na-dist-wrapper')?.classList.remove('hidden');
+  el('hc-screen')?.classList.add('hidden');
+  el('refresh-btn')?.classList.remove('hidden');
+}
+
+function updateHotColdOrb(angleDiff, rotationDeg){
+  // angleDiff 0=hot, 180=cold
+  const t=1-(angleDiff/180); // 1=hot, 0=cold
+  // Smooth colour interpolation: cold(blue) → cool(cyan) → warm(yellow) → hot(red)
+  const stops=[
+    [59,130,246],   // cold  blue   t=0
+    [34,211,238],   // cool  cyan   t=0.33
+    [251,191,36],   // warm  amber  t=0.66
+    [239,68,68],    // hot   red    t=1
+  ];
+  function lerpColor(a,b,f){ return a.map((v,i)=>Math.round(v+(b[i]-v)*f)); }
+  let r,g,b2;
+  if(t<0.33){const f=t/0.33;[r,g,b2]=lerpColor(stops[0],stops[1],f);}
+  else if(t<0.66){const f=(t-0.33)/0.33;[r,g,b2]=lerpColor(stops[1],stops[2],f);}
+  else{const f=(t-0.66)/0.34;[r,g,b2]=lerpColor(stops[2],stops[3],f);}
+  const col=`rgb(${r},${g},${b2})`;
+  const alpha=0.18+t*0.55;
+  const glow=`rgba(${r},${g},${b2},${alpha})`;
+  const shadow=`0 0 ${20+t*60}px ${glow}, 0 0 ${40+t*100}px rgba(${r},${g},${b2},${alpha*0.5})`;
+
+  const orb=el('hc-orb'),glowEl=el('hc-glow'),arrow=el('hc-arrow');
+  const labelEl=el('hc-label'),angleEl=el('hc-angle');
+  if(orb){
+    orb.style.background=`radial-gradient(circle at 40% 35%, rgba(255,255,255,0.25), ${col} 60%)`;
+    orb.style.boxShadow=shadow;
+  }
+  if(glowEl){ glowEl.style.background=col; glowEl.style.opacity=String(alpha); }
+  if(arrow){
+    arrow.style.transform=`rotate(${rotationDeg}deg)`;
+    arrow.style.opacity=String(0.5+t*0.5);
+    // Arrow colour matches orb
+    arrow.style.filter=`drop-shadow(0 0 ${4+t*8}px ${col})`;
+  }
+  const hot=angleDiff<30,warm=angleDiff<60,cool=angleDiff<90;
+  if(labelEl){
+    labelEl.textContent=hot?'🔥 HOT!':warm?'Warm':cool?'Cool':'❄️ Cold';
+    labelEl.style.color=col;
+  }
+  if(angleEl) angleEl.textContent=Math.round(angleDiff)+'° off';
+
+  // Periodic haptic pulse when very hot
+  if(hot&&!S._hcHapticTs||Date.now()-(S._hcHapticTs||0)>800){
+    if(hot){ haptic('light'); S._hcHapticTs=Date.now(); }
+  }
+}
+
+/* ── TEAMS ARRIVAL CHECK ─────────────────────────────────── */
+function checkTeamArrival(players){
+  if(!S.teamsMode) return false;
+  const teams={red:false,blue:false};
+  players.forEach(p=>{
+    if(p.role==='navigator'&&p.arrived&&p.team) teams[p.team]=true;
+  });
+  if(teams.red||teams.blue){
+    const winner=teams.red&&!teams.blue?'🔴 Red Team':!teams.red&&teams.blue?'🔵 Blue Team':'Both Teams';
+    set('res-name',winner+' wins!');
+    return true;
+  }
+  return false;
+}
+
+/* ── AUTO-ZOOM HOST MAP ───────────────────────────────────── */
+function startAutoZoom(){
+  if(S._autoZoomIv) clearInterval(S._autoZoomIv);
+  S._autoZoomIv=setInterval(()=>{
+    if(S.screen!=='hactive'&&S.screen!=='spectator') return;
+    const map=S.screen==='hactive'?S.hostMap:S.specMap;
+    if(!map) return;
+    const pts=[];
+    if(S.targetLat) pts.push([S.targetLat,S.targetLon]);
+    Object.values(S.latestPlayers).forEach(p=>{
+      if(p.lat&&p.lon&&!p.arrived&&!p.eliminated) pts.push([+p.lat,+p.lon]);
+    });
+    if(pts.length>=2){
+      try{ map.fitBounds(L.latLngBounds(pts),{padding:[44,44],maxZoom:14,animate:true}); }
+      catch(_){}
+    }
+  },10000);
+}
+function stopAutoZoom(){ clearInterval(S._autoZoomIv); S._autoZoomIv=null; }
+
+/* ── OFFLINE GPS QUEUE ───────────────────────────────────── */
+async function sendPosUpdateQueued(manual=false){
+  const token=S.myToken;
+  if(!token||!S.myLat||S.status!=='active') return;
+  if(!S.targetLat) return;
+  const dist=hav(S.myLat,S.myLon,S.targetLat,S.targetLon);
+  const noised=noiseDist(dist,S.noiseSeed);
+  if(manual) spawnRipple(S.myLat?'success':'error');
+  const upd={lat:S.myLat,lon:S.myLon,speedKmh:S.speedKmh,lastSeen:SV.TIMESTAMP};
+  if(!S.startDist){upd.startDist=dist;S.startDist=dist;}
+  // Attempt Firebase write — buffer on fail
+  try{
+    await pRef().update(upd);
+    // Flush any queued positions
+    if(S._offlineQueue.length){
+      S._offlineQueue.forEach(q=>{ try{ pRef().update({lat:q.lat,lon:q.lon,speedKmh:0,lastSeen:q.ts}); }catch(_){} });
+      S._offlineQueue=[];
+    }
+    updateNavDisplay(noised);
+  } catch(_){
+    if(S._offlineQueue.length<3) S._offlineQueue.push({lat:S.myLat,lon:S.myLon,ts:SV.TIMESTAMP});
+  }
+  // Arrival check
+  if(dist<=S.arrRadius&&!S.arrived&&!S.eliminated){
+    S.arrived=true;
+    const elapsed=S.startedAt?Math.round((Date.now()-S.startedAt)/1000):0;
+    S.arrivalElapsed=elapsed;
+    await pRef().update({arrived:true,arrSec:elapsed});
+    triggerArrival(elapsed,S.startDist);
+    playArrivalSound();haptic('heavy');
+    // Teams: notify team
+    if(S.teamsMode&&S.myTeam) toast(`${S.myTeam==='red'?'🔴':'🔵'} Team arrived!`,3000);
+  }
+}
+
+/* ── PWA INSTALL ─────────────────────────────────────────── */
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  S._pwaPrompt=e;
+  if(!localStorage.getItem('pwa-dismissed')){
+    setTimeout(()=>el('pwa-banner')?.classList.remove('hidden'),2500);
+  }
+});
+function pwaInstall(){
+  if(!S._pwaPrompt) return;
+  S._pwaPrompt.prompt();
+  S._pwaPrompt.userChoice.then(()=>{ el('pwa-banner')?.classList.add('hidden'); });
+}
+function pwaDismiss(){
+  el('pwa-banner')?.classList.add('hidden');
+  localStorage.setItem('pwa-dismissed','1');
+}
+
+/* ── SHARE RESULT CARD (fixed — zoomed map + stats) ─────── */
+async function shareResult(){
+  try{
+    const canvas=document.createElement('canvas');
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    const W=600,H=500;
+    canvas.width=W*dpr;canvas.height=H*dpr;
+    const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+    const dark=document.documentElement.getAttribute('data-theme')==='dark';
+
+    // Background gradient
+    const grad=ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,dark?'#0a1628':'#c8e6ff');
+    grad.addColorStop(1,dark?'#05080f':'#eef4f0');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+
+    // — Map snapshot via Leaflet container —
+    const mapEl=S.resMap?.getContainer();
+    if(mapEl){
+      try{
+        // Draw map as image if html2canvas is available; else draw placeholder
+        ctx.save();
+        ctx.beginPath();ctx.roundRect?ctx.roundRect(20,16,W-40,200,12):ctx.rect(20,16,W-40,200);
+        ctx.clip();
+        // Teal map placeholder with route overlay
+        ctx.fillStyle=dark?'#0f1a2a':'#d4e8f0';ctx.fillRect(20,16,W-40,200);
+        // Draw simplified trails
+        const drawTrail=(trail,color,weight=2.5)=>{
+          if(trail.length<2||!S.resMap)return;
+          const bounds=S.resMap.getBounds();
+          const toXY=([lat,lon])=>{
+            const nx=(lon-bounds.getWest())/(bounds.getEast()-bounds.getWest());
+            const ny=1-(lat-bounds.getSouth())/(bounds.getNorth()-bounds.getSouth());
+            return[20+nx*(W-40),16+ny*200];
+          };
+          ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.lineCap='round';ctx.lineJoin='round';
+          ctx.beginPath();
+          trail.forEach(([lat,lon],i)=>{ const[x,y]=toXY([lat,lon]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
+          ctx.stroke();
+        };
+        if(S.resMap){
+          drawTrail(S.myTrail,'#34C759');
+          Object.values(S.playerTrails).forEach((trail,i)=>drawTrail(trail,PCOLS[i%PCOLS.length],2));
+          // Target pin
+          if(S.targetLat){
+            const bounds=S.resMap.getBounds();
+            const nx=(S.targetLon-bounds.getWest())/(bounds.getEast()-bounds.getWest());
+            const ny=1-(S.targetLat-bounds.getSouth())/(bounds.getNorth()-bounds.getSouth());
+            const tx=20+nx*(W-40),ty=16+ny*200;
+            ctx.fillStyle='#007AFF';ctx.beginPath();ctx.arc(tx,ty,6,0,Math.PI*2);ctx.fill();
+            ctx.fillStyle='white';ctx.beginPath();ctx.arc(tx,ty,3,0,Math.PI*2);ctx.fill();
+          }
+        }
+        ctx.restore();
+        // Map border
+        ctx.strokeStyle=dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.08)';ctx.lineWidth=1;
+        ctx.strokeRect(20,16,W-40,200);
+      }catch(_){}
+    }
+
+    // Header block
+    const headerY=232;
+    ctx.fillStyle=dark?'rgba(255,255,255,.9)':'rgba(0,0,0,.85)';
+    ctx.font='bold 22px -apple-system,Arial,sans-serif';
+    ctx.fillText('Luftlinie',28,headerY);
+    ctx.fillStyle=dark?'rgba(255,255,255,.4)':'rgba(0,0,0,.4)';
+    ctx.font='12px -apple-system,Arial,sans-serif';
+    const dist=S.startDist?(S.startDist/1000).toFixed(1)+' km straight-line':'';
+    ctx.fillText(`Game ${S.gameCode||''}  ·  ${dist}  ·  ${new Date().toLocaleDateString()}`,28,headerY+18);
+
+    // Stats row
+    const statY=headerY+46;
+    [[el('stat-dist')?.textContent||'—','Straight-line'],[el('stat-time')?.textContent||'—','Best time'],[el('stat-players')?.textContent||'—','Players']].forEach(([v,l],i)=>{
+      const sx=28+i*185;
+      ctx.fillStyle=dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.8)';
+      ctx.font='bold 16px "SF Mono","Menlo",monospace';ctx.fillText(v,sx,statY);
+      ctx.fillStyle=dark?'rgba(255,255,255,.38)':'rgba(0,0,0,.38)';
+      ctx.font='11px -apple-system,Arial,sans-serif';ctx.fillText(l,sx,statY+14);
+    });
+
+    // Leaderboard
+    let y=statY+44;
+    const rows2=el('result-rows');
+    if(rows2){
+      rows2.querySelectorAll('.rr-row').forEach((row,i)=>{
+        const dot=row.querySelector('.rr-dot');
+        const col=dot?.style.background||PCOLS[i%PCOLS.length];
+        ctx.fillStyle=col;ctx.beginPath();ctx.arc(38,y-4,5,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=i===0?col:(dark?'rgba(255,255,255,.8)':'rgba(0,0,0,.75)');
+        ctx.font=`${i===0?'bold ':''}14px -apple-system,Arial,sans-serif`;
+        ctx.fillText(row.querySelector('.rr-name')?.textContent||'',52,y);
+        ctx.textAlign='right';
+        ctx.fillStyle=i===0?'#34C759':(dark?'rgba(255,255,255,.45)':'rgba(0,0,0,.4)');
+        ctx.font='bold 13px "SF Mono","Menlo",monospace';
+        ctx.fillText(row.querySelector('.rr-time')?.textContent||'',W-28,y);
+        ctx.textAlign='left';
+        y+=26;
+      });
+    }
+
+    // Footer
+    ctx.fillStyle=dark?'rgba(255,255,255,.18)':'rgba(0,0,0,.14)';
+    ctx.font='10px -apple-system,Arial,sans-serif';
+    ctx.fillText('luftlinie.app',28,H-14);
+
+    canvas.toBlob(async blob=>{
+      if(!blob)return;
+      const file=new File([blob],'luftlinie-result.png',{type:'image/png'});
+      if(navigator.share&&navigator.canShare?.({files:[file]})){
+        await navigator.share({files:[file],title:'Luftlinie Result'});
+      } else {
+        const a=document.createElement('a');
+        a.href=URL.createObjectURL(blob);a.download='luftlinie-result.png';a.click();
+        toast('Result saved!');
+      }
+    },'image/png');
+  }catch(e){ toast('Could not generate share card'); }
+}
+
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
-  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,updateGoMapBtn,upSetup,
+  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,updateGoMapBtn,upSetup,
   goMap,smartPick,confirmTarget,
   copyLink,copyCodeTap,showQR,hideQR,lockStart,toggleMyView,goHostView,leaveOrHostView,abortGame,confirmAbort,cancelAbort,
   joinGame,leaveGame,
@@ -2573,6 +2975,7 @@ const App={
   toggleMapOrientation,
   dismissRejoin,doRejoin,
   approveSpec,denySpec,
+  pwaInstall,pwaDismiss,
   goHome,
 };
 const Nav={go:goScreen};
