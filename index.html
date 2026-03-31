@@ -807,7 +807,10 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div class="sc map-sc" id="sc-hactive">
   <div class="game-bar">
     <div class="game-bar-left">
-      <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+      <div class="na-players">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span id="ha-pcount">—</span>
+      </div>
       <span class="elim-countdown hidden" id="ha-elim-cd"></span>
     </div>
     <div class="game-bar-center">
@@ -815,38 +818,36 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="gbar-timer" id="ha-timer">00:00</div>
     </div>
     <div class="game-bar-right">
+      <div class="na-gps" id="ha-gps"><span class="gps-dot"></span><span id="ha-gps-txt">GPS</span></div>
       <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
-      <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="North-up">🧭</button>
       <button class="toolbar-btn" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()" title="Switch to navigator view">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
       </button>
-      <div class="game-bar-overflow">
-        <button class="overflow-btn" onclick="haptic('light');App.toggleOverflow()" id="overflow-btn">···</button>
-        <div class="overflow-menu hidden" id="overflow-menu">
-          <button class="omenu-item" onclick="haptic('light');App.toggleOverflow();App.showQR()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/></svg>
-            Show QR Code
-          </button>
-          <button class="omenu-item" onclick="haptic('light');App.toggleOverflow();App.copyLink()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            Copy Invite Link
-          </button>
-          <button class="omenu-item destruct" onclick="haptic('medium');App.toggleOverflow();App.abortGame()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-            End Game
-          </button>
-        </div>
-      </div>
+      <button class="btn-destruct sm" onclick="haptic('medium');App.abortGame()">End</button>
     </div>
   </div>
   <div class="map-rotate-container" id="hostmap-wrap"><div class="map-rotate-frame" id="hostmap-frame"><div id="hostmap"></div></div></div>
   <div class="host-panel">
     <div id="spec-requests-active" class="hidden" style="margin-bottom:8px"></div>
     <div class="hp-row">
+      <span class="section-label" style="margin:0">Game Code</span>
+      <span class="badge blue" id="ha-code-badge" style="font-family:var(--mono);letter-spacing:1px;cursor:pointer" onclick="haptic('light');App.copyCodeTap()">—</span>
+    </div>
+    <div class="hp-row">
       <span class="section-label" style="margin:0">Navigators</span>
       <span class="badge blue" id="ha-nbadge">0</span>
     </div>
     <div id="ha-cards" class="nav-card-grid"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-secondary btn-sm btn-full" onclick="haptic('light');App.showQR()" style="flex:1">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/></svg>
+        QR Code
+      </button>
+      <button class="btn-secondary btn-sm btn-full" onclick="haptic('light');App.copyLink()" style="flex:1">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Link
+      </button>
+    </div>
   </div>
 </div>
 
@@ -855,7 +856,10 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div class="sc map-sc" id="sc-spectator">
   <div class="game-bar">
     <div class="game-bar-left">
-      <div class="live-badge spec-badge"><span class="live-dot"></span>WATCHING</div>
+      <div class="na-players">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span id="sp-pcount">—</span>
+      </div>
       <span class="elim-countdown hidden" id="sp-elim-cd"></span>
     </div>
     <div class="game-bar-center">
@@ -864,8 +868,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <div class="game-bar-right">
       <button class="toolbar-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
-      <button class="toolbar-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="North-up">🧭</button>
-      <button class="btn-destruct sm" id="spec-leave-btn" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
+      <button class="btn-destruct sm" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
     </div>
   </div>
   <div class="map-rotate-container" id="specmap-wrap"><div class="map-rotate-frame" id="specmap-frame"><div id="specmap"></div></div></div>
@@ -1633,6 +1636,8 @@ function startPlayersListener(){
     // Show how many navigators are still racing (not arrived, not eliminated)
     const stillRacing=navs.filter(p=>!p.arrived).length;
     set('na-pcount', allNavs.length ? String(allNavs.length) : '—');
+    set('ha-pcount', allNavs.length ? String(allNavs.length) : '—');
+    set('sp-pcount', allNavs.length ? String(allNavs.length) : '—');
     // Lobby — show everyone including spectators
     if(S.screen==='hlobby'){
       const newHtml=players.length
@@ -1716,6 +1721,7 @@ function launchHostActive(){
   S.hostViewActive=true;
   S._lastUrgentBeep=-1;S._lastElimBeep=-1;
   goScreen('hactive');setTimeout(initHostMap,80);
+  set('ha-code-badge',S.gameCode||'—');
   startClientTimer();
   startSpecRequestsListener();
   const btn=el('btn-role-toggle');
@@ -1750,6 +1756,7 @@ function toggleMyView(){
 function goHostView(){
   S.hostViewActive=true;
   goScreen('hactive');setTimeout(initHostMap,80);
+  set('ha-code-badge',S.gameCode||'—');
   hide('btn-host-back');
   const lb=el('spec-leave-btn');if(lb)lb.textContent=S.isHost?'← Host':'Leave';
   const btn=el('btn-role-toggle');
@@ -2065,6 +2072,12 @@ function handleGPSPos(pos){
   if(pill){
     if(acc>50){pill.className='na-gps lost';set('na-gps-txt','~'+Math.round(acc)+'m');}
     else{pill.className='na-gps live';set('na-gps-txt','Live');}
+  }
+  // Host GPS pill (always shows host's own GPS on host bar)
+  const hPill=el('ha-gps');
+  if(hPill){
+    if(acc>50){hPill.className='na-gps lost';set('ha-gps-txt','~'+Math.round(acc)+'m');}
+    else{hPill.className='na-gps live';set('ha-gps-txt','Live');}
   }
   // Ripple: only spawn when showing the number (not in HC/whisper modes)
   // and only when we've actually moved (not every 1s backup poll)
