@@ -498,6 +498,20 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .hc-word{position:relative;z-index:3;font-size:13px;font-weight:800;letter-spacing:3.5px;text-transform:uppercase;margin-top:32px;transition:color 1s ease;opacity:.75}
 /* ── PEER SCREEN DISSOLVE (nav↔host↔spec) ────────────────── */
 .sc.dissolve{transform:none!important}
+/* ── SAILOR COMPASS ──────────────────────────────────────── */
+.sailor-screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10}
+.sailor-compass{position:relative;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.08)}
+.sailor-ticks{position:absolute;inset:0}
+.s-tick{position:absolute;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);font-family:var(--mono);letter-spacing:1px}
+.s-n{top:10px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.55)}
+.s-e{right:12px;top:50%;transform:translateY(-50%)}
+.s-s{bottom:10px;left:50%;transform:translateX(-50%)}
+.s-w{left:12px;top:50%;transform:translateY(-50%)}
+.sailor-needle{position:relative;width:4px;height:120px;transform-origin:center center;transition:transform .15s ease-out;will-change:transform}
+.needle-tip{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:52px solid #FF3B30;filter:drop-shadow(0 0 6px rgba(255,59,48,.4))}
+.needle-tail{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:48px solid rgba(255,255,255,.3)}
+.sailor-center-dot{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.7);z-index:3;box-shadow:0 0 8px rgba(0,0,0,.3)}
+.sailor-hint{margin-top:24px;font-size:12px;color:var(--t3);letter-spacing:.5px;text-align:center}
 </style>
 </head>
 <body>
@@ -611,6 +625,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="mode-card-ico">🌡️</div>
       <div class="mode-card-name">Hot & Cold</div>
       <div class="mode-card-desc">Find it by feel alone</div>
+    </div>
+    <div class="mode-card" id="mode-card-sailor" onclick="App.setGameMode('sailor')">
+      <div class="mode-card-ico">🧭</div>
+      <div class="mode-card-name">Sailor</div>
+      <div class="mode-card-desc">Compass points to target</div>
     </div>
   </div>
   <div class="mode-warn hidden" id="mode-warn" style="padding:0 14px 12px;display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--t3);line-height:1.5">
@@ -932,6 +951,23 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       </div>
       <div class="hc-word" id="hc-word">—</div>
     </div>
+    <!-- Sailor compass — directional only, no distance -->
+    <div class="sailor-screen hidden" id="sailor-screen">
+      <div class="sailor-compass">
+        <div class="sailor-ticks">
+          <span class="s-tick s-n">N</span>
+          <span class="s-tick s-e">E</span>
+          <span class="s-tick s-s">S</span>
+          <span class="s-tick s-w">W</span>
+        </div>
+        <div class="sailor-needle" id="sailor-needle">
+          <div class="needle-tip"></div>
+          <div class="needle-tail"></div>
+        </div>
+        <div class="sailor-center-dot"></div>
+      </div>
+      <div class="sailor-hint" id="sailor-hint">Point your phone forward</div>
+    </div>
     <button class="refresh-link" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15M1 20v-6h6"/></svg>
       refresh
@@ -1113,7 +1149,7 @@ const S = {
   startDist:null, lastDist:null, arrived:false, arrivalElapsed:null,
   eliminated:false,
   /* blind start */
-  blindStartDist:0, blindUnlocked:false,
+  blindStartDist:0, blindUnlocked:false, blindStartLat:null, blindStartLon:null,
   /* GPS */
   myLat:null, myLon:null, lastAccuracy:null,
   prevLat:null, prevLon:null, prevGPSTime:null,
@@ -1143,6 +1179,8 @@ const S = {
   _compassTarget:null, _compassFrame:null, _compassMap:null,
   /* hot/cold */
   _hcHistory:[], _hcHapticTs:0, _pwaPrompt:null,
+  /* sailor */
+  _sailorHeading:0, _sailorListener:null,
   /* whisper */
   _whisperShowing:false, _whisperHideTimeout:null,
   /* pwa */
@@ -1277,12 +1315,12 @@ function resetGameState(){
   S.targetLat=null;S.targetLon=null;S.noiseSeed=0.5;
   S.timeLimitSec=3600;S.startedAt=null;S.status='idle';
   S.startDist=null;S.lastDist=null;S.arrived=false;S.arrivalElapsed=null;
-  S.eliminated=false;S.blindStartDist=0;S.blindUnlocked=false;
+  S.eliminated=false;S.blindStartDist=0;S.blindUnlocked=false;S.blindStartLat=null;S.blindStartLon=null;
   S.speedKmh=0;S.speedWarnShown=false;
   S.gameListener=null;S.playersListener=null;S.timerIv=null;
   if(S.elimIv){clearInterval(S.elimIv);S.elimIv=null;}
   S.latestPlayers={};S.lastProximityBeep=0;
-  S._hcHistory=[];S._hcHapticTs=0;
+  S._hcHistory=[];S._hcHapticTs=0;S._sailorHeading=0;
   S._whisperShowing=false;clearTimeout(S._whisperHideTimeout);S._whisperHideTimeout=null;
   S._lastLobbyHtml=null;S._lastNWaitHtml=null;
   S.lastAccuracy=null;
@@ -1761,7 +1799,7 @@ async function runElimCheck(){
 function watchAfterElim(){
   el('ov-eliminated').classList.add('hidden');
   // Switch to spectator view
-  S.role='spectator';S.isSpectator=true;
+  S.role='spectator';
   goScreen('spectator');setTimeout(initSpecMap,80);
 }
 
@@ -1942,12 +1980,14 @@ function startGPS(){
   startWakeLock();
   if(S.whisperMode) startWhisperTimer();
   if(S.gameMode==='hotcold') startHotCold();
+  if(S.gameMode==='sailor') startSailor();
 }
 function stopGPS(){
   if(S.gpsWatch!=null){navigator.geolocation.clearWatch(S.gpsWatch);S.gpsWatch=null;}
   if(S.gpsInterval!=null){clearInterval(S.gpsInterval);S.gpsInterval=null;}
   stopWhisperTimer();
   stopHotCold();
+  stopSailor();
 }
 
 function handleGPSPos(pos){
@@ -1959,6 +1999,10 @@ function handleGPSPos(pos){
     if(S.speedKmh>80&&!S.speedWarnShown){el('ov-speed').classList.remove('hidden');S.speedWarnShown=true;}
   }
   S.prevLat=lat;S.prevLon=lon;S.prevGPSTime=now;S.myLat=lat;S.myLon=lon;S.lastAccuracy=acc;
+  // Blind start: record the first GPS fix as the "start" point
+  if(S.blindStart&&!S.blindStartLat&&!S.blindUnlocked){
+    S.blindStartLat=lat;S.blindStartLon=lon;
+  }
   const t=S.myTrail,last=t[t.length-1];
   if(!last||hav(last[0],last[1],lat,lon)>5) t.push([lat,lon]);
   // GPS pill
@@ -1970,7 +2014,7 @@ function handleGPSPos(pos){
   // Ripple: only spawn when showing the number (not in HC/whisper modes)
   // and only when we've actually moved (not every 1s backup poll)
   const moved=!last||hav(last[0],last[1],lat,lon)>8;
-  if(moved&&S.gameMode!=='hotcold'&&!S.whisperMode){
+  if(moved&&S.gameMode!=='hotcold'&&S.gameMode!=='sailor'&&!S.whisperMode){
     spawnRipple(acc>50?'warn':'auto');
   }
   sendPosUpdateQueued(false);
@@ -2248,25 +2292,24 @@ function updateBlindDisplay(distM){
     updateNavDisplay(distM);
     return;
   }
-  // Compute cumulative distance walked along the trail (sum of segments)
-  const trail=S.myTrail;
-  let walked=0;
-  for(let i=1;i<trail.length;i++){
-    walked+=hav(trail[i-1][0],trail[i-1][1],trail[i][0],trail[i][1]);
+  // Straight-line distance from the start GPS fix (can't game by walking in circles)
+  if(S.blindStartLat&&S.blindStartLon){
+    const fromStart=hav(S.blindStartLat,S.blindStartLon,S.myLat,S.myLon);
+    if(fromStart>=300){
+      S.blindUnlocked=true;
+      playTone(523,0.1,0.15);setTimeout(()=>playTone(659,0.15,0.18),100);
+      haptic('medium');
+      toast('Distance unlocked — you\'ve moved 300m from start',2500);
+      if(eyebrow) eyebrow.textContent='';
+      nd?.classList.remove('blind-num');
+      updateNavDisplay(distM);
+      return;
+    }
+    const remaining=Math.max(0,Math.ceil(300-fromStart));
+    if(eyebrow) eyebrow.textContent=`${Math.round(fromStart)}m from start`;
+  } else {
+    if(eyebrow) eyebrow.textContent='Acquiring GPS…';
   }
-  S.blindStartDist=walked;
-  if(walked>=500){
-    S.blindUnlocked=true;
-    playTone(523,0.1,0.15);setTimeout(()=>playTone(659,0.15,0.18),100);
-    haptic('medium');
-    toast('Distance unlocked — you\'ve moved 500m',2500);
-    if(eyebrow) eyebrow.textContent='';
-    nd?.classList.remove('blind-num');
-    updateNavDisplay(distM);
-    return;
-  }
-  const remaining=Math.max(0,Math.ceil(500-walked));
-  if(eyebrow) eyebrow.textContent=`Walk ${remaining}m to unlock`;
   if(nd){nd.textContent='—';nd.classList.add('blind-num');}
   if(nu) nu.textContent='';
 }
@@ -2456,6 +2499,9 @@ function setGameMode(m){
     setBlindStart(false);
   } else if(m==='hotcold'){
     warnTxt.textContent='No distance shown — find the target by feel. Move and observe the pulse.';
+    warn.classList.remove('hidden');
+  } else if(m==='sailor'){
+    warnTxt.textContent='A compass needle points toward the target. No distance shown — navigate by direction alone.';
     warn.classList.remove('hidden');
   } else {
     warn.classList.add('hidden');
@@ -2757,23 +2803,33 @@ function stopHotCold(){
 
 function updateHotColdTrend(){
   const hist=S._hcHistory||[];
+  // Need at least 2 readings with meaningful time gap
   if(hist.length<2){
-    // Not enough data yet — show neutral pulsing
     _applyHCState('neutral',2.5);
     return;
   }
-  // Compare the oldest half to the newest half of the window
-  // This smooths noise while remaining responsive
-  const mid=Math.floor(hist.length/2);
-  const oldAvg=hist.slice(0,mid).reduce((a,b)=>a+b,0)/mid;
-  const newAvg=hist.slice(mid).reduce((a,b)=>a+b,0)/(hist.length-mid);
-  const delta=oldAvg-newAvg; // positive = getting closer = hot
+  const oldest=hist[0], newest=hist[hist.length-1];
+  const dtSec=(newest.ts-oldest.ts)/1000;
+  if(dtSec<0.5){
+    _applyHCState('neutral',2.5);
+    return;
+  }
+  // Velocity in m/s: negative = closing in, positive = moving away
+  const velMs=(oldest.dist-newest.dist)/dtSec;
 
-  // Normalise: ±200m delta maps to full hot/cold range
-  const t=Math.max(-1,Math.min(1,delta/200)); // -1=cold, 0=neutral, +1=hot
+  // Map velocity to labels and intensity
+  // HOT: closing >1.5 m/s, Warmer: 0.5-1.5, Same: -0.5 to 0.5, Cooler: -0.5 to -1.5, COLD: moving away >1.5
+  let t; // -1=cold(moving away fast), 0=neutral, +1=hot(closing fast)
+  if(velMs>1.5) t=-1;
+  else if(velMs>0.5) t=-0.5-(velMs-0.5)/1; // maps 0.5..1.5 → -0.5..-1
+  else if(velMs>0.15) t=-(velMs-0.15)/0.35; // maps 0.15..0.5 → 0..-0.5 (Cooler)
+  else if(velMs>-0.15) t=0; // Same
+  else if(velMs>-0.5) t=(-0.15-velMs)/0.35; // maps -0.15..-0.5 → 0..0.5 (Warmer)
+  else if(velMs>-1.5) t=0.5+(-0.5-velMs)/1; // maps -0.5..-1.5 → 0.5..1 (Warmer→HOT)
+  else t=1; // HOT
 
-  // Pulse duration: hot=0.7s, neutral=2.5s, cold=5s
-  const dur=2.5-t*1.8; // maps [-1..1] → [4.3s..0.7s]
+  // Pulse duration: HOT=0.5s, neutral=2.5s, COLD=4s
+  const dur=2.5-t*1.5; // maps [-1..1] → [4.0s..1.0s]
 
   _applyHCState(t,dur);
 }
@@ -2812,13 +2868,13 @@ function _applyHCState(t,dur){
     core.style.boxShadow=`0 0 ${16+Math.round(c*36)}px ${rgbA(0.22)}`;
     core.style.border=`1.5px solid ${rgbA(0.2)}`;
   }
-  // Word label
+  // Word label — velocity-based feedback, not absolute position
   const word=el('hc-word');
   if(word){
-    if(isNeutral||Math.abs(tNum)<0.08){ word.textContent='—'; word.style.color=''; }
-    else if(tNum>0.6){ word.textContent='Hotter'; word.style.color=col; }
+    if(isNeutral||Math.abs(tNum)<0.08){ word.textContent='Same'; word.style.color=''; }
+    else if(tNum>0.6){ word.textContent='HOT'; word.style.color=col; }
     else if(tNum>0.15){ word.textContent='Warmer'; word.style.color=col; }
-    else if(tNum<-0.6){ word.textContent='Colder'; word.style.color=col; }
+    else if(tNum<-0.6){ word.textContent='COLD'; word.style.color=col; }
     else if(tNum<-0.15){ word.textContent='Cooler'; word.style.color=col; }
     else { word.textContent='Same'; word.style.color=''; }
   }
@@ -2828,7 +2884,57 @@ function _applyHCState(t,dur){
   }
 }
 
-/* ── TEAMS ARRIVAL CHECK ─────────────────────────────────── */
+/* ── SAILOR MODE — COMPASS NEEDLE ────────────────────────── */
+// A compass needle that always points toward the target.
+// bearingTo(myPos, target) = absolute bearing (0-360, 0=North)
+// deviceHeading = webkitCompassHeading or 360-alpha
+// needleAngle = targetBearing - deviceHeading → arrow rotates to always point at target
+function startSailor(){
+  stopSailor();
+  el('na-dist-wrapper')?.classList.add('hidden');
+  el('hc-screen')?.classList.add('hidden');
+  el('sailor-screen')?.classList.remove('hidden');
+  el('refresh-btn')?.classList.add('hidden');
+  // Request compass permission on iOS
+  if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission()
+      .then(state=>{
+        if(state==='granted') _startSailorListener();
+        else el('sailor-hint').textContent='Compass permission denied';
+      })
+      .catch(()=>el('sailor-hint').textContent='Compass not available');
+  } else {
+    _startSailorListener();
+  }
+}
+
+function _startSailorListener(){
+  S._sailorListener=(e)=>{
+    const heading=e.webkitCompassHeading!=null?e.webkitCompassHeading:(360-(e.alpha||0))%360;
+    S._sailorHeading=heading;
+    updateSailorNeedle();
+  };
+  window.addEventListener('deviceorientation',S._sailorListener,true);
+  el('sailor-hint').textContent='';
+}
+
+function stopSailor(){
+  if(S._sailorListener){
+    window.removeEventListener('deviceorientation',S._sailorListener,true);
+    S._sailorListener=null;
+  }
+  el('na-dist-wrapper')?.classList.remove('hidden');
+  el('sailor-screen')?.classList.add('hidden');
+  el('refresh-btn')?.classList.remove('hidden');
+}
+
+function updateSailorNeedle(){
+  if(!S.myLat||!S.targetLat||!S._sailorHeading&&S._sailorHeading!==0) return;
+  const targetBearing=bearingTo(S.myLat,S.myLon,S.targetLat,S.targetLon);
+  const needleAngle=targetBearing-S._sailorHeading;
+  const needle=el('sailor-needle');
+  if(needle) needle.style.transform=`rotate(${needleAngle}deg)`;
+}
 function checkTeamArrival(players){
   if(!S.teamsMode) return false;
   const teams={red:false,blue:false};
@@ -2874,10 +2980,11 @@ async function sendPosUpdateQueued(manual=false){
   const upd={lat:S.myLat,lon:S.myLon,speedKmh:S.speedKmh,lastSeen:SV.TIMESTAMP};
   if(!S.startDist){upd.startDist=dist;S.startDist=dist;}
 
-  // Track distance history for Hot & Cold trend (20 readings ≈ 20s window)
+  // Track distance history for Hot & Cold velocity analysis (timestamped, ~8s window)
   if(!S._hcHistory) S._hcHistory=[];
-  S._hcHistory.push(dist);
-  if(S._hcHistory.length>20) S._hcHistory.shift();
+  S._hcHistory.push({dist,ts:Date.now()});
+  const cutoff=Date.now()-8000;
+  while(S._hcHistory.length>1&&S._hcHistory[0].ts<cutoff) S._hcHistory.shift();
 
   // Attempt Firebase write — buffer on fail
   try{
@@ -2894,6 +3001,9 @@ async function sendPosUpdateQueued(manual=false){
   if(S.gameMode==='hotcold'){
     // HC: update trend analysis, never show number
     updateHotColdTrend();
+  } else if(S.gameMode==='sailor'){
+    // Sailor: update compass needle, never show number
+    updateSailorNeedle();
   } else if(S.whisperMode){
     // Whisper: distance is hidden until timer fires — do nothing here
     // (startWhisperTimer handles reveals)

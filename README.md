@@ -24,13 +24,21 @@ The core tension: you can only figure out which direction to go by moving and wa
 - 🧭 **Live GPS distance** — straight-line, updated continuously, reliable on both iOS and Android
 - 👁 **Spectator mode** — full live map with driving routes per player, colour-coded, updating as players move
 - ⚡ **Elimination mode** — furthest player knocked out every 5 minutes
-- 🙈 **Blind start** — distance stays hidden until you've moved 500m, forcing you to commit to a direction first
+- 🙈 **Blind start** — distance stays hidden until you've moved 300m straight-line from your start
+- 🏁 **Blind finish** — game continues after first arrival so everyone can finish
+- 👻 **Exclude host** — hide the host from the results leaderboard
+- 🔴🔵 **Teams mode** — Red vs Blue, first team with a member at the target wins
 - 🔊 **Proximity sounds** — subtle tones as you close in, a chime on arrival — all toggleable
 - ⏱ **Server-synced timer** — anchored to Firebase's server timestamp, no drift between devices
 - 🔒 **Anti-cheat noise** — deterministic ±30m offset applied consistently across all players
 - 🌙 **Dark mode** — automatic system dark mode support
 - 📱 **Mobile-first** — designed for iPhone, works on any modern mobile browser
 - 🔥 **Real-time** — Firebase Realtime Database, instant updates, no polling
+- 📲 **PWA** — installable to home screen for best experience
+- 🔄 **Rejoin** — reconnect to an active game after a page reload (4-hour window)
+- 📤 **Share result card** — generate a shareable image of the final leaderboard
+- ▶ **Route replay** — watch all player trails animate on the results map
+- 🔋 **Battery & offline detection** — warnings for low battery and connection loss
 
 ---
 
@@ -44,9 +52,10 @@ The core tension: you can only figure out which direction to go by moving and wa
 | Difficulty | ★ Easy → ★★★★★ Expert | ★★★ Medium |
 | Ideal drive time | 10–90 min | 30 min |
 | Arrival radius | 25 / 50 / 100 / 200 m | 50 m |
-| Host role | Navigator / Spectator | Spectator |
-| Elimination | On / Off | Off |
 | Blind start | On / Off | Off |
+| Blind finish | On / Off | On |
+| Exclude host | On / Off | On |
+| Teams | On / Off | Off |
 
 **Time limit = ideal drive time × difficulty multiplier**
 
@@ -58,6 +67,16 @@ The core tension: you can only figure out which direction to go by moving and wa
 | Hard | 1.5× |
 | Expert | 1.2× |
 
+### Game modes
+
+| Mode | Description |
+|---|---|
+| 🎯 **Standard** | Race to the target. First to arrive wins. |
+| ⚡ **Elimination** | Every 5 minutes the player furthest from the target is eliminated. Last one standing wins. |
+| 👂 **Whisper** | Distance is hidden most of the time and revealed dramatically for 8 seconds once per minute. |
+| 🌡️ **Hot & Cold** | No distance shown at all. A pulsing ring gives velocity-based feedback: **HOT** when closing fast, **COLD** when moving away, **Same** when stationary. Navigate by feel. |
+| 🧭 **Sailor** | A compass needle always points toward the target. No distance, no proximity info — pure directional navigation. Hold the phone flat and follow the red tip. |
+
 ### Distance display
 
 Always straight-line (Haversine). Never driving distance.
@@ -68,7 +87,9 @@ Always straight-line (Haversine). Never driving distance.
 < 1 000 m  →  XXX M
 ```
 
-Colour shifts from neutral → orange (< 2 km) → green (< 500 m) as you close in.
+In Standard mode, colour shifts from neutral → orange (< 2 km) → green (< 500 m) as you close in.
+
+In Whisper mode the distance is hidden except during timed reveals. In Hot & Cold and Sailor modes, no distance is shown at all.
 
 ### GPS indicator
 
@@ -92,6 +113,43 @@ Behind the distance number, rings pulse outward on every GPS event:
 
 ---
 
+## Game modes in detail
+
+### Hot & Cold
+
+The feedback is based on your **rate of distance change** over the last ~8 seconds — not your absolute position. This means:
+
+- **Standing still** → neutral pulse regardless of where you are
+- **Walking toward the target** → pulse speeds up and turns red (HOT)
+- **Walking away** → pulse slows down and turns blue (COLD)
+- **Turning around** → instant feedback switch
+
+| Label | Meaning |
+|---|---|
+| **HOT** | Closing fast (> 1.5 m/s) |
+| **Warmer** | Closing moderately (0.5–1.5 m/s) |
+| **Same** | Stationary or drifting (< 0.5 m/s) |
+| **Cooler** | Moving away slowly (0.5–1.5 m/s) |
+| **COLD** | Moving away fast (> 1.5 m/s) |
+
+### Sailor
+
+A frosted-glass compass face with a single needle. The red tip always points toward the hidden target, regardless of which way you're holding the phone. Works like a normal compass, except "north" has been replaced by the target.
+
+**How it works:**
+1. The app computes the absolute bearing from your position to the target
+2. Your device's compass heading is read from the hardware sensor
+3. The needle angle = target bearing − device heading
+4. The needle rotates via CSS to always point at the target
+
+No distance is shown. No proximity feedback. Pure directional navigation.
+
+### Whisper
+
+The distance number stays hidden as dashes. Once per minute it dramatically reveals for 8 seconds, then vanishes again. A countdown in the game bar shows when the next reveal will happen.
+
+---
+
 ## Smart target algorithm
 
 When Smart mode is selected, the Overpass API is queried for publicly accessible roads near the ideal drive distance:
@@ -101,7 +159,6 @@ When Smart mode is selected, the Overpass API is queried for publicly accessible
 - **Acceptance band:** 82–112% of the ideal straight-line distance
 - **Preference:** dead-ends and cul-de-sacs over through-roads
 - **Attempts:** 5 random bearings before falling back to a geometric point
-- **Fairness:** if the host chose Navigator + Smart, the map is never shown to them — target is found silently and the host goes straight to the lobby
 
 ---
 
@@ -130,7 +187,7 @@ Go to [console.firebase.google.com](https://console.firebase.google.com), create
 
 **2. Edit the file**
 
-Open `index.html` in any text editor. Find the `FIREBASE_CONFIG` block near the top of the script and replace the placeholder values with your real ones:
+Open `index.html` in any text editor. Find the `FIREBASE_CONFIG` block near the top of the script and replace the values with your real ones:
 
 ```js
 const FIREBASE_CONFIG = {
@@ -193,4 +250,4 @@ These rules validate all data written to the database — rejecting impossible G
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+GPL v3 — see [LICENSE](LICENSE)
