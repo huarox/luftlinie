@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <!--
 ╔══════════════════════════════════════════════════════════════╗
 ║  LUFTLINIE — Firebase Edition  (single HTML file)            ║
@@ -11,6 +12,7 @@
 ║  5. Open the URL in Chrome on your iPhone — done.            ║
 ╚══════════════════════════════════════════════════════════════╝
 -->
+
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
@@ -155,7 +157,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .code-card{background:var(--surf1);border:1px solid rgba(255,255,255,.7);border-radius:var(--r16);box-shadow:var(--sh-md);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);padding:22px;text-align:center}
 [data-theme="dark"] .code-card{border-color:var(--border)}
 .code-eye{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin-bottom:8px}
-.code-big{font-family:var(--mono);font-size:44px;font-weight:700;letter-spacing:8px;color:var(--t1);margin-bottom:6px}
 .code-sub{font-size:13px;color:var(--t3)}
 .player-list{display:flex;flex-direction:column;gap:6px;min-height:52px}
 .player-row{display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--surf1);border:1px solid var(--border2);border-radius:var(--r10);box-shadow:var(--sh-sm);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
@@ -163,15 +164,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .p-name{flex:1;font-size:15px;font-weight:500;color:var(--t1)}
 .p-role-tag{font-size:11px;font-weight:600;color:var(--t3);letter-spacing:.5px}
 .empty-state{font-size:14px;color:var(--t3);text-align:center;padding:16px}
-/* ── UNIFIED GAME BAR (nav + host + spec) ────────────────── */
-/* Same height and structure across all active screens.
-   Left: status badge (LIVE/WATCHING) or player count
-   Center: timer (absolute, always centered)
-   Right: controls cluster */
-.game-bar{display:flex;align-items:center;height:52px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border);padding:0 12px}
-.game-bar-left{display:flex;align-items:center;gap:5px;min-width:80px;flex-shrink:0}
-.game-bar-center{position:absolute;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none}
-.game-bar-right{margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0}
+/* ── UNIFIED GAME BAR ────────────────────────────────────── */
+/* 3-column grid guarantees timer is always truly centered
+   regardless of how wide the left/right controls are */
+.game-bar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:52px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border);padding:0 12px;gap:4px}
+.game-bar-left{display:flex;align-items:center;gap:5px;min-width:0;overflow:hidden}
+.game-bar-center{text-align:center;white-space:nowrap}
+.game-bar-right{display:flex;align-items:center;gap:5px;justify-content:flex-end}
 .gbar-timer{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1}
 .gbar-timer.urgent{color:var(--red);animation:blink 1s ease infinite}
 .gbar-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);font-weight:700;margin-bottom:1px}
@@ -227,18 +226,18 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .na-gps.lost{color:var(--orange)}
 .gps-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 .na-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;isolation:isolate;padding:24px 16px;transition:background .8s ease}
-/* Subtle glass card feel behind the distance number */
-.na-dist-wrapper{display:flex;flex-direction:column;align-items:center;background:var(--surf1);border:1px solid var(--border2);border-radius:var(--r20);padding:28px 36px 20px;box-shadow:var(--sh-md);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);position:relative;z-index:2;min-width:220px;transition:background .8s ease,border-color .5s ease}
-/* na-eyebrow is BELOW the number — status messages only (blind start, whisper) */
+.na-dist-wrapper{display:flex;flex-direction:column;align-items:center;position:relative;z-index:2}
+/* proximity tint goes on na-center itself, very subtle */
+.na-center.prox-close{background:rgba(255,159,10,.06)!important}
+.na-center.prox-very-close{background:rgba(52,199,89,.07)!important}
+[data-theme="dark"] .na-center.prox-close{background:rgba(255,159,10,.09)!important}
+[data-theme="dark"] .na-center.prox-very-close{background:rgba(52,199,89,.10)!important}
 .na-dist-row{display:flex;align-items:flex-end;gap:8px;position:relative;z-index:3}
 .na-dist{font-family:var(--mono);font-size:clamp(72px,21vw,114px);font-weight:700;line-height:.9;letter-spacing:-2px;color:var(--t1);transition:color .5s ease;font-variant-numeric:tabular-nums}
 .na-dist.updating{animation:dist-flash .3s ease}
 @keyframes dist-flash{0%,100%{opacity:1}50%{opacity:.35}}
-/* proximity tint on the card wrapper */
-.na-dist-wrapper.prox-close{background:rgba(255,159,10,.08)!important;border-color:rgba(255,159,10,.20)!important}
-.na-dist-wrapper.prox-very-close{background:rgba(52,199,89,.08)!important;border-color:rgba(52,199,89,.22)!important}
-[data-theme="dark"] .na-dist-wrapper.prox-close{background:rgba(255,159,10,.11)!important;border-color:rgba(255,159,10,.25)!important}
-[data-theme="dark"] .na-dist-wrapper.prox-very-close{background:rgba(52,199,89,.11)!important;border-color:rgba(52,199,89,.28)!important}
+/* na-eyebrow is BELOW the number — status messages only (blind start, whisper) */
+.na-dist-row{display:flex;align-items:flex-end;gap:8px;position:relative;z-index:3}
 .na-unit{font-family:var(--mono);font-size:clamp(18px,5.5vw,30px);font-weight:400;color:var(--t3);letter-spacing:2px;margin-bottom:5px}
 .na-ripples{position:absolute;inset:0;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:1}
 @keyframes rip-out{0%{transform:translate(-50%,-50%) scale(0.25);opacity:1}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
@@ -380,10 +379,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 /* ── BATTERY WARNING ─────────────────────────────────────── */
 .battery-banner{background:rgba(255,59,48,.1);border-bottom:1px solid rgba(255,59,48,.2);padding:7px 16px;font-size:12px;font-weight:600;color:var(--red);display:flex;align-items:center;gap:6px;flex-shrink:0}
 .battery-banner.hidden{display:none!important}
-/* ── CODE CARD INTERACTIVE ───────────────────────────────── */
-.code-big{cursor:pointer;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
-.code-big:active{opacity:.6}
-.code-copied{font-size:18px;font-weight:700;color:var(--green);letter-spacing:2px;transition:all .3s}
 /* ── QR SHEET ────────────────────────────────────────────── */
 .qr-sheet{position:fixed;inset:0;z-index:6000;display:flex;align-items:flex-start;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:var(--blur)}
 .qr-sheet.hidden{display:none!important}
@@ -429,14 +424,14 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .rs-v{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--t1)}
 .rs-l{font-size:11px;color:var(--t3);margin-top:2px;letter-spacing:.3px;font-weight:600;text-transform:uppercase}
 /* ── HOT/COLD MODE ───────────────────────────────────────── */
-.hc-screen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--bg)}
-.hc-orb-wrap{position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center}
-.hc-orb-glow{position:absolute;inset:-30px;border-radius:50%;filter:blur(40px);opacity:.55;transition:background 0.6s ease,opacity 0.4s ease}
-.hc-orb{width:180px;height:180px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.5s ease,box-shadow 0.5s ease;box-shadow:0 0 0 0 transparent;position:relative;z-index:1}
-.hc-arrow{font-size:72px;line-height:1;transition:transform 0.3s cubic-bezier(.4,0,.2,1),opacity 0.3s ease;display:block;filter:drop-shadow(0 2px 8px rgba(0,0,0,.3))}
-.hc-label{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-top:20px;transition:color 0.5s ease;color:var(--t2)}
-.hc-angle{font-family:var(--mono);font-size:28px;font-weight:700;margin-top:6px;transition:color 0.5s ease;color:var(--t1)}
-.hc-sub{font-size:12px;color:var(--t3);margin-top:4px}
+/* hc-screen overlays the entire na-center absolutely.
+   The background IS the temperature feedback — no orb, no box.
+   A single directional arrow and a label are the only UI. */
+.hc-screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;transition:background 0.5s ease;z-index:10;border-radius:inherit}
+.hc-arrow-wrap{display:flex;align-items:center;justify-content:center;width:120px;height:120px;position:relative}
+.hc-arrow-svg{width:80px;height:80px;transition:transform 0.25s cubic-bezier(.4,0,.2,1),opacity 0.3s ease;filter:drop-shadow(0 0 20px currentColor);will-change:transform}
+.hc-temp-label{font-size:12px;font-weight:800;letter-spacing:3px;text-transform:uppercase;margin-top:18px;transition:color 0.4s ease,opacity 0.4s ease;opacity:.9}
+.hc-bearing-hint{font-size:11px;font-weight:500;color:rgba(255,255,255,.45);margin-top:6px;letter-spacing:.5px}
 /* ── TEAMS MODE ──────────────────────────────────────────── */
 .team-pick{display:flex;gap:10px;margin-top:4px}
 .team-btn{flex:1;padding:12px 8px;border-radius:var(--r12);border:2px solid transparent;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:700;transition:all .16s;text-align:center;-webkit-tap-highlight-color:transparent}
@@ -454,6 +449,55 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .pwa-info{flex:1}
 .pwa-title{font-size:14px;font-weight:700;color:var(--t1)}
 .pwa-sub{font-size:12px;color:var(--t2);margin-top:1px}
+/* ── iOS-STYLE SWITCH ────────────────────────────────────── */
+.ios-switch{position:relative;display:inline-block;width:51px;height:31px;flex-shrink:0}
+.ios-switch input{opacity:0;width:0;height:0;position:absolute}
+.ios-switch-track{position:absolute;inset:0;border-radius:16px;background:rgba(120,120,128,.32);transition:background .2s;cursor:pointer}
+[data-theme="dark"] .ios-switch-track{background:rgba(120,120,128,.55)}
+.ios-switch input:checked+.ios-switch-track{background:var(--green)}
+.ios-switch-track::after{content:'';position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:white;box-shadow:0 2px 6px rgba(0,0,0,.22);transition:transform .2s cubic-bezier(.4,0,.2,1)}
+.ios-switch input:checked+.ios-switch-track::after{transform:translateX(20px)}
+/* ── SETUP ADVANCED COLLAPSE ─────────────────────────────── */
+.adv-toggle{display:flex;align-items:center;gap:6px;padding:12px 4px 6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--blue);-webkit-tap-highlight-color:transparent;user-select:none}
+.adv-toggle-chevron{transition:transform .22s;flex-shrink:0;color:var(--blue)}
+.adv-toggle.open .adv-toggle-chevron{transform:rotate(180deg)}
+.adv-section{overflow:hidden;max-height:0;transition:max-height .3s cubic-bezier(.4,0,.2,1)}
+.adv-section.open{max-height:800px}
+/* ── GAME CODE ───────────────────────────────────────────── */
+.code-big{font-family:var(--mono);font-size:36px;font-weight:700;color:var(--t1);margin-bottom:6px;cursor:pointer;transition:opacity .15s;-webkit-tap-highlight-color:transparent;letter-spacing:3px}
+.code-big:active{opacity:.6}
+.code-sep{color:var(--t4);margin:0 1px;letter-spacing:0}
+/* ── ABORT OVERFLOW MENU ─────────────────────────────────── */
+.overflow-btn{width:36px;height:36px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:700;color:var(--t2);transition:all .14s;flex-shrink:0;-webkit-tap-highlight-color:transparent;letter-spacing:2px;padding-bottom:4px}
+.overflow-btn:active{transform:scale(.88);opacity:.7}
+.game-bar-overflow{position:relative}
+.overflow-menu{position:absolute;top:44px;right:0;background:var(--surf1);border:1px solid var(--border);border-radius:var(--r12);box-shadow:var(--sh-lg);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);min-width:170px;z-index:600;overflow:hidden;animation:menu-pop .15s cubic-bezier(.4,0,.2,1)}
+@keyframes menu-pop{from{opacity:0;transform:scale(.93) translateY(-6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.overflow-menu.hidden{display:none!important}
+.omenu-item{display:flex;align-items:center;gap:10px;padding:13px 16px;font-size:15px;font-weight:400;color:var(--t1);cursor:pointer;transition:background .1s;border:none;background:none;width:100%;font-family:var(--font);text-align:left;-webkit-tap-highlight-color:transparent}
+.omenu-item:active{background:var(--surf2)}
+.omenu-item+.omenu-item{border-top:1px solid var(--border2)}
+.omenu-item.destruct{color:var(--red)}
+/* ── REFRESH demoted to a text link ─────────────────────── */
+.refresh-link{display:inline-flex;align-items:center;gap:5px;margin-top:20px;font-size:12px;color:var(--t3);cursor:pointer;transition:color .14s;background:none;border:none;font-family:var(--font);padding:6px;-webkit-tap-highlight-color:transparent;position:relative;z-index:3}
+.refresh-link:active{color:var(--blue)}
+.refresh-link svg{width:11px;height:11px;flex-shrink:0}
+.refresh-link.spinning svg{animation:spin .6s linear infinite}
+/* ── HOT & COLD — PULSE MODE ─────────────────────────────── */
+.hc-screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;transition:background 1.4s ease,backdrop-filter 1.4s ease}
+.hc-ring-wrap{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
+.hc-ring{position:absolute;inset:0;border-radius:50%;border:1.5px solid currentColor;animation:hc-pulse var(--hc-dur,5s) cubic-bezier(.4,0,.6,1) infinite;will-change:transform,opacity}
+.hc-ring:nth-child(2){animation-delay:calc(var(--hc-dur,5s) / -3)}
+.hc-ring:nth-child(3){animation-delay:calc(var(--hc-dur,5s) / -3 * 2)}
+@keyframes hc-pulse{
+  0%{transform:scale(.28);opacity:.85}
+  70%{opacity:.18}
+  100%{transform:scale(1);opacity:0}
+}
+.hc-core{width:72px;height:72px;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;transition:background 1s ease,box-shadow 1s ease}
+.hc-word{position:relative;z-index:3;font-size:13px;font-weight:800;letter-spacing:3.5px;text-transform:uppercase;margin-top:32px;transition:color 1s ease;opacity:.75}
+/* ── PEER SCREEN DISSOLVE (nav↔host↔spec) ────────────────── */
+.sc.dissolve{transform:none!important}
 </style>
 </head>
 <body>
@@ -464,6 +508,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div id="app">
 
 <!-- ══ LANDING ══ -->
+
 <div class="sc active" id="sc-land">
   <div class="rejoin-bar hidden" id="rejoin-bar" style="position:absolute;top:max(16px,env(safe-area-inset-top,16px));left:16px;right:16px;margin:0">
     <div class="rejoin-ico">🔄</div>
@@ -515,6 +560,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ SETUP ══ -->
+
 <div class="sc" id="sc-setup">
   <div class="top-bar">
     <button class="back-btn" onclick="haptic('light');Nav.go('land')">
@@ -524,134 +570,118 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div style="width:72px"></div>
   </div>
   <div class="body-scroll">
-    <div class="section-label">Target Mode</div>
-    <div class="seg-ctrl" id="seg-mode">
-      <button class="seg active" data-v="manual" onclick="App.setMode('manual')">📍 Manual</button>
-      <button class="seg" data-v="smart" onclick="App.setMode('smart')">✦ Smart</button>
-    </div>
-    <p class="mode-hint" id="mode-hint">You'll tap the map to drop the secret target. A range ring shows the ideal distance.</p>
 
-    <div class="section-label" style="margin-top:22px">Difficulty</div>
-    <div class="card">
-      <div class="stars-row" id="stars">
-        <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
-        <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
-        <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
-        <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
-        <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
-      </div>
-      <p class="diff-text" id="diff-txt">Medium — navigators get 2× the ideal drive time</p>
-    </div>
+```
+<div class="section-label">Your Name</div>
+<div class="card" style="margin-bottom:22px">
+  <div style="padding:10px 14px">
+    <input class="input" id="host-name" placeholder="Enter your name" maxlength="20" inputmode="text" autocomplete="nickname" autocapitalize="words">
+  </div>
+</div>
 
-    <div class="section-label" style="margin-top:22px">Drive Time</div>
-    <div class="card">
-      <div class="card-row"><span class="row-label">Ideal duration</span><span class="row-val" id="sv-time">30 min</span></div>
-      <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
-      <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90 min</span></div>
-      <div class="timelimit-row">
-        <span class="tl-lbl">Navigator time limit</span><span class="tl-val" id="sv-limit">60 min</span>
-      </div>
-    </div>
+<div class="section-label">How Far?</div>
+<div class="card" style="margin-bottom:22px">
+  <div class="card-row"><span class="row-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
+  <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
+  <div class="slider-marks"><span>10 min</span><span>30</span><span>60</span><span>90 min</span></div>
+  <div class="timelimit-row">
+    <span class="tl-lbl">Player time limit</span><span class="tl-val" id="sv-limit">60 min</span>
+  </div>
+</div>
 
-    <div class="section-label" style="margin-top:22px">Arrival Radius</div>
-    <div class="card">
-      <p class="radius-hint">How close navigators must get to trigger arrival.</p>
-      <div class="radius-row">
-        <div class="mini-seg" id="seg-radius">
-          <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
-          <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
-          <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
-          <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
-        </div>
-      </div>
+<div class="section-label">Mode</div>
+<div class="card" style="margin-bottom:22px">
+  <div class="mode-card-grid" style="grid-template-columns:repeat(2,1fr)">
+    <div class="mode-card active" id="mode-card-standard" onclick="App.setGameMode('standard')">
+      <div class="mode-card-ico">🎯</div>
+      <div class="mode-card-name">Standard</div>
+      <div class="mode-card-desc">Race to the target</div>
     </div>
+    <div class="mode-card" id="mode-card-elimination" onclick="App.setGameMode('elimination')">
+      <div class="mode-card-ico">⚡</div>
+      <div class="mode-card-name">Elimination</div>
+      <div class="mode-card-desc">Furthest out every 5 min</div>
+    </div>
+    <div class="mode-card" id="mode-card-whisper" onclick="App.setGameMode('whisper')">
+      <div class="mode-card-ico">👂</div>
+      <div class="mode-card-name">Whisper</div>
+      <div class="mode-card-desc">Distance once per minute</div>
+    </div>
+    <div class="mode-card" id="mode-card-hotcold" onclick="App.setGameMode('hotcold')">
+      <div class="mode-card-ico">🌡️</div>
+      <div class="mode-card-name">Hot & Cold</div>
+      <div class="mode-card-desc">Find it by feel alone</div>
+    </div>
+  </div>
+  <div class="mode-warn hidden" id="mode-warn" style="padding:0 14px 12px;display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--t3);line-height:1.5">
+    <span>⚠️</span><span id="mode-warn-txt"></span>
+  </div>
+</div>
 
-    <div class="section-label" style="margin-top:22px">Game Mode</div>
-    <div class="card">
-      <div class="mode-card-grid" style="grid-template-columns:repeat(2,1fr)">
-        <div class="mode-card active" id="mode-card-standard" onclick="App.setGameMode('standard')">
-          <div class="mode-card-ico">🎯</div>
-          <div class="mode-card-name">Standard</div>
-          <div class="mode-card-desc">Race to reach the target first</div>
-        </div>
-        <div class="mode-card" id="mode-card-elimination" onclick="App.setGameMode('elimination')">
-          <div class="mode-card-ico">⚡</div>
-          <div class="mode-card-name">Elimination</div>
-          <div class="mode-card-desc">Furthest knocked out every 5 min</div>
-        </div>
-        <div class="mode-card" id="mode-card-whisper" onclick="App.setGameMode('whisper')">
-          <div class="mode-card-ico">👂</div>
-          <div class="mode-card-name">Whisper</div>
-          <div class="mode-card-desc">Distance revealed once per minute</div>
-        </div>
-        <div class="mode-card" id="mode-card-hotcold" onclick="App.setGameMode('hotcold')">
-          <div class="mode-card-ico">🌡️</div>
-          <div class="mode-card-name">Hot & Cold</div>
-          <div class="mode-card-desc">Face the target to feel warmer</div>
-        </div>
-      </div>
-      <div class="mode-warn hidden" id="mode-warn">
-        <span>⚠️</span><span id="mode-warn-txt"></span>
+<div class="adv-toggle" id="adv-toggle" onclick="App.toggleAdvanced()">
+  <svg class="adv-toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+  Advanced Options
+</div>
+<div class="adv-section" id="adv-section">
+  <div class="section-label" style="margin-top:4px">Arrival Radius</div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="radius-row" style="padding:12px 14px">
+      <div class="mini-seg" id="seg-radius">
+        <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
+        <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
+        <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
+        <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
       </div>
     </div>
+  </div>
+  <div class="section-label">Difficulty</div>
+  <div class="card" style="margin-bottom:18px">
+    <div class="stars-row" id="stars">
+      <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
+      <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
+      <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
+      <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
+      <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
+    </div>
+    <p class="diff-text" id="diff-txt" style="padding:0 14px 12px;font-size:13px;color:var(--t2);line-height:1.5">Medium — 2× ideal drive time</p>
+  </div>
+  <div class="section-label">Target Mode</div>
+  <div class="seg-ctrl" id="seg-mode" style="margin-bottom:6px">
+    <button class="seg active" data-v="manual" onclick="App.setMode('manual')">📍 Manual</button>
+    <button class="seg" data-v="smart" onclick="App.setMode('smart')">✦ Smart</button>
+  </div>
+  <p class="mode-hint" id="mode-hint" style="font-size:12px;color:var(--t3);padding:4px 4px 18px;line-height:1.5">Tap the map to drop the target.</p>
+  <div class="section-label">Rules</div>
+  <div class="card" style="margin-bottom:4px">
+    <div class="setup-toggle-row">
+      <div><div class="setup-toggle-label">Teams</div><div class="setup-toggle-sub">Red vs Blue</div></div>
+      <label class="ios-switch"><input type="checkbox" id="sw-teams" onchange="App.setTeamsMode(this.checked)"><span class="ios-switch-track"></span></label>
+    </div>
+    <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+      <div><div class="setup-toggle-label">Blind Start</div><div class="setup-toggle-sub">Distance hidden until 500m moved</div></div>
+      <label class="ios-switch"><input type="checkbox" id="sw-blind" onchange="App.setBlindStart(this.checked)"><span class="ios-switch-track"></span></label>
+    </div>
+    <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+      <div><div class="setup-toggle-label">Blind Finish</div><div class="setup-toggle-sub">Others keep playing after first arrival</div></div>
+      <label class="ios-switch"><input type="checkbox" id="sw-blindfinish" checked onchange="App.setBlindFinish(this.checked)"><span class="ios-switch-track"></span></label>
+    </div>
+    <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
+      <div><div class="setup-toggle-label">Exclude Host</div><div class="setup-toggle-sub">Host hidden from results</div></div>
+      <label class="ios-switch"><input type="checkbox" id="sw-excludehost" checked onchange="App.setExcludeHost(this.checked)"><span class="ios-switch-track"></span></label>
+    </div>
+  </div>
+</div>
 
-    <div class="section-label" style="margin-top:22px">Rules</div>
-    <div class="card">
-      <div class="setup-toggle-row">
-        <div>
-          <div class="setup-toggle-label">👥 Teams</div>
-          <div class="setup-toggle-sub">Navigators split into Red &amp; Blue teams</div>
-        </div>
-        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-teams">
-          <button class="seg active" data-v="off" onclick="App.setTeamsMode(false)">Off</button>
-          <button class="seg" data-v="on" onclick="App.setTeamsMode(true)">On</button>
-        </div>
-      </div>
-      <div class="setup-toggle-row">
-        <div>
-          <div class="setup-toggle-label">🙈 Blind Start</div>
-          <div class="setup-toggle-sub">Distance hidden until you've moved 500m</div>
-        </div>
-        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blind">
-          <button class="seg active" data-v="off" onclick="App.setBlindStart(false)">Off</button>
-          <button class="seg" data-v="on" onclick="App.setBlindStart(true)">On</button>
-        </div>
-      </div>
-      <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-        <div>
-          <div class="setup-toggle-label">🏁 Blind Finish</div>
-          <div class="setup-toggle-sub">Others keep playing after first arrival</div>
-        </div>
-        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-blindfinish">
-          <button class="seg" data-v="off" onclick="App.setBlindFinish(false)">Off</button>
-          <button class="seg active" data-v="on" onclick="App.setBlindFinish(true)">On</button>
-        </div>
-      </div>
-      <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-        <div>
-          <div class="setup-toggle-label">👻 Exclude Host</div>
-          <div class="setup-toggle-sub">Host hidden from leaderboard &amp; results</div>
-        </div>
-        <div class="seg-ctrl" style="width:100px;flex-shrink:0" id="seg-excludehost">
-          <button class="seg" data-v="off" onclick="App.setExcludeHost(false)">Off</button>
-          <button class="seg active" data-v="on" onclick="App.setExcludeHost(true)">On</button>
-        </div>
-      </div>
-    </div>
-    <div class="section-label" style="margin-top:22px">Your Name</div>
-    <div class="card">
-      <div style="padding:10px 14px">
-        <input class="input" id="host-name" placeholder="Host" maxlength="20" value="Host" inputmode="text" autocomplete="nickname" autocapitalize="words">
-      </div>
-    </div>
+<button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="haptic('medium');App.goMap()">
+  Place Target on Map →
+</button>
+```
 
-    <button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="haptic('medium');App.goMap()">
-      Place Target on Map →
-    </button>
   </div>
 </div>
 
 <!-- ══ MAP (target placement) ══ -->
+
 <div class="sc map-sc" id="sc-map">
   <div class="map-topbar">
     <button class="map-back-btn" onclick="haptic('light');Nav.go('setup')">
@@ -668,6 +698,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ HOST LOBBY ══ -->
+
 <div class="sc" id="sc-hlobby">
   <div class="top-bar">
     <button class="back-btn" onclick="haptic('light');Nav.go('map')">
@@ -714,6 +745,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ HOST ACTIVE ══ -->
+
 <div class="sc map-sc" id="sc-hactive">
   <div class="game-bar">
     <div class="game-bar-left">
@@ -727,8 +759,26 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="game-bar-right">
       <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
       <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="North-up">🧭</button>
-      <button class="role-toggle-btn" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()">🧭 Nav</button>
-      <button class="btn-destruct sm" onclick="haptic('medium');App.abortGame()">Abort</button>
+      <button class="toolbar-btn" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()" title="Switch to navigator view">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+      </button>
+      <div class="game-bar-overflow">
+        <button class="overflow-btn" onclick="haptic('light');App.toggleOverflow()" id="overflow-btn">···</button>
+        <div class="overflow-menu hidden" id="overflow-menu">
+          <button class="omenu-item" onclick="haptic('light');App.toggleOverflow();App.showQR()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/></svg>
+            Show QR Code
+          </button>
+          <button class="omenu-item" onclick="haptic('light');App.toggleOverflow();App.copyLink()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy Invite Link
+          </button>
+          <button class="omenu-item destruct" onclick="haptic('medium');App.toggleOverflow();App.abortGame()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            End Game
+          </button>
+        </div>
+      </div>
     </div>
   </div>
   <div class="map-rotate-container" id="hostmap-wrap"><div class="map-rotate-frame" id="hostmap-frame"><div id="hostmap"></div></div></div>
@@ -743,6 +793,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ SPECTATOR MAP ══ -->
+
 <div class="sc map-sc" id="sc-spectator">
   <div class="game-bar">
     <div class="game-bar-left">
@@ -777,41 +828,38 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <span class="top-title">Join Game</span>
     <div style="width:72px"></div>
   </div>
-  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto">
-  <div class="center-glass" style="width:100%">
-    <div class="join-icon">📍</div>
-    <h2 class="join-title">Enter Details</h2>
-    <div class="join-form">
-      <div class="field">
-        <label class="field-lbl">Game Code</label>
-        <input class="input mono" id="inp-code" placeholder="ABC123" maxlength="6" inputmode="text" autocomplete="off" autocapitalize="characters" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+  <div class="body-scroll">
+    <div class="section-label">Game Code</div>
+    <div class="card" style="margin-bottom:18px">
+      <div style="padding:10px 14px">
+        <input class="input mono" id="inp-code" placeholder="ABC 123" maxlength="6" inputmode="text" autocomplete="off" autocapitalize="characters" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
       </div>
-      <div class="field">
-        <label class="field-lbl">Your Name</label>
-        <input class="input" id="inp-name" placeholder="Navigator" maxlength="20" inputmode="text" autocomplete="nickname" autocapitalize="words">
-      </div>
-      <div class="field">
-        <label class="field-lbl">Role</label>
-        <div class="seg-ctrl" id="seg-role">
-          <button class="seg active" data-v="navigator" onclick="App.setRole('navigator')">🧭 Navigator</button>
-          <button class="seg" data-v="spectator" onclick="App.setRole('spectator')">👁 Spectator</button>
-        </div>
-      </div>
-      <div class="field hidden" id="team-pick-field">
-        <label class="field-lbl">Your Team</label>
-        <div class="team-pick">
-          <button class="team-btn team-red" id="team-btn-red" onclick="App.setTeam('red')">🔴 Red Team</button>
-          <button class="team-btn team-blue" id="team-btn-blue" onclick="App.setTeam('blue')">🔵 Blue Team</button>
-        </div>
-      </div>
-      <button class="btn-primary btn-lg btn-full" onclick="haptic('medium');App.joinGame()">Join →</button>
-      <div class="err-msg hidden" id="join-err"></div>
     </div>
-  </div>
+    <div class="section-label">Your Name</div>
+    <div class="card" style="margin-bottom:18px">
+      <div style="padding:10px 14px">
+        <input class="input" id="inp-name" placeholder="Your name" maxlength="20" inputmode="text" autocomplete="nickname" autocapitalize="words">
+      </div>
+    </div>
+    <div class="section-label">Role</div>
+    <div class="seg-ctrl" id="seg-role" style="margin-bottom:18px">
+      <button class="seg active" data-v="navigator" onclick="App.setRole('navigator')">🧭 Navigator</button>
+      <button class="seg" data-v="spectator" onclick="App.setRole('spectator')">👁 Spectator</button>
+    </div>
+    <div class="hidden" id="team-pick-field">
+      <div class="section-label">Your Team</div>
+      <div class="team-pick" style="margin-bottom:18px">
+        <button class="team-btn team-red" id="team-btn-red" onclick="App.setTeam('red')">🔴 Red Team</button>
+        <button class="team-btn team-blue" id="team-btn-blue" onclick="App.setTeam('blue')">🔵 Blue Team</button>
+      </div>
+    </div>
+    <button class="btn-primary btn-lg btn-full" onclick="haptic('medium');App.joinGame()">Join →</button>
+    <div class="err-msg hidden" id="join-err" style="margin-top:10px"></div>
   </div>
 </div>
 
 <!-- ══ NAV WAIT ══ -->
+
 <div class="sc" id="sc-nwait">
   <div class="top-bar">
     <button class="back-btn" onclick="haptic('light');App.leaveGame()">
@@ -835,6 +883,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ══ NAV ACTIVE ══ -->
+
 <div class="sc nav-active-sc" id="sc-nactive">
   <div class="game-bar">
     <div class="game-bar-left">
@@ -864,7 +913,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
   </div>
   <div class="na-center" id="na-center">
-    <!-- Standard distance card -->
+    <!-- Standard distance display -->
     <div class="na-dist-wrapper" id="na-dist-wrapper">
       <div class="na-dist-row">
         <div class="na-dist" id="na-dist">—</div>
@@ -873,30 +922,28 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="na-ripples" id="na-ripples"></div>
       <div class="na-eyebrow" id="na-eyebrow"></div>
     </div>
-    <!-- Hot/Cold compass orb — shown only in hotcold mode -->
+    <!-- Hot/Cold pulse — overlays na-center, pure distance feedback, no bearing -->
     <div class="hc-screen hidden" id="hc-screen">
-      <div class="hc-orb-wrap">
-        <div class="hc-orb-glow" id="hc-glow"></div>
-        <div class="hc-orb" id="hc-orb">
-          <span class="hc-arrow" id="hc-arrow">↑</span>
-        </div>
+      <div class="hc-ring-wrap">
+        <div class="hc-ring" id="hc-ring1"></div>
+        <div class="hc-ring" id="hc-ring2"></div>
+        <div class="hc-ring" id="hc-ring3"></div>
+        <div class="hc-core" id="hc-core"></div>
       </div>
-      <div class="hc-label" id="hc-label">Calibrating…</div>
-      <div class="hc-angle" id="hc-angle"></div>
-      <div class="hc-sub">Face the direction you think the target is</div>
+      <div class="hc-word" id="hc-word">—</div>
     </div>
-    <button class="refresh-btn" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-      Refresh
+    <button class="refresh-link" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15M1 20v-6h6"/></svg>
+      refresh
     </button>
   </div>
   <div class="na-foot">
     <div class="na-upd" id="na-upd">Acquiring GPS…</div>
-    <div class="na-noise hidden" id="na-noise">🔒 Protected</div>
   </div>
 </div>
 
 <!-- ══ RESULTS ══ -->
+
 <div class="sc map-sc" id="sc-results">
   <div class="map-topbar" style="justify-content:center">
     <div class="map-pill green-pill">🏁 Route Revealed</div>
@@ -932,6 +979,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- ABORT SHEET -->
+
 <div class="action-sheet hidden" id="as-abort">
   <div class="as-box">
     <div class="as-title">Abort Game?</div>
@@ -946,6 +994,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div><!-- #app -->
 
 <!-- QR SHEET -->
+
 <div class="qr-sheet hidden" id="qr-sheet" onclick="haptic('light');App.hideQR()">
   <div class="qr-box" onclick="event.stopPropagation()">
     <div class="qr-title">Scan to Join</div>
@@ -957,6 +1006,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 </div>
 
 <!-- OVERLAYS -->
+
 <div class="overlay hidden" id="ov-cd">
   <div class="cd-wrap">
     <svg class="cd-svg" viewBox="0 0 160 160">
@@ -1004,10 +1054,15 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div id="toast" class="toast hidden"></div>
 
 <!-- ══ SCRIPTS ══ -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
 'use strict';
 /* ═══════════════════════════════════════════════════════════
@@ -1087,7 +1142,9 @@ const S = {
   mapOrientMode:{host:false,spec:false}, _compassHeading:0, _orientListener:null,
   _compassTarget:null, _compassFrame:null, _compassMap:null,
   /* hot/cold */
-  _hcListener:null, _hcPermitted:false,
+  _hcHistory:[], _hcHapticTs:0, _pwaPrompt:null,
+  /* whisper */
+  _whisperShowing:false, _whisperHideTimeout:null,
   /* pwa */
   _pwaPrompt:null,
   /* anti-flash */
@@ -1173,15 +1230,26 @@ function startClientTimer(){
 }
 
 /* ── NAVIGATION ──────────────────────────────────────────── */
+const PEER_SCREENS=new Set(['hactive','spectator','nactive']);
 function goScreen(id){
-  document.querySelectorAll('.sc').forEach(s=>s.classList.remove('active'));
+  const fromId=S.screen;
+  const dissolve=PEER_SCREENS.has(id)&&PEER_SCREENS.has(fromId);
+  document.querySelectorAll('.sc').forEach(s=>{
+    s.classList.remove('active');
+    if(dissolve) s.classList.add('dissolve'); else s.classList.remove('dissolve');
+  });
   const sc=el('sc-'+id);
-  if(sc) requestAnimationFrame(()=>sc.classList.add('active'));
+  if(sc){
+    if(dissolve) sc.classList.add('dissolve'); else sc.classList.remove('dissolve');
+    requestAnimationFrame(()=>sc.classList.add('active'));
+  }
   S.screen=id;
   if(id==='map')       setTimeout(initLeafMap,80);
   if(id==='hactive')   setTimeout(initHostMap,80);
   if(id==='spectator'){ setTimeout(initSpecMap,80); updateSpecLeaveBtn(); }
   if(id==='results')   setTimeout(initResMap,80);
+  // Close overflow on any nav
+  el('overflow-menu')?.classList.add('hidden');
 }
 function toggleTheme(){
   const html=document.documentElement;
@@ -1214,6 +1282,8 @@ function resetGameState(){
   S.gameListener=null;S.playersListener=null;S.timerIv=null;
   if(S.elimIv){clearInterval(S.elimIv);S.elimIv=null;}
   S.latestPlayers={};S.lastProximityBeep=0;
+  S._hcHistory=[];S._hcHapticTs=0;
+  S._whisperShowing=false;clearTimeout(S._whisperHideTimeout);S._whisperHideTimeout=null;
   S._lastLobbyHtml=null;S._lastNWaitHtml=null;
   S.lastAccuracy=null;
   stopWakeLock();
@@ -1261,14 +1331,18 @@ function setElimMode(on){
 }
 function setBlindStart(on){
   S.blindStart=!!on;
+  const sw=el('sw-blind');if(sw)sw.checked=!!on;
+  // Legacy seg-ctrl support
   document.querySelectorAll('#seg-blind .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
 }
 function setBlindFinish(on){
   S.blindFinish=!!on;
+  const sw=el('sw-blindfinish');if(sw)sw.checked=!!on;
   document.querySelectorAll('#seg-blindfinish .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
 }
 function setExcludeHost(on){
   S.excludeHost=!!on;
+  const sw=el('sw-excludehost');if(sw)sw.checked=!!on;
   document.querySelectorAll('#seg-excludehost .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
 }
 function updateGoMapBtn(){
@@ -1382,7 +1456,7 @@ async function createGameFB(){
 }
 
 async function goMap(){
-  const hostName=(el('host-name')?.value||'Host').trim()||'Host';
+  const hostName=(el('host-name')?.value||'').trim()||(localStorage.getItem('ll_nickname')||'Host');
   S.myName=hostName;
   localStorage.setItem('ll_nickname',hostName);
   const btn=el('btn-go-map');btn.disabled=true;btn.textContent='Creating…';
@@ -1411,7 +1485,11 @@ async function confirmTarget(){
 
 /* ── HOST LOBBY ──────────────────────────────────────────── */
 function renderHLobby(){
-  set('hl-code',S.gameCode||'——');
+  const code=S.gameCode||'——';
+  const codeEl=el('hl-code');
+  if(codeEl&&code.length===6){
+    codeEl.innerHTML=`${code.slice(0,3)}<span class="code-sep">·</span>${code.slice(3)}`;
+  } else if(codeEl){ codeEl.textContent=code; }
   set('hl-tlim',fmtTime(S.timeLimitSec));
   set('hl-diff',DIFF.labels[S.diff]);
   set('hl-radius',S.arrRadius+'m');
@@ -1882,13 +1960,19 @@ function handleGPSPos(pos){
   }
   S.prevLat=lat;S.prevLon=lon;S.prevGPSTime=now;S.myLat=lat;S.myLon=lon;S.lastAccuracy=acc;
   const t=S.myTrail,last=t[t.length-1];
-  if(!last||hav(last[0],last[1],lat,lon)>5)t.push([lat,lon]);
+  if(!last||hav(last[0],last[1],lat,lon)>5) t.push([lat,lon]);
+  // GPS pill
   const pill=el('na-gps');
   if(pill){
     if(acc>50){pill.className='na-gps lost';set('na-gps-txt','~'+Math.round(acc)+'m');}
     else{pill.className='na-gps live';set('na-gps-txt','Live');}
   }
-  spawnRipple(acc>50?'warn':'auto');
+  // Ripple: only spawn when showing the number (not in HC/whisper modes)
+  // and only when we've actually moved (not every 1s backup poll)
+  const moved=!last||hav(last[0],last[1],lat,lon)>8;
+  if(moved&&S.gameMode!=='hotcold'&&!S.whisperMode){
+    spawnRipple(acc>50?'warn':'auto');
+  }
   sendPosUpdateQueued(false);
 }
 function handleGPSErr(err){
@@ -1957,19 +2041,18 @@ async function manualRefresh(){
 /* ── NAV DISPLAY ─────────────────────────────────────────── */
 function updateNavDisplay(distM){
   if(distM==null)return;S.lastDist=distM;
-  const nd=el('na-dist'),nu=el('na-unit'),nw=el('na-dist-wrapper');
+  const nd=el('na-dist'),nu=el('na-unit'),nc=el('na-center');
   if(nd){
     nd.textContent=fmtDist(distM);nd.classList.remove('updating');
     void nd.offsetWidth;nd.classList.add('updating');
   }
-  if(nw){
-    nw.classList.remove('prox-close','prox-very-close');
-    if(distM<200)nw.classList.add('prox-very-close');
-    else if(distM<1000)nw.classList.add('prox-close');
+  if(nc){
+    nc.classList.remove('prox-close','prox-very-close');
+    if(distM<200)nc.classList.add('prox-very-close');
+    else if(distM<1000)nc.classList.add('prox-close');
   }
-  if(nu)nu.textContent=distUnit(distM);
+  if(nu) nu.textContent=distUnit(distM);
   set('na-upd','Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
-  show('na-noise');
 }
 
 function spawnRipple(type='auto'){
@@ -2055,11 +2138,11 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(navigator.geolocation&&window.isSecureContext){
     navigator.geolocation.getCurrentPosition(p=>{S.myLat=p.coords.latitude;S.myLon=p.coords.longitude;},()=>{},{enableHighAccuracy:false,timeout:8000,maximumAge:60000});
   }
-  // Nickname persistence
+  // Nickname persistence — pre-fill both inputs if saved
   const savedName=localStorage.getItem('ll_nickname');
   if(savedName){
-    const hn=el('host-name');if(hn){hn.value=savedName;}
-    const jn=el('inp-name');if(jn){jn.value=savedName;}
+    const hn=el('host-name');if(hn&&!hn.value)hn.value=savedName;
+    const jn=el('inp-name');if(jn&&!jn.value)jn.value=savedName;
   }
   startOfflineDetection();
   checkBattery();
@@ -2160,28 +2243,32 @@ function toggleSound(){
 function updateBlindDisplay(distM){
   const nd=el('na-dist'),nu=el('na-unit'),eyebrow=el('na-eyebrow');
   if(!S.blindStart||S.blindUnlocked){
-    if(eyebrow)eyebrow.textContent='';
+    if(eyebrow) eyebrow.textContent='';
     nd?.classList.remove('blind-num');
     updateNavDisplay(distM);
     return;
   }
-  if(S.myTrail.length>=2){
-    const first=S.myTrail[0],last=S.myTrail[S.myTrail.length-1];
-    S.blindStartDist=hav(first[0],first[1],last[0],last[1]);
-    if(S.blindStartDist>=500){
-      S.blindUnlocked=true;
-      playTone(523,0.1,0.15);
-      setTimeout(()=>playTone(659,0.15,0.18),100);
-      toast('Blind start lifted',2500);
-      if(eyebrow)eyebrow.textContent='';
-      updateNavDisplay(distM);
-      return;
-    }
+  // Compute cumulative distance walked along the trail (sum of segments)
+  const trail=S.myTrail;
+  let walked=0;
+  for(let i=1;i<trail.length;i++){
+    walked+=hav(trail[i-1][0],trail[i-1][1],trail[i][0],trail[i][1]);
   }
-  const remaining=Math.max(0,500-Math.round(S.blindStartDist));
-  if(eyebrow)eyebrow.textContent=`MOVE ${remaining}m TO UNLOCK`;
+  S.blindStartDist=walked;
+  if(walked>=500){
+    S.blindUnlocked=true;
+    playTone(523,0.1,0.15);setTimeout(()=>playTone(659,0.15,0.18),100);
+    haptic('medium');
+    toast('Distance unlocked — you\'ve moved 500m',2500);
+    if(eyebrow) eyebrow.textContent='';
+    nd?.classList.remove('blind-num');
+    updateNavDisplay(distM);
+    return;
+  }
+  const remaining=Math.max(0,Math.ceil(500-walked));
+  if(eyebrow) eyebrow.textContent=`Walk ${remaining}m to unlock`;
   if(nd){nd.textContent='—';nd.classList.add('blind-num');}
-  if(nu)nu.textContent='';
+  if(nu) nu.textContent='';
 }
 
 /* ── REPLAY ──────────────────────────────────────────────── */
@@ -2364,21 +2451,19 @@ function setGameMode(m){
   document.querySelectorAll('.mode-card').forEach(c=>c.classList.toggle('active',c.id==='mode-card-'+m));
   const warn=el('mode-warn'),warnTxt=el('mode-warn-txt');
   if(m==='whisper'){
-    warnTxt.textContent='Distance only reveals once per minute. Blind Start is disabled in Whisper mode.';
+    warnTxt.textContent='Distance reveals once per minute only.';
     warn.classList.remove('hidden');
     setBlindStart(false);
-    document.querySelectorAll('#seg-blind .seg').forEach(b=>{b.disabled=true;b.style.opacity='.4';});
   } else if(m==='hotcold'){
-    warnTxt.textContent='Hot & Cold uses your compass bearing — no distance shown. Requires device orientation permission.';
+    warnTxt.textContent='No distance shown — find the target by feel. Move and observe the pulse.';
     warn.classList.remove('hidden');
-    document.querySelectorAll('#seg-blind .seg').forEach(b=>{b.disabled=false;b.style.opacity='';});
   } else {
     warn.classList.add('hidden');
-    document.querySelectorAll('#seg-blind .seg').forEach(b=>{b.disabled=false;b.style.opacity='';});
   }
 }
 function setTeamsMode(on){
   S.teamsMode=!!on;
+  const sw=el('sw-teams');if(sw)sw.checked=!!on;
   document.querySelectorAll('#seg-teams .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
 }
 function setTeam(t){
@@ -2503,29 +2588,77 @@ async function checkBattery(){
 /* ── GPS ACCURACY RING ───────────────────────────────────── */
 /* ── WHISPER MODE TIMER ──────────────────────────────────── */
 function startWhisperTimer(){
-  if(!S.whisperMode)return;
+  if(!S.whisperMode) return;
   clearInterval(S.whisperIv);
+  // Show dashes immediately — number is hidden until first reveal
+  const nd=el('na-dist'),nu=el('na-unit'),eyebrow=el('na-eyebrow');
+  if(nd){nd.textContent='—';nd.classList.remove('blind-num');}
+  if(nu) nu.textContent='';
+  if(eyebrow) eyebrow.textContent='';
   S.whisperNext=Date.now()+60000;
-  const cd=el('na-whisper-cd');if(cd)cd.classList.remove('hidden');
+  S._whisperShowing=false; // true when number is currently visible
+  S._whisperHideTimeout=null;
+  const cd=el('na-whisper-cd');if(cd) cd.classList.remove('hidden');
+
   S.whisperIv=setInterval(()=>{
     const rem=Math.max(0,Math.ceil((S.whisperNext-Date.now())/1000));
-    if(cd) cd.textContent='👂 '+fmtTime(rem);
-    if(rem<=0){
+    if(cd){
+      if(rem>0) cd.textContent='👁 '+fmtTime(rem);
+    }
+    if(rem<=0 && !S._whisperShowing){
+      S._whisperShowing=true;
       S.whisperNext=Date.now()+60000;
-      // Force a distance reveal
+      // Dramatic reveal
       if(S.myLat&&S.targetLat){
         const dist=hav(S.myLat,S.myLon,S.targetLat,S.targetLon);
         const noised=noiseDist(dist,S.noiseSeed);
-        updateNavDisplay(noised);
-        spawnRipple('auto');
-        playTone(440,0.06,0.08);
-        haptic('light');
+        whisperReveal(noised);
       }
+      // Hide the number again after 8 seconds
+      clearTimeout(S._whisperHideTimeout);
+      S._whisperHideTimeout=setTimeout(()=>{
+        S._whisperShowing=false;
+        whisperHide();
+        if(cd) cd.textContent='👁 '+fmtTime(60);
+      },8000);
     }
   },500);
 }
+
+function whisperReveal(distM){
+  const nd=el('na-dist'),nu=el('na-unit'),eyebrow=el('na-eyebrow');
+  if(nd){
+    nd.textContent=fmtDist(distM);
+    nd.classList.remove('blind-num','updating');
+    void nd.offsetWidth;
+    nd.classList.add('updating'); // flash animation
+  }
+  if(nu) nu.textContent=distUnit(distM);
+  if(eyebrow) eyebrow.textContent='Fades in 8s';
+  spawnRipple('auto');
+  playTone(659,0.10,0.15);setTimeout(()=>playTone(880,0.14,0.18),120);
+  haptic('medium');
+  // Proximity tint briefly
+  const nc=el('na-center');
+  if(nc){
+    nc.classList.remove('prox-close','prox-very-close');
+    if(distM<200) nc.classList.add('prox-very-close');
+    else if(distM<1000) nc.classList.add('prox-close');
+    setTimeout(()=>nc.classList.remove('prox-close','prox-very-close'),8000);
+  }
+}
+
+function whisperHide(){
+  const nd=el('na-dist'),nu=el('na-unit'),eyebrow=el('na-eyebrow');
+  if(nd){nd.textContent='—';}
+  if(nu) nu.textContent='';
+  if(eyebrow) eyebrow.textContent='';
+}
+
 function stopWhisperTimer(){
   clearInterval(S.whisperIv);S.whisperIv=null;
+  clearTimeout(S._whisperHideTimeout);S._whisperHideTimeout=null;
+  S._whisperShowing=false;
   el('na-whisper-cd')?.classList.add('hidden');
 }
 
@@ -2610,83 +2743,88 @@ function startHotCold(){
   el('na-dist-wrapper')?.classList.add('hidden');
   el('hc-screen')?.classList.remove('hidden');
   el('refresh-btn')?.classList.add('hidden');
-
-  const request=()=>{
-    S._hcListener=(e)=>{
-      if(!S.targetLat||!S.myLat) return;
-      const heading=e.webkitCompassHeading!=null
-        ?e.webkitCompassHeading:(360-(e.alpha||0));
-      const targetBearing=bearingTo(S.myLat,S.myLon,S.targetLat,S.targetLon);
-      // angleDiff: 0=exactly facing target, 180=facing away
-      let diff=Math.abs(((heading-targetBearing)+540)%360-180);
-      updateHotColdOrb(diff,targetBearing-heading);
-    };
-    window.addEventListener('deviceorientation',S._hcListener,true);
-  };
-
-  if(typeof DeviceOrientationEvent!=='undefined'&&
-     typeof DeviceOrientationEvent.requestPermission==='function'){
-    DeviceOrientationEvent.requestPermission()
-      .then(s=>{ if(s==='granted') request(); else toast('Compass permission denied'); })
-      .catch(()=>toast('Compass not available'));
-  } else {
-    request();
-  }
+  // Init history with current dist if known
+  if(!S._hcHistory) S._hcHistory=[];
+  if(S.lastDist) S._hcHistory=[S.lastDist];
+  updateHotColdTrend();
 }
 
 function stopHotCold(){
-  if(S._hcListener){
-    window.removeEventListener('deviceorientation',S._hcListener,true);
-    S._hcListener=null;
-  }
   el('na-dist-wrapper')?.classList.remove('hidden');
   el('hc-screen')?.classList.add('hidden');
   el('refresh-btn')?.classList.remove('hidden');
 }
 
-function updateHotColdOrb(angleDiff, rotationDeg){
-  // angleDiff 0=hot, 180=cold
-  const t=1-(angleDiff/180); // 1=hot, 0=cold
-  // Smooth colour interpolation: cold(blue) → cool(cyan) → warm(yellow) → hot(red)
-  const stops=[
-    [59,130,246],   // cold  blue   t=0
-    [34,211,238],   // cool  cyan   t=0.33
-    [251,191,36],   // warm  amber  t=0.66
-    [239,68,68],    // hot   red    t=1
-  ];
-  const lerpColor=(a,b,f)=>a.map((v,i)=>Math.round(v+(b[i]-v)*f));
-  let r,g,b2;
-  if(t<0.33){const f=t/0.33;[r,g,b2]=lerpColor(stops[0],stops[1],f);}
-  else if(t<0.66){const f=(t-0.33)/0.33;[r,g,b2]=lerpColor(stops[1],stops[2],f);}
-  else{const f=(t-0.66)/0.34;[r,g,b2]=lerpColor(stops[2],stops[3],f);}
-  const col=`rgb(${r},${g},${b2})`;
-  const alpha=0.18+t*0.55;
-  const glow=`rgba(${r},${g},${b2},${alpha})`;
-  const shadow=`0 0 ${20+t*60}px ${glow}, 0 0 ${40+t*100}px rgba(${r},${g},${b2},${alpha*0.5})`;
+function updateHotColdTrend(){
+  const hist=S._hcHistory||[];
+  if(hist.length<2){
+    // Not enough data yet — show neutral pulsing
+    _applyHCState('neutral',2.5);
+    return;
+  }
+  // Compare the oldest half to the newest half of the window
+  // This smooths noise while remaining responsive
+  const mid=Math.floor(hist.length/2);
+  const oldAvg=hist.slice(0,mid).reduce((a,b)=>a+b,0)/mid;
+  const newAvg=hist.slice(mid).reduce((a,b)=>a+b,0)/(hist.length-mid);
+  const delta=oldAvg-newAvg; // positive = getting closer = hot
 
-  const orb=el('hc-orb'),glowEl=el('hc-glow'),arrow=el('hc-arrow');
-  const labelEl=el('hc-label'),angleEl=el('hc-angle');
-  if(orb){
-    orb.style.background=`radial-gradient(circle at 40% 35%, rgba(255,255,255,0.25), ${col} 60%)`;
-    orb.style.boxShadow=shadow;
-  }
-  if(glowEl){ glowEl.style.background=col; glowEl.style.opacity=String(alpha); }
-  if(arrow){
-    arrow.style.transform=`rotate(${rotationDeg}deg)`;
-    arrow.style.opacity=String(0.5+t*0.5);
-    // Arrow colour matches orb
-    arrow.style.filter=`drop-shadow(0 0 ${4+t*8}px ${col})`;
-  }
-  const hot=angleDiff<30,warm=angleDiff<60,cool=angleDiff<90;
-  if(labelEl){
-    labelEl.textContent=hot?'🔥 HOT!':warm?'Warm':cool?'Cool':'❄️ Cold';
-    labelEl.style.color=col;
-  }
-  if(angleEl) angleEl.textContent=Math.round(angleDiff)+'° off';
+  // Normalise: ±200m delta maps to full hot/cold range
+  const t=Math.max(-1,Math.min(1,delta/200)); // -1=cold, 0=neutral, +1=hot
 
-  // Periodic haptic pulse when very hot
-  if(hot&&!S._hcHapticTs||Date.now()-(S._hcHapticTs||0)>800){
-    if(hot){ haptic('light'); S._hcHapticTs=Date.now(); }
+  // Pulse duration: hot=0.7s, neutral=2.5s, cold=5s
+  const dur=2.5-t*1.8; // maps [-1..1] → [4.3s..0.7s]
+
+  _applyHCState(t,dur);
+}
+
+function _applyHCState(t,dur){
+  // t: -1=cold, 0=neutral, +1=hot (or 'neutral' string for init)
+  const isNeutral=(t==='neutral');
+  const tNum=isNeutral?0:t;
+
+  // Clamp to [0,1] for color (0=cold, 1=hot)
+  const c=(tNum+1)/2; // 0=cold, 1=hot
+
+  // Color gradient cold→neutral→hot
+  const lerpC=(a,b,f)=>a.map((v,i)=>Math.round(v+(b[i]-v)*f));
+  const cold=[59,130,246],neutral=[120,120,130],hot=[239,68,68];
+  let rgb;
+  if(c<0.5) rgb=lerpC(cold,neutral,c*2);
+  else rgb=lerpC(neutral,hot,(c-0.5)*2);
+  const [r,g,b]=rgb;
+  const col=`rgb(${r},${g},${b})`;
+  const rgbA=(a)=>`rgba(${r},${g},${b},${a})`;
+
+  // Apply to DOM
+  const screen=el('hc-screen');
+  if(screen){
+    screen.style.setProperty('--hc-dur',dur+'s');
+    screen.style.background=isNeutral?''
+      :`radial-gradient(ellipse at 50% 50%, ${rgbA(0.06+c*0.08)} 0%, transparent 70%)`;
+  }
+  [el('hc-ring1'),el('hc-ring2'),el('hc-ring3')].forEach(ring=>{
+    if(ring) ring.style.color=col;
+  });
+  const core=el('hc-core');
+  if(core){
+    core.style.background=`radial-gradient(circle at 40% 35%, ${rgbA(0.2)}, ${rgbA(0.06)})`;
+    core.style.boxShadow=`0 0 ${16+Math.round(c*36)}px ${rgbA(0.22)}`;
+    core.style.border=`1.5px solid ${rgbA(0.2)}`;
+  }
+  // Word label
+  const word=el('hc-word');
+  if(word){
+    if(isNeutral||Math.abs(tNum)<0.08){ word.textContent='—'; word.style.color=''; }
+    else if(tNum>0.6){ word.textContent='Hotter'; word.style.color=col; }
+    else if(tNum>0.15){ word.textContent='Warmer'; word.style.color=col; }
+    else if(tNum<-0.6){ word.textContent='Colder'; word.style.color=col; }
+    else if(tNum<-0.15){ word.textContent='Cooler'; word.style.color=col; }
+    else { word.textContent='Same'; word.style.color=''; }
+  }
+  // Haptic on strong hot signal
+  if(tNum>0.7&&Date.now()-(S._hcHapticTs||0)>Math.max(600,dur*600)){
+    haptic('light'); S._hcHapticTs=Date.now();
   }
 }
 
@@ -2735,19 +2873,38 @@ async function sendPosUpdateQueued(manual=false){
   if(manual) spawnRipple(S.myLat?'success':'error');
   const upd={lat:S.myLat,lon:S.myLon,speedKmh:S.speedKmh,lastSeen:SV.TIMESTAMP};
   if(!S.startDist){upd.startDist=dist;S.startDist=dist;}
+
+  // Track distance history for Hot & Cold trend (20 readings ≈ 20s window)
+  if(!S._hcHistory) S._hcHistory=[];
+  S._hcHistory.push(dist);
+  if(S._hcHistory.length>20) S._hcHistory.shift();
+
   // Attempt Firebase write — buffer on fail
   try{
     await pRef().update(upd);
-    // Flush any queued positions
     if(S._offlineQueue.length){
       S._offlineQueue.forEach(q=>{ try{ pRef().update({lat:q.lat,lon:q.lon,speedKmh:0,lastSeen:q.ts}); }catch(_){} });
       S._offlineQueue=[];
     }
-    updateNavDisplay(noised);
   } catch(_){
     if(S._offlineQueue.length<3) S._offlineQueue.push({lat:S.myLat,lon:S.myLon,ts:SV.TIMESTAMP});
   }
-  // Arrival check
+
+  // ── Mode-aware display ─────────────────────────────────────
+  if(S.gameMode==='hotcold'){
+    // HC: update trend analysis, never show number
+    updateHotColdTrend();
+  } else if(S.whisperMode){
+    // Whisper: distance is hidden until timer fires — do nothing here
+    // (startWhisperTimer handles reveals)
+  } else if(S.blindStart&&!S.blindUnlocked){
+    updateBlindDisplay(noised);
+  } else {
+    updateNavDisplay(noised);
+    if(!manual) playProximitySound(dist);
+  }
+
+  // Arrival check (all modes)
   if(dist<=S.arrRadius&&!S.arrived&&!S.eliminated){
     S.arrived=true;
     const elapsed=S.startedAt?Math.round((Date.now()-S.startedAt)/1000):0;
@@ -2755,7 +2912,6 @@ async function sendPosUpdateQueued(manual=false){
     await pRef().update({arrived:true,arrSec:elapsed});
     triggerArrival(elapsed,S.startDist);
     playArrivalSound();haptic('heavy');
-    // Teams: notify team
     if(S.teamsMode&&S.myTeam) toast(`${S.myTeam==='red'?'🔴':'🔵'} Team arrived!`,3000);
   }
 }
@@ -2897,10 +3053,33 @@ async function shareResult(){
   }catch(e){ toast('Could not generate share card'); }
 }
 
+/* ── ADVANCED OPTIONS TOGGLE ─────────────────────────────── */
+function toggleAdvanced(){
+  const toggle=el('adv-toggle');
+  const section=el('adv-section');
+  if(!toggle||!section)return;
+  const open=section.classList.toggle('open');
+  toggle.classList.toggle('open',open);
+  haptic('light');
+}
+
+/* ── OVERFLOW MENU ───────────────────────────────────────── */
+function toggleOverflow(){
+  const menu=el('overflow-menu');
+  if(!menu)return;
+  menu.classList.toggle('hidden');
+}
+// Close overflow on outside tap
+document.addEventListener('click',e=>{
+  const ob=el('overflow-btn'),om=el('overflow-menu');
+  if(!ob||!om)return;
+  if(!ob.contains(e.target)&&!om.contains(e.target)) om.classList.add('hidden');
+},true);
+
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
-  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,updateGoMapBtn,upSetup,
+  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,updateGoMapBtn,upSetup,toggleAdvanced,toggleOverflow,
   goMap,smartPick,confirmTarget,
   copyLink,copyCodeTap,showQR,hideQR,lockStart,toggleMyView,goHostView,leaveOrHostView,abortGame,confirmAbort,cancelAbort,
   joinGame,leaveGame,
@@ -2914,5 +3093,6 @@ const App={
 };
 const Nav={go:goScreen};
 </script>
+
 </body>
 </html>
