@@ -75,13 +75,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .section-label{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--t3);padding-left:4px;margin-bottom:6px}
 .seg-ctrl{display:flex;background:var(--surf2);border-radius:var(--r8);padding:2px;border:1px solid var(--border2);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
 .seg-ctrl>*+*{margin-left:2px}
-.seg{flex:1;padding:8px 10px;min-height:44px;border-radius:7px;border:none;background:none;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .14s;-webkit-tap-highlight-color:transparent}
+.seg{flex:1;padding:8px 10px;min-height:44px;border-radius:7px;border:none;background:none;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .14s;-webkit-tap-highlight-color:transparent;text-align:center}
 .seg:active{opacity:.6}
 .seg.active{background:var(--surf1);color:var(--t1);box-shadow:var(--sh-sm)}
 [data-theme="dark"] .seg.active{background:rgba(88,88,92,.65)}
 .mini-seg{display:flex;flex-wrap:wrap}
 .mini-seg>*+*{margin-left:4px}
-.mseg{padding:11px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surf2);font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .13s;min-height:44px;display:inline-flex;align-items:center;-webkit-tap-highlight-color:transparent}
+.mseg{padding:11px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surf2);font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .13s;min-height:44px;display:inline-flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
 .mseg:active{transform:scale(.95);opacity:.8}
 .mseg.active{background:var(--blue);color:white;border-color:var(--blue)}
 .card{background:var(--surf1);border:1px solid var(--border2);border-radius:var(--r12);box-shadow:var(--sh-sm);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);overflow:hidden}
@@ -120,7 +120,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .btn-destruct:hover{background:rgba(255,59,48,.2)}
 .btn-destruct:active{transform:scale(.95);opacity:.85}
 .btn-destruct.sm{font-size:12px;padding:5px 12px;min-height:44px}
-.btn-text{background:none;border:none;color:var(--blue);font-family:var(--font);font-size:14px;cursor:pointer;padding:10px 6px;min-height:44px;display:inline-flex;align-items:center;transition:opacity .14s;-webkit-tap-highlight-color:transparent}
+.btn-text{background:none;border:none;color:var(--blue);font-family:var(--font);font-size:14px;cursor:pointer;padding:10px 6px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;transition:opacity .14s;-webkit-tap-highlight-color:transparent}
 .btn-text:active{opacity:.5}
 .btn-ico{width:15px;height:15px;flex-shrink:0}
 .badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
@@ -148,7 +148,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .map-back-btn svg{width:17px;height:17px}
 .map-pill{font-size:12px;font-weight:500;color:var(--t2);background:var(--surf2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);transition:background .2s,border-color .2s,color .2s}
 .green-pill{background:rgba(52,199,89,.12);color:var(--green);border-color:rgba(52,199,89,.25)}
-.smart-btn{padding:6px 13px;border-radius:20px;border:1px solid rgba(191,90,242,.35);background:rgba(191,90,242,.1);color:var(--purple);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .13s;flex-shrink:0}
+.smart-btn{padding:6px 13px;border-radius:20px;border:1px solid rgba(191,90,242,.35);background:rgba(191,90,242,.1);color:var(--purple);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .13s;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center}
 .smart-btn:hover{background:rgba(191,90,242,.18)}
 #leafmap,#hostmap,#resultmap,#specmap{flex:1;min-height:0}
 .map-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 20px;padding:12px 14px max(20px,calc(env(safe-area-inset-bottom,0px) + 14px));flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--border)}
@@ -183,16 +183,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .gbar-timer{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums;line-height:1}
 .gbar-timer.urgent{color:var(--red);animation:blink 1s ease infinite}
 .gbar-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);font-weight:700;margin-bottom:1px}
-.live-badge{display:flex;align-items:center;font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--red);flex-shrink:0}
-.live-badge>*+*{margin-left:5px}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--red);animation:live-pulse 1.4s ease-in-out infinite}
-@keyframes live-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,.5)}60%{box-shadow:0 0 0 5px rgba(255,59,48,0)}}
-.host-bar{display:flex;align-items:center;height:52px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border);padding:0 12px}
-.host-bar-end{display:flex;align-items:center;flex-shrink:0}
-.host-bar-end>*+*{margin-left:5px}
-.htb-lbl{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);font-weight:700}
-.htb-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--t1);font-variant-numeric:tabular-nums}
-.htb-val.urgent{color:var(--red);animation:blink 1s ease infinite}
 @keyframes blink{50%{opacity:.3}}
 .host-panel{background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-top:1px solid var(--border);padding:12px 14px 22px;padding:12px 14px max(22px,calc(env(safe-area-inset-bottom,0px) + 10px));flex-shrink:0}
 .hp-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -259,7 +249,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .na-ripples{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:1}
 @keyframes rip-out{0%{transform:translate(-50%,-50%) scale(0.25);opacity:1}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
 .na-eyebrow{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--t3);margin-top:10px;min-height:16px;text-align:center;position:relative;z-index:3}
-.refresh-btn{display:flex;align-items:center;margin-top:16px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r20);padding:11px 18px;min-height:44px;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-sm);-webkit-tap-highlight-color:transparent;position:relative;z-index:3}
+.refresh-btn{display:flex;align-items:center;justify-content:center;margin-top:16px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--r20);padding:11px 18px;min-height:44px;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);box-shadow:var(--sh-sm);-webkit-tap-highlight-color:transparent;position:relative;z-index:3}
 .refresh-btn>*+*{margin-left:6px}
 .rip{position:absolute;left:50%;top:50%;width:72px;height:72px;border-radius:50%;border:2.5px solid transparent;transform:translate(-50%,-50%);pointer-events:none;animation:rip-out 0.85s cubic-bezier(.2,.8,.35,1) forwards}
 .rip-auto{border-color:rgba(0,122,255,.55);box-shadow:0 0 10px rgba(0,122,255,.20)}
@@ -348,14 +338,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .radius-row{padding:6px 14px 14px}
 .ring-lbl{font-size:11px;font-weight:600;color:#007AFF;background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.25);padding:2px 7px;border-radius:10px;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)}
 [data-theme=dark] .ring-lbl{background:rgba(0,122,255,.2);border-color:rgba(0,122,255,.4)}
-.spec-badge{background:rgba(191,90,242,.12)!important;color:var(--purple)!important}
-.spec-badge .live-dot{background:var(--purple)!important;animation:spec-pulse 1.8s ease-in-out infinite}
-@keyframes spec-pulse{0%,100%{box-shadow:0 0 0 0 rgba(191,90,242,.4)}60%{box-shadow:0 0 0 5px rgba(191,90,242,0)}}
 /* Host-back button shown on navigator screen when user is host */
-.host-back-btn{padding:5px 11px;font-size:12px;font-weight:700;background:rgba(0,122,255,.1);border:1.5px solid rgba(0,122,255,.25);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap;line-height:1.3}
+.host-back-btn{padding:5px 11px;font-size:12px;font-weight:700;background:rgba(0,122,255,.1);border:1.5px solid rgba(0,122,255,.25);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap;line-height:1.3;display:inline-flex;align-items:center;justify-content:center}
 .host-back-btn:hover{background:rgba(0,122,255,.18)}
-.role-toggle-btn{padding:6px 10px;font-size:12px;font-weight:700;background:var(--surf2);border:1.5px solid var(--border);border-radius:var(--r8);color:var(--blue);cursor:pointer;font-family:var(--font);transition:all .14s;white-space:nowrap;-webkit-tap-highlight-color:transparent}
-.role-toggle-btn:active{opacity:.6;transform:scale(.95)}
 .gps-warn{display:flex;align-items:center;padding:10px 16px;background:rgba(255,59,48,.08);border-bottom:1px solid rgba(255,59,48,.18);flex-shrink:0}
 .gps-warn>*+*{margin-left:10px}
 .gps-warn.hidden{display:none!important}
@@ -533,7 +518,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 /* overflow menu removed — QR/Copy Link moved to host panel */
 .omenu-item.destruct{color:var(--red)}
 /* ── REFRESH demoted to a text link ─────────────────────── */
-.refresh-link{display:inline-flex;align-items:center;gap:5px;margin-top:20px;font-size:12px;color:var(--t3);cursor:pointer;transition:color .14s;background:none;border:none;font-family:var(--font);padding:6px;-webkit-tap-highlight-color:transparent;position:relative;z-index:3}
+.refresh-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;margin-top:20px;font-size:12px;color:var(--t3);cursor:pointer;transition:color .14s;background:none;border:none;font-family:var(--font);padding:6px;-webkit-tap-highlight-color:transparent;position:relative;z-index:3}
 .refresh-link:active{color:var(--blue)}
 .refresh-link svg{width:11px;height:11px;flex-shrink:0}
 .refresh-link.spinning svg{animation:spin .6s linear infinite}
@@ -554,18 +539,26 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .sc.dissolve{transform:none!important}
 /* ── SAILOR COMPASS ──────────────────────────────────────── */
 .sailor-screen{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10}
-.sailor-compass{position:relative;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.08)}
+.sailor-compass{position:relative;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.06);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.08),0 0 40px rgba(0,122,255,.1)}
+.sailor-compass::before{content:'';position:absolute;top:8px;right:8px;bottom:8px;left:8px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
 .sailor-ticks{position:absolute;top:0;right:0;bottom:0;left:0}
 .s-tick{position:absolute;font-size:11px;font-weight:700;color:rgba(255,255,255,.35);font-family:var(--mono);letter-spacing:1px}
 .s-n{top:10px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.55)}
 .s-e{right:12px;top:50%;transform:translateY(-50%)}
 .s-s{bottom:10px;left:50%;transform:translateX(-50%)}
 .s-w{left:12px;top:50%;transform:translateY(-50%)}
-.sailor-needle{position:relative;width:4px;height:120px;transform-origin:center center;transition:transform .15s ease-out;will-change:transform}
+.s-ne{top:18px;right:28px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-se{bottom:18px;right:28px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-sw{bottom:18px;left:28px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-nw{top:18px;left:28px;font-size:9px;color:rgba(255,255,255,.2)}
+.sailor-needle{position:relative;width:4px;height:120px;transform-origin:center center;transition:transform .2s cubic-bezier(.4,0,.2,1);will-change:transform}
+.sailor-needle.aligned{animation:sailor-pulse 1.5s ease-in-out infinite}
+@keyframes sailor-pulse{0%,100%{filter:drop-shadow(0 0 6px rgba(255,59,48,.4))}50%{filter:drop-shadow(0 0 12px rgba(255,59,48,.7))}}
 .needle-tip{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:52px solid #FF3B30;filter:drop-shadow(0 0 6px rgba(255,59,48,.4))}
 .needle-tail{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:48px solid rgba(255,255,255,.3)}
 .sailor-center-dot{position:absolute;width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.7);z-index:3;box-shadow:0 0 8px rgba(0,0,0,.3)}
-.sailor-hint{margin-top:24px;font-size:12px;color:var(--t3);letter-spacing:.5px;text-align:center}
+.sailor-distance{position:absolute;bottom:-40px;font-family:var(--mono);font-size:14px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:1px}
+.sailor-hint{margin-top:40px;font-size:12px;color:var(--t3);letter-spacing:.5px;text-align:center}
 </style>
 </head>
 <body>
@@ -716,6 +709,15 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
   </div>
 </div>
 
+<div class="section-label">Target Mode</div>
+<div class="card" style="margin-bottom:22px">
+  <div class="seg-ctrl" id="seg-mode" style="margin:0 14px 10px">
+    <button class="seg active" data-v="manual" onclick="App.setMode('manual')">📍 Manual</button>
+    <button class="seg" data-v="smart" onclick="App.setMode('smart')">✦ Smart</button>
+  </div>
+  <p class="mode-hint" id="mode-hint" style="font-size:12px;color:var(--t3);padding:4px 14px 4px;line-height:1.5">Tap the map to drop the target.</p>
+</div>
+
 <div class="adv-toggle" id="adv-toggle" onclick="App.toggleAdvanced()">
   <svg class="adv-toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
   Advanced Options
@@ -743,12 +745,6 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <p class="diff-text" id="diff-txt" style="padding:0 14px 12px;font-size:13px;color:var(--t2);line-height:1.5">Medium — 2× ideal drive time</p>
   </div>
-  <div class="section-label">Target Mode</div>
-  <div class="seg-ctrl" id="seg-mode" style="margin-bottom:6px">
-    <button class="seg active" data-v="manual" onclick="App.setMode('manual')">📍 Manual</button>
-    <button class="seg" data-v="smart" onclick="App.setMode('smart')">✦ Smart</button>
-  </div>
-  <p class="mode-hint" id="mode-hint" style="font-size:12px;color:var(--t3);padding:4px 4px 18px;line-height:1.5">Tap the map to drop the target.</p>
   <div class="section-label">Rules</div>
   <div class="card" style="margin-bottom:4px">
     <div class="setup-toggle-row">
@@ -995,7 +991,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
         <span id="na-pcount">—</span>
       </div>
       <span class="whisper-cd hidden" id="na-whisper-cd">👂 —:——</span>
-      <button class="host-back-btn hidden" id="btn-host-back" onclick="haptic('medium');App.goHostView()">📡</button>
+      <button class="toolbar-btn hidden" id="btn-host-back" onclick="haptic('medium');App.goHostView()" title="Switch to host view">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+      </button>
     </div>
     <div class="game-bar-center">
       <div class="gbar-lbl">Time Left</div>
@@ -1004,6 +1002,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="game-bar-right">
       <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
       <button class="toolbar-btn sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Sound">🔊</button>
+      <button class="toolbar-btn" id="compass-btn-nav" onclick="haptic('light');App.toggleMapOrientation('nav')" title="Compass orientation">🧭</button>
     </div>
   </div>
   <div class="offline-banner hidden" id="na-offline">⚡ Connection lost — reconnecting…</div>
@@ -1043,6 +1042,10 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
           <span class="s-tick s-e">E</span>
           <span class="s-tick s-s">S</span>
           <span class="s-tick s-w">W</span>
+          <span class="s-tick s-ne">NE</span>
+          <span class="s-tick s-se">SE</span>
+          <span class="s-tick s-sw">SW</span>
+          <span class="s-tick s-nw">NW</span>
         </div>
         <div class="sailor-needle" id="sailor-needle">
           <div class="needle-tip"></div>
@@ -1050,6 +1053,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
         </div>
         <div class="sailor-center-dot"></div>
       </div>
+      <div class="sailor-distance" id="sailor-distance">— km</div>
       <div class="sailor-hint" id="sailor-hint">Point your phone forward</div>
     </div>
     <button class="refresh-link" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
@@ -1548,32 +1552,72 @@ function placeTarget(lat,lon){
 /* ── SMART TARGET FINDER ─────────────────────────────────── */
 async function findSmartTarget(myLat,myLon,idealKm){
   const minKm=idealKm*0.82,maxKm=idealKm*1.12;
-  for(let a=0;a<5;a++){
-    const bear=Math.random()*360,rad=bear*Math.PI/180;
-    const cLat=myLat+(idealKm/111)*Math.cos(rad);
-    const cLon=myLon+(idealKm/(111*Math.cos(myLat*Math.PI/180)))*Math.sin(rad);
-    const q=`[out:json][timeout:14];(way[highway~"^(residential|service|unclassified|living_street)$"][access!~"^(private|no|customers|permit|military|restricted)$"][motor_vehicle!~"^(no|private)$"](around:1200,${cLat.toFixed(5)},${cLon.toFixed(5)});way[highway="tertiary"][access!~"^(private|no|customers|permit|military|restricted)$"](around:1200,${cLat.toFixed(5)},${cLon.toFixed(5)}););out geom 40;`;
-    try{
-      const ctrl=new AbortController();
-      const timer=setTimeout(()=>ctrl.abort(),12000);
-      const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),signal:ctrl.signal});
-      clearTimeout(timer);
-      if(!res.ok)continue;
-      const data=await res.json();
-      const ways=(data.elements||[]).filter(w=>{const t=w.tags||{};return!t.barrier&&(!t.access||!/private|no|customers|permit|military|restricted/i.test(t.access));});
-      if(!ways.length)continue;
-      const tp={service:0,living_street:1,residential:2,unclassified:3,tertiary:4};
-      ways.sort((a,b)=>{
-        var ta2=a.tags&&a.tags.highway?tp[a.tags.highway]:9;
-        var tb2=b.tags&&b.tags.highway?tp[b.tags.highway]:9;
-        return ta2-tb2;
-      });
-      const pool=[];
-      for(const w of ways.slice(0,6)){const g=w.geometry||[];if(!g.length)continue;pool.push({lat:g[g.length-1].lat,lon:g[g.length-1].lon,s:0});pool.push({lat:g[0].lat,lon:g[0].lon,s:1});if(g.length>2){const m=g[Math.floor(g.length/2)];pool.push({lat:m.lat,lon:m.lon,s:2});}}
-      const valid=pool.filter(n=>{const d=hav(myLat,myLon,n.lat,n.lon)/1000;return d>=minKm&&d<=maxKm;});
-      if(valid.length){valid.sort((a,b)=>a.s-b.s);return valid[0];}
-    }catch(_){clearTimeout(timer);}
+  const radii=[1200,1500,2000]; // Adaptive radius on failure
+  for(let radiusIdx=0;radiusIdx<radii.length;radiusIdx++){
+    const searchRadius=radii[radiusIdx];
+    for(let a=0;a<5;a++){
+      const bear=Math.random()*360,rad=bear*Math.PI/180;
+      const cLat=myLat+(idealKm/111)*Math.cos(rad);
+      const cLon=myLon+(idealKm/(111*Math.cos(myLat*Math.PI/180)))*Math.sin(rad);
+      // Improved access filter regex
+      const q=`[out:json][timeout:14];(way[highway~"^(living_street|residential|unclassified|tertiary|service)$"][access!~"^(private|no|customers|permit|military|restricted|destination|delivery)$"][motor_vehicle!~"^(no|private)$"](around:${searchRadius},${cLat.toFixed(5)},${cLon.toFixed(5)}););out geom 50;`;
+      try{
+        const ctrl=new AbortController();
+        const timer=setTimeout(()=>ctrl.abort(),12000);
+        const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),signal:ctrl.signal});
+        clearTimeout(timer);
+        if(!res.ok)continue;
+        const data=await res.json();
+        const ways=(data.elements||[]).filter(w=>{const t=w.tags||{};return!t.barrier&&(!t.access||!/private|no|customers|permit|military|restricted|destination|delivery/i.test(t.access));});
+        if(!ways.length)continue;
+        // Improved priority: living_street > residential > unclassified > tertiary > service
+        const tp={living_street:0,residential:1,unclassified:2,tertiary:3,service:4};
+        ways.sort((a,b)=>{
+          var ta2=a.tags&&a.tags.highway?tp[a.tags.highway]:9;
+          var tb2=b.tags&&b.tags.highway?tp[b.tags.highway]:9;
+          return ta2-tb2;
+        });
+        const pool=[];
+        for(const w of ways.slice(0,8)){const g=w.geometry||[];if(!g.length)continue;pool.push({lat:g[g.length-1].lat,lon:g[g.length-1].lon,s:0});pool.push({lat:g[0].lat,lon:g[0].lon,s:1});if(g.length>2){const m=g[Math.floor(g.length/2)];pool.push({lat:m.lat,lon:m.lon,s:2});}}
+        const valid=pool.filter(n=>{const d=hav(myLat,myLon,n.lat,n.lon)/1000;return d>=minKm&&d<=maxKm;});
+        if(valid.length){
+          // Randomize among top 10 candidates for variety
+          valid.sort((a,b)=>a.s-b.s);
+          const topCandidates=valid.slice(0,Math.min(10,valid.length));
+          return topCandidates[Math.floor(Math.random()*topCandidates.length)];
+        }
+      }catch(_){clearTimeout(timer);}
+    }
   }
+  // Final fallback: try to snap to nearest road with larger radius
+  try{
+    const bear=Math.random()*360,rad=bear*Math.PI/180;
+    const fallbackLat=myLat+(idealKm/111)*Math.cos(rad);
+    const fallbackLon=myLon+(idealKm/(111*Math.cos(myLat*Math.PI/180)))*Math.sin(rad);
+    const q=`[out:json][timeout:10];way[highway~"^(living_street|residential|unclassified|tertiary|service)$"](around:2000,${fallbackLat.toFixed(5)},${fallbackLon.toFixed(5)});out geom;`;
+    const ctrl=new AbortController();
+    const timer=setTimeout(()=>ctrl.abort(),10000);
+    const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),signal:ctrl.signal});
+    clearTimeout(timer);
+    if(res.ok){
+      const data=await res.json();
+      const ways=data.elements||[];
+      if(ways.length){
+        // Find closest point on any way to ideal distance
+        let bestPoint=null,bestDistDiff=Infinity;
+        for(const w of ways){
+          const g=w.geometry||[];
+          for(const pt of g){
+            const d=hav(myLat,myLon,pt.lat,pt.lon)/1000;
+            const diff=Math.abs(d-idealKm);
+            if(diff<bestDistDiff){bestDistDiff=diff;bestPoint={lat:pt.lat,lon:pt.lon};}
+          }
+        }
+        if(bestPoint&&bestDistDiff<maxKm) return bestPoint;
+      }
+    }
+  }catch(_){}
+  // Ultimate fallback: random point on ideal circle
   const bear=Math.random()*360,r=bear*Math.PI/180;
   return{lat:myLat+(idealKm/111)*Math.cos(r),lon:myLon+(idealKm/(111*Math.cos(myLat*Math.PI/180)))*Math.sin(r)};
 }
@@ -1642,16 +1686,28 @@ async function confirmTarget(){
   if(!S.targetLat){toast('Place a target first');return;}
   const btn=el('btn-confirm');if(btn){btn.disabled=true;btn.textContent='Saving…';}
   if(S.gameMode==='multi'){
-    // Generate 2 more targets at different bearings and distances from first
+    // Generate 2 more targets - use smart finding if in smart mode
     var targets=[{lat:S.targetLat,lon:S.targetLon}];
     var baseDist=S.startDist||idealRangeM()/1000;
-    for(var ti=1;ti<3;ti++){
-      var bear=(ti*120)*Math.PI/180; // 120° apart
-      var distKm=baseDist*(0.6+ti*0.4)/1000;
-      targets.push({
-        lat:S.targetLat+(distKm/111)*Math.cos(bear),
-        lon:S.targetLon+(distKm/(111*Math.cos(S.targetLat*Math.PI/180)))*Math.sin(bear)
-      });
+    if(S.mode==='smart'){
+      // Use findSmartTarget for road-snapped additional targets
+      for(var ti=1;ti<3;ti++){
+        var bear=(ti*120)*Math.PI/180; // 120° apart from first target
+        var offsetLat=S.targetLat+(baseDist*0.3/111)*Math.cos(bear);
+        var offsetLon=S.targetLon+(baseDist*0.3/(111*Math.cos(S.targetLat*Math.PI/180)))*Math.sin(bear);
+        var picked=await findSmartTarget(offsetLat,offsetLon,baseDist*(0.6+ti*0.4));
+        targets.push({lat:picked.lat,lon:picked.lon});
+      }
+    } else {
+      // Manual mode: generate at different bearings
+      for(var ti=1;ti<3;ti++){
+        var bear=(ti*120)*Math.PI/180; // 120° apart
+        var distKm=baseDist*(0.6+ti*0.4)/1000;
+        targets.push({
+          lat:S.targetLat+(distKm/111)*Math.cos(bear),
+          lon:S.targetLon+(distKm/(111*Math.cos(S.targetLat*Math.PI/180)))*Math.sin(bear)
+        });
+      }
     }
     S.multiTargets=targets;S.multiCurrent=0;
     await gRef().update({targetLat:targets[0].lat,targetLon:targets[0].lon,multiTargets:targets});
@@ -1834,11 +1890,12 @@ function launchHostActive(){
 
 function toggleMyView(){
   const btn=el('btn-role-toggle');
+  const backBtn=el('btn-host-back');
   if(S.hostViewActive){
     S.hostViewActive=false;
     goScreen('nactive');
-    show('btn-host-back');
-    if(btn)btn.textContent='📡 Host';
+    if(backBtn)backBtn.classList.remove('hidden');
+    if(btn)btn.title='Switch to host view';
     startGPS();
   } else {
     goHostView();
@@ -1850,10 +1907,10 @@ function goHostView(){
   S.hostViewActive=true;
   goScreen('hactive');setTimeout(initHostMap,80);
   set('ha-code-badge',S.gameCode||'—');
-  hide('btn-host-back');
+  const backBtn=el('btn-host-back');if(backBtn)backBtn.classList.add('hidden');
   const lb=el('spec-leave-btn');if(lb)lb.textContent=S.isHost?'← Host':'Leave';
   const btn=el('btn-role-toggle');
-  if(btn)btn.textContent='🧭 My View';
+  if(btn)btn.title='Switch to navigator view';
 }
 
 function leaveOrHostView(){
@@ -3163,7 +3220,18 @@ function updateSailorNeedle(){
   const targetBearing=bearingTo(S.myLat,S.myLon,S.targetLat,S.targetLon);
   const needleAngle=targetBearing-S._sailorHeading;
   const needle=el('sailor-needle');
-  if(needle) needle.style.transform=`rotate(${needleAngle}deg)`;
+  if(needle){
+    needle.style.transform=`rotate(${needleAngle}deg)`;
+    // Add pulse animation when aligned (within 5 degrees)
+    const normalizedAngle=((needleAngle%360)+360)%360;
+    const isAligned=normalizedAngle<5||normalizedAngle>355;
+    needle.classList.toggle('aligned',isAligned);
+  }
+  // Update distance display
+  const dist=hav(S.myLat,S.myLon,S.targetLat,S.targetLon);
+  const distTxt=dist>=1000?(dist/1000).toFixed(1)+' km':Math.round(dist)+' m';
+  const distEl=el('sailor-distance');
+  if(distEl) distEl.textContent=distTxt;
 }
 /* ── DYNAMIC TARGET — MOVES EVERY 3 MINUTES ──────────────── */
 function startDynamicTarget(){
