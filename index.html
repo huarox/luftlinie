@@ -435,6 +435,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .rr-name{flex:1;font-size:13px;font-weight:600;color:var(--t1)}
 .rr-time{font-family:var(--mono);font-size:12px;color:var(--t2);white-space:nowrap}
 .rr-dist{font-size:11px;color:var(--t3);white-space:nowrap;margin-left:4px}
+.rr-team{font-size:11px;font-weight:800;width:18px;text-align:center;flex-shrink:0}
 /* ── SHARE BUTTON ────────────────────────────────────────── */
 .share-btn{display:flex;align-items:center;justify-content:center;width:100%;padding:11px;border-radius:var(--r10);border:none;background:linear-gradient(135deg,rgba(0,122,255,.15),rgba(191,90,242,.12));border:1px solid rgba(0,122,255,.2);color:var(--blue);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all .14s;margin-bottom:8px}
 .share-btn>*+*{margin-left:7px}
@@ -455,6 +456,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .spec-req-sub{font-size:12px;color:var(--t2);margin-top:1px}
 .spec-req-btns{display:flex;flex-shrink:0}
 .spec-req-btns>*+*{margin-left:6px}
+/* ── TEAM RESULT BANNER ──────────────────────────────────── */
+.team-result-banner{display:flex;align-items:center;gap:12px;padding:13px 14px;background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.2);border-radius:var(--r10);margin-bottom:12px}
+.team-result-banner.hidden{display:none!important}
+.team-result-ico{font-size:28px;flex-shrink:0}
+.team-result-info{flex:1}
+.team-result-title{font-size:16px;font-weight:700;color:var(--t1)}
+.team-result-sub{font-size:12px;color:var(--t2);margin-top:2px}
 /* ── ROUTE STATS ─────────────────────────────────────────── */
 .rs{flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r8);padding:8px 10px;text-align:center}
 .rs-v{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--t1)}
@@ -478,6 +486,21 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .team-btn.team-blue{background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)}
 .team-btn.team-blue.active{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 3px 12px rgba(0,122,255,.4)}
 .team-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+/* ── PERSISTENT STATS CARD ───────────────────────────────── */
+.stats-card{width:calc(100% - 32px);max-width:340px;margin-top:16px;background:var(--surf1);border:1px solid rgba(255,255,255,.7);border-radius:var(--r16);box-shadow:var(--sh-md);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);overflow:hidden}
+[data-theme="dark"] .stats-card{border-color:var(--border)}
+.stats-card.hidden{display:none!important}
+.stats-card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.stats-card-title{font-size:14px;font-weight:700;color:var(--t1)}
+.stats-card-chevron{font-size:12px;color:var(--t3);transition:transform .2s}
+.stats-card-chevron.open{transform:rotate(180deg)}
+.stats-card-body{display:flex;gap:6px;padding:0 12px 14px;flex-wrap:wrap}
+.stats-card-body.hidden{display:none!important}
+.sc-stat{flex:1;min-width:60px;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r8);padding:8px 6px;text-align:center}
+.sc-stat-v{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--t1);display:block}
+.sc-stat-l{font-size:10px;color:var(--t3);margin-top:2px;letter-spacing:.3px;font-weight:600;display:block}
+.stats-reset-btn{background:none;border:none;color:var(--t4);font-size:11px;cursor:pointer;font-family:var(--font);padding:4px 8px;margin-top:4px;width:100%;text-align:center}
+.stats-reset-btn:active{color:var(--red)}
 /* ── PWA INSTALL BANNER ──────────────────────────────────── */
 .pwa-banner{position:absolute;bottom:70px;bottom:max(70px,calc(env(safe-area-inset-bottom,0px)+60px));left:16px;right:16px;background:var(--surf1);border:1px solid var(--border);border-radius:var(--r12);padding:12px 14px;display:flex;align-items:center;box-shadow:var(--sh-md);backdrop-filter:var(--blur);animation:slide-up .4s cubic-bezier(.4,0,.2,1) both}
 .pwa-banner>*+*{margin-left:10px}
@@ -602,6 +625,21 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <button class="btn-text" onclick="toggleTheme()" id="theme-label">🌙 Dark Mode</button>
     </div>
   </div>
+  <!-- Persistent stats card on landing page -->
+  <div id="stats-card" class="stats-card hidden">
+    <div class="stats-card-header" onclick="toggleStatsCard()">
+      <span class="stats-card-title">Your Stats</span>
+      <span class="stats-card-chevron" id="stats-chevron">▾</span>
+    </div>
+    <div class="stats-card-body hidden" id="stats-card-body">
+      <div class="sc-stat"><span class="sc-stat-v" id="sc-games">0</span><span class="sc-stat-l">Games</span></div>
+      <div class="sc-stat"><span class="sc-stat-v" id="sc-wins">0</span><span class="sc-stat-l">Wins</span></div>
+      <div class="sc-stat"><span class="sc-stat-v" id="sc-best">—</span><span class="sc-stat-l">Best Time</span></div>
+      <div class="sc-stat"><span class="sc-stat-v" id="sc-eff">—</span><span class="sc-stat-l">Avg Efficiency</span></div>
+      <div class="sc-stat"><span class="sc-stat-v" id="sc-dist">—</span><span class="sc-stat-l">Total Distance</span></div>
+      <button class="stats-reset-btn" onclick="resetStats()">Reset</button>
+    </div>
+  </div>
   <div class="land-foot">No maps. No compass. Just a number.</div>
   <div class="pwa-banner hidden" id="pwa-banner">
     <div class="pwa-ico">📲</div>
@@ -645,7 +683,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
 <div class="section-label">Mode</div>
 <div class="card" style="margin-bottom:22px">
-  <div class="mode-card-grid" style="grid-template-columns:repeat(2,1fr)">
+  <div class="mode-card-grid">
     <div class="mode-card active" id="mode-card-standard" onclick="App.setGameMode('standard')">
       <div class="mode-card-ico">🎯</div>
       <div class="mode-card-name">Standard</div>
@@ -670,6 +708,16 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="mode-card-ico">🧭</div>
       <div class="mode-card-name">Sailor</div>
       <div class="mode-card-desc">Compass points to target</div>
+    </div>
+    <div class="mode-card" id="mode-card-multi" onclick="App.setGameMode('multi')">
+      <div class="mode-card-ico">🎯</div>
+      <div class="mode-card-name">Multi-Target</div>
+      <div class="mode-card-desc">Find 3 targets to win</div>
+    </div>
+    <div class="mode-card" id="mode-card-dynamic" onclick="App.setGameMode('dynamic')">
+      <div class="mode-card-ico">🔄</div>
+      <div class="mode-card-name">Dynamic</div>
+      <div class="mode-card-desc">Target moves every 3 min</div>
     </div>
   </div>
   <div class="mode-warn hidden" id="mode-warn" style="padding:0 14px 12px;display:flex;align-items:flex-start;font-size:12px;color:var(--t3);line-height:1.5">
@@ -1024,27 +1072,35 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
 <div class="sc map-sc" id="sc-results">
   <div class="map-topbar" style="justify-content:center">
-    <div class="map-pill green-pill">🏁 Route Revealed</div>
+    <div class="map-pill green-pill" id="res-mode-pill">🏁 Route Revealed</div>
   </div>
   <div id="resultmap"></div>
   <div class="results-panel">
+    <!-- Team result banner -->
+    <div class="team-result-banner hidden" id="team-result-banner">
+      <span class="team-result-ico" id="team-result-ico"></span>
+      <div class="team-result-info">
+        <div class="team-result-title" id="team-result-title"></div>
+        <div class="team-result-sub">First team to reach the target</div>
+      </div>
+    </div>
     <div class="winner-row" id="winner-row">
       <span class="winner-ico">🏆</span>
       <div class="winner-info">
         <div class="winner-name" id="res-name">—</div>
-        <div class="winner-sub">First to reach the target</div>
+        <div class="winner-sub" id="res-winner-sub">First to reach the target</div>
       </div>
       <div class="winner-time" id="res-time">—</div>
     </div>
-    <div class="stats-grid">
-      <div class="stat"><div class="stat-v blue" id="stat-dist">—</div><div class="stat-l">Straight-line</div></div>
-      <div class="stat"><div class="stat-v green" id="stat-time">—</div><div class="stat-l">Time taken</div></div>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat"><div class="stat-v blue" id="stat-dist">—</div><div class="stat-l">Distance</div></div>
+      <div class="stat"><div class="stat-v green" id="stat-time">—</div><div class="stat-l">Best Time</div></div>
       <div class="stat"><div class="stat-v" id="stat-players">—</div><div class="stat-l">Players</div></div>
     </div>
     <div class="route-stats hidden" id="route-stats">
       <div class="rs"><div class="rs-v" id="rs-walked">—</div><div class="rs-l">Walked</div></div>
       <div class="rs"><div class="rs-v" id="rs-efficiency">—</div><div class="rs-l">Efficiency</div></div>
-      <div class="rs"><div class="rs-v" id="rs-rank">—</div><div class="rs-l">Your rank</div></div>
+      <div class="rs"><div class="rs-v" id="rs-rank">—</div><div class="rs-l">Your Rank</div></div>
     </div>
     <div id="result-rows" class="result-rows"></div>
     <button class="share-btn" onclick="haptic('light');App.shareResult()">
@@ -1233,6 +1289,10 @@ const S = {
   _hcHistory:[], _hcHapticTs:0, _pwaPrompt:null,
   /* sailor */
   _sailorHeading:0, _sailorListener:null,
+  /* multi-target */
+  multiTargets:[], multiCurrent:0, multiArrived:0,
+  /* dynamic target */
+  _dynamicMoveIv:null, _dynamicMoveCount:0,
   /* whisper */
   _whisperShowing:false, _whisperHideTimeout:null,
   /* pwa */
@@ -1373,6 +1433,8 @@ function resetGameState(){
   if(S.elimIv){clearInterval(S.elimIv);S.elimIv=null;}
   S.latestPlayers={};S.lastProximityBeep=0;
   S._hcHistory=[];S._hcHapticTs=0;S._sailorHeading=0;
+  S.multiTargets=[];S.multiCurrent=0;S.multiArrived=0;
+  S._dynamicMoveIv=null;S._dynamicMoveCount=0;
   S._whisperShowing=false;clearTimeout(S._whisperHideTimeout);S._whisperHideTimeout=null;
   S._lastLobbyHtml=null;S._lastNWaitHtml=null;
   S.lastAccuracy=null;
@@ -1380,7 +1442,7 @@ function resetGameState(){
   stopMapOrientation();
   S.mapOrientMode={host:false,spec:false};S._lastUrgentBeep=-1;S._lastElimBeep=-1;S.nextElimTime=0;
 }
-function goHome(){ stopAutoZoom(); clearSession(); resetGameState(); goScreen('land'); }
+function goHome(){ stopAutoZoom(); stopDynamicTarget(); clearSession(); resetGameState(); goScreen('land'); renderStats(); }
 
 /* ── SETUP ───────────────────────────────────────────────── */
 function upSetup(){
@@ -1545,7 +1607,8 @@ async function createGameFB(){
     timeLimitSec:S.timeLimitSec,noiseSeed:S.noiseSeed,hostRole:S.hostRole,
     elimMode:S.elimMode,blindStart:S.blindStart,blindFinish:S.blindFinish,excludeHost:S.excludeHost,
     gameMode:S.gameMode,whisperMode:S.whisperMode,teamsMode:S.teamsMode,
-    targetLat:null,targetLon:null,startedAt:null,createdAt:SV.TIMESTAMP
+    targetLat:null,targetLon:null,startedAt:null,createdAt:SV.TIMESTAMP,
+    multiTargets:null,multiCount:3
   });
   S.isHost=true;
 }
@@ -1561,12 +1624,29 @@ async function goMap(){
   if(S.mode==='smart'){
     goScreen('hlobby');renderHLobby();set('hl-target','Finding target…');
     const myLat=S.myLat||HOME.lat,myLon=S.myLon||HOME.lon;
-    const picked=await findSmartTarget(myLat,myLon,idealRangeM()/1000);
-    S.targetLat=picked.lat;S.targetLon=picked.lon;
-    await gRef().update({targetLat:picked.lat,targetLon:picked.lon});
-    set('hl-target','✓ Set');
+    if(S.gameMode==='multi'){
+      // Generate 3 targets at increasing distances
+      var targets=[];
+      for(var ti=0;ti<3;ti++){
+        var mult=0.6+ti*0.4; // 60%, 100%, 140% of ideal
+        var picked=await findSmartTarget(myLat,myLon,idealRangeM()/1000*mult);
+        targets.push({lat:picked.lat,lon:picked.lon});
+      }
+      S.multiTargets=targets;S.multiCurrent=0;
+      S.targetLat=targets[0].lat;S.targetLon=targets[0].lon;
+      await gRef().update({targetLat:targets[0].lat,targetLon:targets[0].lon,multiTargets:targets});
+      set('hl-target','✓ 3 targets set');
+    } else {
+      const picked=await findSmartTarget(myLat,myLon,idealRangeM()/1000);
+      S.targetLat=picked.lat;S.targetLon=picked.lon;
+      await gRef().update({targetLat:picked.lat,targetLon:picked.lon});
+      set('hl-target','✓ Set');
+    }
   } else {
     goScreen('map');
+    if(S.gameMode==='multi'){
+      toast('Place 3 targets on the map for Multi-Target mode',3000);
+    }
   }
 }
 
@@ -1618,8 +1698,8 @@ async function lockStart(){
   S.startedAt=g.startedAt;
   S.hostRole='spectator'; // host starts in overview, can toggle to nav
   showCountdown(()=>{
-    S.status='active';
     launchHostActive();
+    if(S.gameMode==='dynamic')startDynamicTarget();
   });
 }
 
@@ -1681,6 +1761,15 @@ function startPlayersListener(){
   gRef().on('value',snap=>{
     if(!snap.exists())return;
     const g=snap.val();
+    // Track target changes for dynamic mode
+    if(S.status==='active'&&S.targetLat&&(g.targetLat!==S.targetLat||g.targetLon!==S.targetLon)){
+      S.targetLat=g.targetLat;S.targetLon=g.targetLon;
+      S.startDist=null; // Reset startDist for new target position
+    }
+    // Multi-target: load targets from Firebase
+    if(g.multiTargets&&!S.multiTargets.length){
+      S.multiTargets=g.multiTargets;S.multiCurrent=0;
+    }
     if(g.status==='active'&&S.status!=='active'){
       S.status='active';S.startedAt=g.startedAt;
       S.targetLat=g.targetLat;S.targetLon=g.targetLon;
@@ -2050,6 +2139,7 @@ function stopGPS(){
   stopWhisperTimer();
   stopHotCold();
   stopSailor();
+  stopDynamicTarget();
 }
 
 function handleGPSPos(pos){
@@ -2256,6 +2346,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     const hn=el('host-name');if(hn&&!hn.value)hn.value=savedName;
     const jn=el('inp-name');if(jn&&!jn.value)jn.value=savedName;
   }
+  renderStats();
   startOfflineDetection();
   checkBattery();
   const jc=new URLSearchParams(location.search).get('join');
@@ -2571,6 +2662,12 @@ function setGameMode(m){
   } else if(m==='sailor'){
     warnTxt.textContent='A compass needle points toward the target. No distance shown — navigate by direction alone.';
     warn.classList.remove('hidden');
+  } else if(m==='multi'){
+    warnTxt.textContent='3 hidden targets at increasing distances. Use Smart mode to auto-generate all 3.';
+    warn.classList.remove('hidden');
+  } else if(m==='dynamic'){
+    warnTxt.textContent='The target moves every 3 minutes. You must keep adjusting — never fully lock on.';
+    warn.classList.remove('hidden');
   } else {
     warn.classList.add('hidden');
   }
@@ -2659,6 +2756,8 @@ async function doRejoin(){
   S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;
   S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;
   S.gameMode=g.gameMode||'standard';S.whisperMode=!!g.whisperMode;
+  // Restore multi-target data
+  if(g.multiTargets){S.multiTargets=g.multiTargets;S.multiCurrent=0;}
   startPlayersListener();
   if(g.status==='active'){
     S.status='active';S.startedAt=g.startedAt;S.targetLat=g.targetLat;S.targetLon=g.targetLon;
@@ -2782,17 +2881,46 @@ function fillResults(players){
   set('res-time',fmtTime(elapsed));set('stat-time',fmtTime(elapsed));
   set('stat-dist',S.startDist?(S.startDist/1000).toFixed(1)+' km':'—');
 
+  // Game mode pill
+  var modePill=el('res-mode-pill');
+  if(modePill){
+    var modeLabels2={standard:'🎯 Standard',elimination:'⚡ Elimination',whisper:'👂 Whisper',hotcold:'🌡️ Hot \u0026 Cold',sailor:'🧭 Sailor',multi:'🎯 Multi-Target',dynamic:'🔄 Dynamic'};
+    modePill.textContent=modeLabels2[S.gameMode]||'🏁 Route Revealed';
+  }
+
+  // Team result banner
+  var teamBanner=el('team-result-banner');
+  var teamIco=el('team-result-ico');
+  var teamTitle=el('team-result-title');
+  if(teamBanner&&S.teamsMode){
+    var allP2=players||[];
+    var redArr2=allP2.some(function(p){return p.team==='red'&&p.arrived;});
+    var blueArr2=allP2.some(function(p){return p.team==='blue'&&p.arrived;});
+    if(redArr2||blueArr2){
+      teamBanner.classList.remove('hidden');
+      if(redArr2&&!blueArr2){teamIco.textContent='\uD83D\uDD34';teamTitle.textContent='Red Team Wins!';teamTitle.style.color='#FF3B30';}
+      else if(blueArr2&&!redArr2){teamIco.textContent='\uD83D\uDD35';teamTitle.textContent='Blue Team Wins!';teamTitle.style.color='#007AFF';}
+      else{teamIco.textContent='\uD83C\uDFC1';teamTitle.textContent='Both Teams Arrived!';teamTitle.style.color='var(--t1)';}
+      // Hide individual winner row
+      var wr=el('winner-row');if(wr)wr.classList.add('hidden');
+    } else {
+      teamBanner.classList.add('hidden');
+    }
+  } else if(teamBanner){
+    teamBanner.classList.add('hidden');
+  }
+
   const rows=el('result-rows');
   if(!rows||!players)return;
 
   // Build full navigator list
-  let navs=players.filter(p=>p.role==='navigator');
+  let navs=players.filter(function(p){return p.role==='navigator';});
   // Host exclusion
-  if(S.excludeHost&&S.hostPlayerToken) navs=navs.filter(p=>p.id!==S.hostPlayerToken);
+  if(S.excludeHost&&S.hostPlayerToken) navs=navs.filter(function(p){return p.id!==S.hostPlayerToken;});
   set('stat-players',navs.length);
 
   // Sort: arrived first by time, then DNF
-  const sorted=[...navs].sort((a,b)=>{
+  const sorted=[...navs].sort(function(a,b){
     if(a.arrived&&!b.arrived)return -1;
     if(!a.arrived&&b.arrived)return 1;
     return(a.arrSec||9999)-(b.arrSec||9999);
@@ -2800,33 +2928,42 @@ function fillResults(players){
 
   // Winner row — teams override
   const winner=sorted[0];
-  if(S.teamsMode&&checkTeamArrival(players)){
-    // team win already set res-name in checkTeamArrival
-  } else if(winner){
+  if(!S.teamsMode&&winner){
     set('res-name',winner.arrived?winner.name:'—');
-    const wrDiv=el('winner-row');
+    var wrDiv=el('winner-row');
     if(wrDiv){
+      var wr=el('res-winner-sub');
+      if(wr){
+        if(S.gameMode==='elimination')wr.textContent='Last one standing';
+        else if(S.gameMode==='whisper')wr.textContent='Found it in the whispers';
+        else if(S.gameMode==='hotcold')wr.textContent='Felt the way there';
+        else if(S.gameMode==='sailor')wr.textContent='Sailed to the target';
+        else wr.textContent='First to reach the target';
+      }
       const idx=navs.indexOf(winner);
       const col=PCOLS[idx%PCOLS.length];
       wrDiv.style.borderColor=winner.arrived?col:'var(--border)';
-      wrDiv.style.background=winner.arrived?`${col}18`:'rgba(0,0,0,.04)';
+      wrDiv.style.background=winner.arrived?col+'18':'rgba(0,0,0,.04)';
     }
   }
 
   // Leaderboard rows with team color dots
-  rows.innerHTML=sorted.map((p,i)=>{
+  rows.innerHTML=sorted.map(function(p,i){
     const col=p.team==='red'?'#FF3B30':p.team==='blue'?'#007AFF':PCOLS[i%PCOLS.length];
-    const medal=['🥇','🥈','🥉'][i]||'';
-    const pos=medal||`<span style="font-size:12px;font-weight:700;color:var(--t3)">${i+1}</span>`;
+    const medal=['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'][i]||'';
+    const pos=medal||'<span style="font-size:12px;font-weight:700;color:var(--t3)">'+(i+1)+'</span>';
     const time=p.arrived?fmtTime(p.arrSec):'<span style="color:var(--t3)">DNF</span>';
-    const dist=p.startDist?`<span class="rr-dist">${(p.startDist/1000).toFixed(1)}km</span>`:'';
-    return`<div class="rr-row">
-      <span class="rr-pos">${pos}</span>
-      <div class="rr-dot" style="background:${col}"></div>
-      <span class="rr-name">${escHtml(p.name)}</span>
-      ${dist}
-      <span class="rr-time">${time}</span>
-    </div>`;
+    const dist=p.startDist?'<span class="rr-dist">'+(p.startDist/1000).toFixed(1)+'km</span>':'';
+    var teamTag='';
+    if(S.teamsMode&&p.team) teamTag='<span class="rr-team" style="color:'+(p.team==='red'?'#FF3B30':'#007AFF')+'">'+(p.team==='red'?'R':'B')+'</span>';
+    return'<div class="rr-row">'+
+      '<span class="rr-pos">'+pos+'</span>'+
+      '<div class="rr-dot" style="background:'+col+'"></div>'+
+      '<span class="rr-name">'+escHtml(p.name)+'</span>'+
+      teamTag+
+      dist+
+      '<span class="rr-time">'+time+'</span>'+
+    '</div>';
   }).join('');
 
   // Route stats for this player
@@ -2834,12 +2971,15 @@ function fillResults(players){
     let walked=0;
     for(let i=1;i<S.myTrail.length;i++) walked+=hav(S.myTrail[i-1][0],S.myTrail[i-1][1],S.myTrail[i][0],S.myTrail[i][1]);
     const eff=S.startDist&&walked>0?Math.round((S.startDist/walked)*100):null;
-    const myRank=winner&&winner.id===S.myToken?1:sorted.findIndex(p=>p.id===S.myToken)+1;
+    const myRank=winner&&winner.id===S.myToken?1:sorted.findIndex(function(p){return p.id===S.myToken;})+1;
     set('rs-walked',walked>1000?(walked/1000).toFixed(1)+' km':Math.round(walked)+' m');
     set('rs-efficiency',eff?eff+'%':'—');
-    set('rs-rank',myRank>0?`${myRank} / ${sorted.length}`:'—');
+    set('rs-rank',myRank>0?myRank+' / '+sorted.length:'—');
     var rs=el('route-stats');if(rs)rs.classList.remove('hidden');
   }
+
+  // Save stats to localStorage
+  saveGameStats(elapsed,sorted.length,winner&&winner.id===S.myToken);
 }
 
 /* ── HOT & COLD COMPASS ──────────────────────────────────── */
@@ -3013,6 +3153,26 @@ function updateSailorNeedle(){
   const needle=el('sailor-needle');
   if(needle) needle.style.transform=`rotate(${needleAngle}deg)`;
 }
+/* ── DYNAMIC TARGET — MOVES EVERY 3 MINUTES ──────────────── */
+function startDynamicTarget(){
+  stopDynamicTarget();
+  S._dynamicMoveCount=0;
+  S._dynamicMoveIv=setInterval(function(){
+    if(S.status!=='active')return;
+    var bear=Math.random()*360*Math.PI/180;
+    var shiftM=50+Math.random()*50;
+    var newLat=S.targetLat+(shiftM/111000)*Math.cos(bear);
+    var newLon=S.targetLon+(shiftM/(111000*Math.cos(S.targetLat*Math.PI/180)))*Math.sin(bear);
+    S.targetLat=newLat;S.targetLon=newLon;
+    S._dynamicMoveCount++;
+    gRef().update({targetLat:newLat,targetLon:newLon});
+    toast('Target moved! ('+S._dynamicMoveCount+')',2500);
+    playTone(440,0.1,0.1);setTimeout(function(){playTone(550,0.1,0.1);},150);
+  },3*60*1000);
+}
+function stopDynamicTarget(){
+  if(S._dynamicMoveIv){clearInterval(S._dynamicMoveIv);S._dynamicMoveIv=null;}
+}
 function checkTeamArrival(players){
   if(!S.teamsMode) return false;
   const teams={red:false,blue:false};
@@ -3076,6 +3236,16 @@ async function sendPosUpdateQueued(manual=false){
   }
 
   // ── Mode-aware display ─────────────────────────────────────
+  // Multi-target eyebrow
+  if(S.gameMode==='multi'&&S.multiTargets){
+    var eyebrow=el('na-eyebrow');
+    if(eyebrow)eyebrow.textContent='Target '+(S.multiCurrent+1)+'/'+S.multiTargets.length;
+  }
+  // Dynamic target eyebrow
+  if(S.gameMode==='dynamic'){
+    var eyebrow2=el('na-eyebrow');
+    if(eyebrow2)eyebrow2.textContent='Move #'+S._dynamicMoveCount;
+  }
   if(S.gameMode==='hotcold'){
     // HC: update trend analysis, never show number
     updateHotColdTrend();
@@ -3094,16 +3264,79 @@ async function sendPosUpdateQueued(manual=false){
 
   // Arrival check (all modes)
   if(dist<=S.arrRadius&&!S.arrived&&!S.eliminated){
-    S.arrived=true;
-    const elapsed=S.startedAt?Math.round((Date.now()-S.startedAt)/1000):0;
-    S.arrivalElapsed=elapsed;
-    await pRef().update({arrived:true,arrSec:elapsed});
-    triggerArrival(elapsed,S.startDist);
-    playArrivalSound();haptic('heavy');
-    if(S.teamsMode&&S.myTeam) toast(`${S.myTeam==='red'?'🔴':'🔵'} Team arrived!`,3000);
+    if(S.gameMode==='multi'&&S.multiTargets&&S.multiCurrent<2){
+      // Multi-target: advance to next target
+      S.multiCurrent++;
+      S.targetLat=S.multiTargets[S.multiCurrent].lat;
+      S.targetLon=S.multiTargets[S.multiCurrent].lon;
+      S.multiArrived++;
+      // Update Firebase target so host/spectator map shows new target
+      await gRef().update({targetLat:S.targetLat,targetLon:S.targetLon});
+      playArrivalSound();haptic('heavy');
+      toast('Target '+S.multiArrived+'/3 found! Next target set.',3000);
+      // Reset startDist for new leg
+      S.startDist=null;
+    } else {
+      // Standard arrival
+      S.arrived=true;
+      const elapsed=S.startedAt?Math.round((Date.now()-S.startedAt)/1000):0;
+      S.arrivalElapsed=elapsed;
+      await pRef().update({arrived:true,arrSec:elapsed});
+      triggerArrival(elapsed,S.startDist);
+      playArrivalSound();haptic('heavy');
+      if(S.teamsMode&&S.myTeam) toast(S.myTeam==='red'?'🔴 Team arrived!':'🔵 Team arrived!',3000);
+    }
   }
 }
 
+/* ── PERSISTENT STATS ────────────────────────────────────── */
+function loadStats(){
+  try{
+    var raw=localStorage.getItem('ll_stats');
+    if(raw)return JSON.parse(raw);
+  }catch(_){}
+  return{games:0,wins:0,bestTime:null,totalEff:0,effCount:0,totalDist:0};
+}
+function saveStats(s){
+  try{localStorage.setItem('ll_stats',JSON.stringify(s));}catch(_){}
+}
+function saveGameStats(elapsed,playerCount,won){
+  var s=loadStats();
+  s.games++;
+  if(won)s.wins++;
+  if(elapsed&&(!s.bestTime||elapsed<s.bestTime))s.bestTime=elapsed;
+  if(S.myTrail.length>1){
+    var walked=0;
+    for(var i=1;i<S.myTrail.length;i++)walked+=hav(S.myTrail[i-1][0],S.myTrail[i-1][1],S.myTrail[i][0],S.myTrail[i][1]);
+    if(S.startDist&&walked>0){
+      var eff=Math.round((S.startDist/walked)*100);
+      s.totalEff+=eff;s.effCount++;
+    }
+    s.totalDist+=walked;
+  }
+  saveStats(s);
+}
+function renderStats(){
+  var s=loadStats();
+  if(s.games===0){hide('stats-card');return;}
+  show('stats-card');
+  set('sc-games',s.games);
+  set('sc-wins',s.wins);
+  set('sc-best',s.bestTime?fmtTime(s.bestTime):'—');
+  set('sc-eff',s.effCount>0?Math.round(s.totalEff/s.effCount)+'%':'—');
+  set('sc-dist',s.totalDist>1000?(s.totalDist/1000).toFixed(1)+' km':Math.round(s.totalDist)+' m');
+}
+function toggleStatsCard(){
+  var body=el('stats-card-body');
+  var chev=el('stats-chevron');
+  if(body)body.classList.toggle('hidden');
+  if(chev)chev.classList.toggle('open');
+}
+function resetStats(){
+  if(!confirm('Reset all stats?'))return;
+  saveStats({games:0,wins:0,bestTime:null,totalEff:0,effCount:0,totalDist:0});
+  hide('stats-card');
+}
 /* ── PWA INSTALL ─────────────────────────────────────────── */
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();
@@ -3127,113 +3360,203 @@ async function shareResult(){
   try{
     const canvas=document.createElement('canvas');
     const dpr=Math.min(window.devicePixelRatio||1,2);
-    const W=600,H=500;
+    const W=600,H=800;
     canvas.width=W*dpr;canvas.height=H*dpr;
     const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
     const dark=document.documentElement.getAttribute('data-theme')==='dark';
 
     // Background gradient
     const grad=ctx.createLinearGradient(0,0,W,H);
-    grad.addColorStop(0,dark?'#0a1628':'#c8e6ff');
-    grad.addColorStop(1,dark?'#05080f':'#eef4f0');
-    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+    if(dark){grad.addColorStop(0,'#0a1628');grad.addColorStop(0.5,'#0d1f3c');grad.addColorStop(1,'#05080f');}
+    else{grad.addColorStop(0,'#c8e6ff');grad.addColorStop(0.5,'#ddf0fb');grad.addColorStop(1,'#eef4f0');}
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.roundRect?ctx.roundRect(0,0,W,H,24):ctx.rect(0,0,W,H);ctx.fill();
 
-    // — Map snapshot via Leaflet container —
-    var mapEl=S.resMap?S.resMap.getContainer():null;
-    if(mapEl){
-      try{
-        // Draw map as image if html2canvas is available; else draw placeholder
-        ctx.save();
-        ctx.beginPath();ctx.roundRect?ctx.roundRect(20,16,W-40,200,12):ctx.rect(20,16,W-40,200);
-        ctx.clip();
-        // Teal map placeholder with route overlay
-        ctx.fillStyle=dark?'#0f1a2a':'#d4e8f0';ctx.fillRect(20,16,W-40,200);
-        // Draw simplified trails
-        const drawTrail=(trail,color,weight=2.5)=>{
-          if(trail.length<2||!S.resMap)return;
-          const bounds=S.resMap.getBounds();
-          const toXY=([lat,lon])=>{
-            const nx=(lon-bounds.getWest())/(bounds.getEast()-bounds.getWest());
-            const ny=1-(lat-bounds.getSouth())/(bounds.getNorth()-bounds.getSouth());
-            return[20+nx*(W-40),16+ny*200];
-          };
-          ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.lineCap='round';ctx.lineJoin='round';
-          ctx.beginPath();
-          trail.forEach(([lat,lon],i)=>{ const[x,y]=toXY([lat,lon]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
-          ctx.stroke();
-        };
-        if(S.resMap){
-          drawTrail(S.myTrail,'#34C759');
-          Object.values(S.playerTrails).forEach((trail,i)=>drawTrail(trail,PCOLS[i%PCOLS.length],2));
-          // Target pin
-          if(S.targetLat){
-            const bounds=S.resMap.getBounds();
-            const nx=(S.targetLon-bounds.getWest())/(bounds.getEast()-bounds.getWest());
-            const ny=1-(S.targetLat-bounds.getSouth())/(bounds.getNorth()-bounds.getSouth());
-            const tx=20+nx*(W-40),ty=16+ny*200;
-            ctx.fillStyle='#007AFF';ctx.beginPath();ctx.arc(tx,ty,6,0,Math.PI*2);ctx.fill();
-            ctx.fillStyle='white';ctx.beginPath();ctx.arc(tx,ty,3,0,Math.PI*2);ctx.fill();
-          }
-        }
-        ctx.restore();
-        // Map border
-        ctx.strokeStyle=dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.08)';ctx.lineWidth=1;
-        ctx.strokeRect(20,16,W-40,200);
-      }catch(_){}
-    }
+    // Subtle top accent line
+    ctx.fillStyle='#007AFF';
+    ctx.beginPath();ctx.roundRect?ctx.roundRect(40,36,W-80,3,1.5):ctx.rect(40,36,W-80,3);ctx.fill();
 
-    // Header block
-    const headerY=232;
-    ctx.fillStyle=dark?'rgba(255,255,255,.9)':'rgba(0,0,0,.85)';
-    ctx.font='bold 22px -apple-system,Arial,sans-serif';
-    ctx.fillText('Luftlinie',28,headerY);
+    // Header
+    ctx.fillStyle=dark?'rgba(255,255,255,.92)':'rgba(0,0,0,.88)';
+    ctx.font='bold 28px -apple-system,Arial,sans-serif';
+    ctx.fillText('Luftlinie',40,72);
     ctx.fillStyle=dark?'rgba(255,255,255,.4)':'rgba(0,0,0,.4)';
     ctx.font='12px -apple-system,Arial,sans-serif';
-    const dist=S.startDist?(S.startDist/1000).toFixed(1)+' km straight-line':'';
-    ctx.fillText(`Game ${S.gameCode||''}  ·  ${dist}  ·  ${new Date().toLocaleDateString()}`,28,headerY+18);
+    ctx.fillText('as the crow flies',40,90);
+
+    // Game mode badge
+    const modeLabels={standard:'Standard',elimination:'Elimination',whisper:'Whisper',hotcold:'Hot \u0026 Cold',sailor:'Sailor',multi:'Multi-Target',dynamic:'Dynamic'};
+    const modeLabel=modeLabels[S.gameMode]||'Standard';
+    const modeColors={standard:'#007AFF',elimination:'#FF9F0A',whisper:'#BF5AF2',hotcold:'#FF3B30',sailor:'#34C759',multi:'#007AFF',dynamic:'#FF9F0A'};
+    const mCol=modeColors[S.gameMode]||'#007AFF';
+    ctx.fillStyle=mCol;
+    ctx.beginPath();ctx.roundRect?ctx.roundRect(40,100,100,26,13):ctx.rect(40,100,100,26);ctx.fill();
+    ctx.fillStyle='white';ctx.font='bold 12px -apple-system,Arial,sans-serif';
+    ctx.fillText(modeLabel,52,118);
+
+    // Game code + date
+    ctx.fillStyle=dark?'rgba(255,255,255,.35)':'rgba(0,0,0,.35)';
+    ctx.font='12px -apple-system,Arial,sans-serif';
+    const dateStr=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    ctx.fillText('Game '+S.gameCode+'  \u00B7  '+dateStr,152,117);
+
+    // Map area with trails
+    const mapX=40,mapY=140,mapW=W-80,mapH=220;
+    ctx.save();
+    ctx.beginPath();ctx.roundRect?ctx.roundRect(mapX,mapY,mapW,mapH,12):ctx.rect(mapX,mapY,mapW,mapH);ctx.clip();
+    ctx.fillStyle=dark?'#0f1a2a':'#d4e8f0';ctx.fillRect(mapX,mapY,mapW,mapH);
+
+    if(S.resMap){
+      try{
+        const bounds=S.resMap.getBounds();
+        const toXY=function(lat,lon){
+          const nx=(lon-bounds.getWest())/(bounds.getEast()-bounds.getWest());
+          const ny=1-(lat-bounds.getSouth())/(bounds.getNorth()-bounds.getSouth());
+          return[mapX+nx*mapW,mapY+ny*mapH];
+        };
+        // Draw trails
+        const drawTrail=function(trail,color,weight){
+          if(trail.length<2)return;
+          ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.lineCap='round';ctx.lineJoin='round';
+          ctx.beginPath();
+          trail.forEach(function(pt,i){
+            var xy=toXY(pt[0],pt[1]);
+            i?ctx.lineTo(xy[0],xy[1]):ctx.moveTo(xy[0],xy[1]);
+          });
+          ctx.stroke();
+        };
+        // Other player trails
+        Object.entries(S.playerTrails).forEach(function(entry){
+          var trail=entry[1];
+          var idx=parseInt(entry[0])||0;
+          if(trail.length>1)drawTrail(trail,PCOLS[idx%PCOLS.length],2);
+        });
+        // My trail
+        if(S.myTrail.length>1)drawTrail(S.myTrail,'#34C759',2.5);
+        // Target pin
+        if(S.targetLat){
+          var tp=toXY(S.targetLat,S.targetLon);
+          ctx.fillStyle='#007AFF';ctx.beginPath();ctx.arc(tp[0],tp[1],8,0,Math.PI*2);ctx.fill();
+          ctx.fillStyle='white';ctx.beginPath();ctx.arc(tp[0],tp[1],4,0,Math.PI*2);ctx.fill();
+        }
+        // Start pin
+        if(S.myTrail.length>0){
+          var sp=toXY(S.myTrail[0][0],S.myTrail[0][1]);
+          ctx.fillStyle='#8e8e93';ctx.beginPath();ctx.arc(sp[0],sp[1],5,0,Math.PI*2);ctx.fill();
+        }
+      }catch(_){}
+    }
+    ctx.restore();
+    // Map border
+    ctx.strokeStyle=dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.08)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect?ctx.roundRect(mapX,mapY,mapW,mapH,12):ctx.rect(mapX,mapY,mapW,mapH);ctx.stroke();
+
+    // Winner section
+    var winY=mapY+mapH+28;
+    if(S.teamsMode){
+      // Find which team won
+      var teamWinner='';
+      var allP=S.latestPlayers?Object.values(S.latestPlayers):[];
+      var redArr=allP.some(function(p){return p.team==='red'&&p.arrived;});
+      var blueArr=allP.some(function(p){return p.team==='blue'&&p.arrived;});
+      if(redArr&&!blueArr)teamWinner='Red Team';
+      else if(blueArr&&!redArr)teamWinner='Blue Team';
+      else if(redArr&&blueArr)teamWinner='Both Teams';
+      if(teamWinner){
+        ctx.fillStyle=dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.85)';
+        ctx.font='bold 14px -apple-system,Arial,sans-serif';
+        ctx.fillText('Team Winner',40,winY);
+        ctx.fillStyle='#FF3B30';ctx.font='bold 22px -apple-system,Arial,sans-serif';
+        ctx.fillText(teamWinner,40,winY+28);
+      }
+    } else {
+      var winnerRow=el('winner-row');
+      var winnerName=el('res-name')?el('res-name').textContent:'—';
+      var winnerTime=el('res-time')?el('res-time').textContent:'—';
+      ctx.fillStyle=dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.85)';
+      ctx.font='bold 14px -apple-system,Arial,sans-serif';
+      ctx.fillText('Winner',40,winY);
+      ctx.fillStyle='#34C759';ctx.font='bold 22px -apple-system,Arial,sans-serif';
+      ctx.fillText(winnerName,40,winY+28);
+      ctx.fillStyle=dark?'rgba(255,255,255,.5)':'rgba(0,0,0,.5)';
+      ctx.font='16px "SF Mono","Menlo",monospace';
+      ctx.fillText(winnerTime,40,winY+50);
+    }
 
     // Stats row
-    const statY=headerY+46;
-    [[el('stat-dist')?el('stat-dist').textContent:'—','Straight-line'],[el('stat-time')?el('stat-time').textContent:'—','Best time'],[el('stat-players')?el('stat-players').textContent:'—','Players']].forEach(([v,l],i)=>{
-      const sx=28+i*185;
-      ctx.fillStyle=dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.8)';
-      ctx.font='bold 16px "SF Mono","Menlo",monospace';ctx.fillText(v,sx,statY);
+    var statY=winY+(S.teamsMode?65:75);
+    var stats=[
+      [el('stat-dist')?el('stat-dist').textContent:'—','Distance'],
+      [el('stat-time')?el('stat-time').textContent:'—','Best Time'],
+      [el('stat-players')?el('stat-players').textContent:'—','Players']
+    ];
+    // Add efficiency if available
+    var effText='';
+    if(S.myTrail.length>1){
+      var walked=0;
+      for(var i=1;i<S.myTrail.length;i++)walked+=hav(S.myTrail[i-1][0],S.myTrail[i-1][1],S.myTrail[i][0],S.myTrail[i][1]);
+      var eff=S.startDist&&walked>0?Math.round((S.startDist/walked)*100):null;
+      effText=eff?eff+'%':'';
+    }
+    if(effText){
+      stats.push([effText,'Efficiency']);
+    }
+    var statW=stats.length===4?135:170;
+    stats.forEach(function(s,i){
+      var sx=40+i*statW;
+      ctx.fillStyle=dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.85)';
+      ctx.font='bold 16px "SF Mono","Menlo",monospace';ctx.fillText(s[0],sx,statY);
       ctx.fillStyle=dark?'rgba(255,255,255,.38)':'rgba(0,0,0,.38)';
-      ctx.font='11px -apple-system,Arial,sans-serif';ctx.fillText(l,sx,statY+14);
+      ctx.font='11px -apple-system,Arial,sans-serif';ctx.fillText(s[1],sx,statY+16);
     });
 
     // Leaderboard
-    let y=statY+44;
-    const rows2=el('result-rows');
+    var lbY=statY+36;
+    ctx.fillStyle=dark?'rgba(255,255,255,.5)':'rgba(0,0,0,.5)';
+    ctx.font='bold 12px -apple-system,Arial,sans-serif';
+    ctx.fillText('Leaderboard',40,lbY);
+    lbY+=20;
+
+    var rows2=el('result-rows');
     if(rows2){
-      rows2.querySelectorAll('.rr-row').forEach((row,i)=>{
-        const dot=row.querySelector('.rr-dot');
+      rows2.querySelectorAll('.rr-row').forEach(function(row,i){
+        var dot=row.querySelector('.rr-dot');
         var col2=dot&&dot.style.background?dot.style.background:PCOLS[i%PCOLS.length];
-        ctx.fillStyle=col;ctx.beginPath();ctx.arc(38,y-4,5,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle=i===0?col:(dark?'rgba(255,255,255,.8)':'rgba(0,0,0,.75)');
-        ctx.font=`${i===0?'bold ':''}14px -apple-system,Arial,sans-serif`;
-        var rn2=row.querySelector('.rr-name');ctx.fillText(rn2?rn2.textContent:'',52,y);
+        var nameEl=row.querySelector('.rr-name');
+        var timeEl=row.querySelector('.rr-time');
+        var name=nameEl?nameEl.textContent:'';
+        var time=timeEl?timeEl.textContent:'';
+        // Dot
+        ctx.fillStyle=col2;ctx.beginPath();ctx.arc(50,lbY-3,5,0,Math.PI*2);ctx.fill();
+        // Name
+        ctx.fillStyle=i===0?(dark?'rgba(255,255,255,.92)':'rgba(0,0,0,.9)'):(dark?'rgba(255,255,255,.7)':'rgba(0,0,0,.7)');
+        ctx.font=(i===0?'bold ':'')+'14px -apple-system,Arial,sans-serif';
+        ctx.fillText(name,64,lbY);
+        // Time
         ctx.textAlign='right';
-        ctx.fillStyle=i===0?'#34C759':(dark?'rgba(255,255,255,.45)':'rgba(0,0,0,.4)');
+        ctx.fillStyle=i===0?'#34C759':(dark?'rgba(255,255,255,.45)':'rgba(0,0,0,.45)');
         ctx.font='bold 13px "SF Mono","Menlo",monospace';
-        var rt2=row.querySelector('.rr-time');ctx.fillText(rt2?rt2.textContent:'',W-28,y);
+        ctx.fillText(time,W-40,lbY);
         ctx.textAlign='left';
-        y+=26;
+        lbY+=26;
       });
     }
 
     // Footer
-    ctx.fillStyle=dark?'rgba(255,255,255,.18)':'rgba(0,0,0,.14)';
-    ctx.font='10px -apple-system,Arial,sans-serif';
-    ctx.fillText('luftlinie.app',28,H-14);
+    ctx.fillStyle=dark?'rgba(255,255,255,.15)':'rgba(0,0,0,.12)';
+    ctx.font='11px -apple-system,Arial,sans-serif';
+    ctx.fillText('luftlinie.app',40,H-24);
+    ctx.textAlign='right';
+    ctx.fillText('No maps. No compass. Just a number.',W-40,H-24);
+    ctx.textAlign='left';
 
-    canvas.toBlob(async blob=>{
+    canvas.toBlob(async function(blob){
       if(!blob)return;
-      const file=new File([blob],'luftlinie-result.png',{type:'image/png'});
+      var file=new File([blob],'luftlinie-result.png',{type:'image/png'});
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({files:[file],title:'Luftlinie Result'});
       } else {
-        const a=document.createElement('a');
+        var a=document.createElement('a');
         a.href=URL.createObjectURL(blob);a.download='luftlinie-result.png';a.click();
         toast('Result saved!');
       }
