@@ -75,7 +75,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .section-label{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--t3);padding-left:4px;margin-bottom:6px}
 .seg-ctrl{display:flex;background:var(--surf2);border-radius:var(--r8);padding:2px;border:1px solid var(--border2);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
 .seg-ctrl>*+*{margin-left:2px}
-.seg{flex:1;padding:8px 10px;min-height:36px;border-radius:7px;border:none;background:none;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .14s;-webkit-tap-highlight-color:transparent}
+.seg{flex:1;padding:8px 10px;min-height:44px;border-radius:7px;border:none;background:none;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;font-family:var(--font);transition:all .14s;-webkit-tap-highlight-color:transparent}
 .seg:active{opacity:.6}
 .seg.active{background:var(--surf1);color:var(--t1);box-shadow:var(--sh-sm)}
 [data-theme="dark"] .seg.active{background:rgba(88,88,92,.65)}
@@ -119,7 +119,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .btn-destruct{display:inline-flex;align-items:center;justify-content:center;padding:7px 14px;border-radius:var(--r20);border:none;background:rgba(255,59,48,.1);color:var(--red);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .13s}
 .btn-destruct:hover{background:rgba(255,59,48,.2)}
 .btn-destruct:active{transform:scale(.95);opacity:.85}
-.btn-destruct.sm{font-size:12px;padding:5px 12px;min-height:36px}
+.btn-destruct.sm{font-size:12px;padding:5px 12px;min-height:44px}
 .btn-text{background:none;border:none;color:var(--blue);font-family:var(--font);font-size:14px;cursor:pointer;padding:10px 6px;min-height:44px;display:inline-flex;align-items:center;transition:opacity .14s;-webkit-tap-highlight-color:transparent}
 .btn-text:active{opacity:.5}
 .btn-ico{width:15px;height:15px;flex-shrink:0}
@@ -756,7 +756,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <label class="ios-switch"><input type="checkbox" id="sw-teams" onchange="App.setTeamsMode(this.checked)"><span class="ios-switch-track"></span></label>
     </div>
     <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-      <div><div class="setup-toggle-label">Blind Start</div><div class="setup-toggle-sub">Distance hidden until 500m moved</div></div>
+      <div><div class="setup-toggle-label">Blind Start</div><div class="setup-toggle-sub">Distance hidden until 300m from start</div></div>
       <label class="ios-switch"><input type="checkbox" id="sw-blind" onchange="App.setBlindStart(this.checked)"><span class="ios-switch-track"></span></label>
     </div>
     <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
@@ -859,6 +859,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="game-bar-right">
       <div class="na-gps" id="ha-gps"><span class="gps-dot"></span><span id="ha-gps-txt">GPS</span></div>
       <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
+      <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="Compass orientation">🧭</button>
       <button class="toolbar-btn" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()" title="Switch to navigator view">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
       </button>
@@ -906,7 +907,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="gbar-timer" id="sp-timer">00:00</div>
     </div>
     <div class="game-bar-right">
+      <div class="na-gps" id="sp-gps"><span class="gps-dot"></span><span id="sp-gps-txt">GPS</span></div>
       <button class="toolbar-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
+      <button class="toolbar-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="Compass orientation">🧭</button>
       <button class="btn-destruct sm" id="spec-leave-btn" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
     </div>
   </div>
@@ -999,8 +1002,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <div class="gbar-timer" id="na-timer">—</div>
     </div>
     <div class="game-bar-right">
-      <button class="toolbar-btn sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Sound">🔊</button>
       <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
+      <button class="toolbar-btn sound-btn active" id="sound-btn" onclick="App.toggleSound()" title="Sound">🔊</button>
     </div>
   </div>
   <div class="offline-banner hidden" id="na-offline">⚡ Connection lost — reconnecting…</div>
@@ -1483,22 +1486,6 @@ function setExcludeHost(on){
   S.excludeHost=!!on;
   const sw=el('sw-excludehost');if(sw)sw.checked=!!on;
 }
-function setBlindStart(on){
-  S.blindStart=!!on;
-  const sw=el('sw-blind');if(sw)sw.checked=!!on;
-  // Legacy seg-ctrl support
-  document.querySelectorAll('#seg-blind .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
-}
-function setBlindFinish(on){
-  S.blindFinish=!!on;
-  const sw=el('sw-blindfinish');if(sw)sw.checked=!!on;
-  document.querySelectorAll('#seg-blindfinish .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
-}
-function setExcludeHost(on){
-  S.excludeHost=!!on;
-  const sw=el('sw-excludehost');if(sw)sw.checked=!!on;
-  document.querySelectorAll('#seg-excludehost .seg').forEach(b=>b.classList.toggle('active',(b.dataset.v==='on')===!!on));
-}
 function updateGoMapBtn(){
   const btn=el('btn-go-map'); if(!btn)return;
   btn.textContent=S.mode==='smart'?'Find Smart Target →':'Place Target on Map →';
@@ -1576,9 +1563,11 @@ async function findSmartTarget(myLat,myLon,idealKm){
       const ways=(data.elements||[]).filter(w=>{const t=w.tags||{};return!t.barrier&&(!t.access||!/private|no|customers|permit|military|restricted/i.test(t.access));});
       if(!ways.length)continue;
       const tp={service:0,living_street:1,residential:2,unclassified:3,tertiary:4};
-      const ta=a.tags&&a.tags.highway?tp[a.tags.highway]:9;
-      const tb=b.tags&&b.tags.highway?tp[b.tags.highway]:9;
-      ways.sort((a,b)=>ta-tb);
+      ways.sort((a,b)=>{
+        var ta2=a.tags&&a.tags.highway?tp[a.tags.highway]:9;
+        var tb2=b.tags&&b.tags.highway?tp[b.tags.highway]:9;
+        return ta2-tb2;
+      });
       const pool=[];
       for(const w of ways.slice(0,6)){const g=w.geometry||[];if(!g.length)continue;pool.push({lat:g[g.length-1].lat,lon:g[g.length-1].lon,s:0});pool.push({lat:g[0].lat,lon:g[0].lon,s:1});if(g.length>2){const m=g[Math.floor(g.length/2)];pool.push({lat:m.lat,lon:m.lon,s:2});}}
       const valid=pool.filter(n=>{const d=hav(myLat,myLon,n.lat,n.lon)/1000;return d>=minKm&&d<=maxKm;});
@@ -1798,7 +1787,7 @@ function startPlayersListener(){
       }
     }
     if(g.status==='finished'&&S.status==='active'&&!S.arrived){
-      S.status='finished'; clearInterval(S.timerIv);
+      S.status='finished'; clearInterval(S.timerIv); stopDynamicTarget();
       // Show results — need player data
       db.ref(`games/${S.gameCode}/players`).once('value').then(s=>{
         const raw=s.val()||{};
@@ -1807,7 +1796,7 @@ function startPlayersListener(){
       });
     }
     if(g.status==='aborted'){
-      clearInterval(S.timerIv);
+      clearInterval(S.timerIv); stopDynamicTarget();
       if(!S.isHost){
         db.ref(`games/${S.gameCode}/players`).once('value').then(snap=>{
           const raw=snap.val()||{};
@@ -1937,6 +1926,7 @@ async function confirmAbort(){
   el('as-abort').classList.add('hidden');
   await gRef().update({status:'aborted'});
   clearInterval(S.timerIv);
+  stopDynamicTarget();
   haptic('medium');
   db.ref(`games/${S.gameCode}/players`).once('value').then(snap=>{
     const raw=snap.val()||{};
@@ -1951,7 +1941,9 @@ function cancelAbort(){
 /* ── ELIMINATION CHECK (host only, runs every 5 min) ─────── */
 async function runElimCheck(){
   if(!S.isHost||S.status!=='active')return;
-  const raw=S.latestPlayers;
+  // Fetch fresh player data from Firebase to avoid stale cached data
+  const snap=await db.ref(`games/${S.gameCode}/players`).once('value');
+  const raw=snap.val()||{};
   const active=Object.entries(raw)
     .filter(([,p])=>p.role==='navigator'&&!p.arrived&&!p.eliminated&&p.lat)
     .map(([id,p])=>({id,...p,dist:hav(+p.lat,+p.lon,S.targetLat,S.targetLon)}));
@@ -2183,6 +2175,12 @@ function handleGPSPos(pos){
   if(hPill){
     if(acc>50){hPill.className='na-gps lost';set('ha-gps-txt','~'+Math.round(acc)+'m');}
     else{hPill.className='na-gps live';set('ha-gps-txt','Live');}
+  }
+  // Spectator GPS pill
+  const sPill=el('sp-gps');
+  if(sPill){
+    if(acc>50){sPill.className='na-gps lost';set('sp-gps-txt','~'+Math.round(acc)+'m');}
+    else{sPill.className='na-gps live';set('sp-gps-txt','Live');}
   }
   // Ripple: only spawn when showing the number (not in HC/whisper modes)
   // and only when we've actually moved (not every 1s backup poll)
@@ -3013,7 +3011,7 @@ function startHotCold(){
   var rb3=el('refresh-btn');if(rb3)rb3.classList.add('hidden');
   // Init history with current dist if known
   if(!S._hcHistory) S._hcHistory=[];
-  if(S.lastDist) S._hcHistory=[S.lastDist];
+  if(S.lastDist) S._hcHistory=[{dist:S.lastDist,ts:Date.now()}];
   updateHotColdTrend();
 }
 
@@ -3036,19 +3034,19 @@ function updateHotColdTrend(){
     _applyHCState('neutral',2.5);
     return;
   }
-  // Velocity in m/s: negative = closing in, positive = moving away
+  // Velocity in m/s: positive = closing in, negative = moving away
   const velMs=(oldest.dist-newest.dist)/dtSec;
 
   // Map velocity to labels and intensity
   // HOT: closing >1.5 m/s, Warmer: 0.5-1.5, Same: -0.5 to 0.5, Cooler: -0.5 to -1.5, COLD: moving away >1.5
-  let t; // -1=cold(moving away fast), 0=neutral, +1=hot(closing fast)
-  if(velMs>1.5) t=-1;
-  else if(velMs>0.5) t=-0.5-(velMs-0.5)/1; // maps 0.5..1.5 → -0.5..-1
-  else if(velMs>0.15) t=-(velMs-0.15)/0.35; // maps 0.15..0.5 → 0..-0.5 (Cooler)
+  let t; // +1=hot(closing fast), 0=neutral, -1=cold(moving away fast)
+  if(velMs>1.5) t=1;
+  else if(velMs>0.5) t=0.5+(velMs-0.5)/1; // maps 0.5..1.5 → 0.5..1 (Warmer→HOT)
+  else if(velMs>0.15) t=(velMs-0.15)/0.35; // maps 0.15..0.5 → 0..0.5 (Warmer)
   else if(velMs>-0.15) t=0; // Same
-  else if(velMs>-0.5) t=(-0.15-velMs)/0.35; // maps -0.15..-0.5 → 0..0.5 (Warmer)
-  else if(velMs>-1.5) t=0.5+(-0.5-velMs)/1; // maps -0.5..-1.5 → 0.5..1 (Warmer→HOT)
-  else t=1; // HOT
+  else if(velMs>-0.5) t=-((0.15+velMs)/0.35); // maps -0.15..-0.5 → 0..-0.5 (Cooler)
+  else if(velMs>-1.5) t=-0.5-(-0.5-velMs)/1; // maps -0.5..-1.5 → -0.5..-1 (Cooler→COLD)
+  else t=-1; // COLD
 
   // Pulse duration: HOT=0.5s, neutral=2.5s, COLD=4s
   const dur=2.5-t*1.5; // maps [-1..1] → [4.0s..1.0s]
@@ -3161,7 +3159,7 @@ function stopSailor(){
 }
 
 function updateSailorNeedle(){
-  if(!S.myLat||!S.targetLat||!S._sailorHeading&&S._sailorHeading!==0) return;
+  if(!S.myLat||!S.targetLat||S._sailorHeading==null) return;
   const targetBearing=bearingTo(S.myLat,S.myLon,S.targetLat,S.targetLon);
   const needleAngle=targetBearing-S._sailorHeading;
   const needle=el('sailor-needle');
@@ -3278,7 +3276,7 @@ async function sendPosUpdateQueued(manual=false){
 
   // Arrival check (all modes)
   if(dist<=S.arrRadius&&!S.arrived&&!S.eliminated){
-    if(S.gameMode==='multi'&&S.multiTargets&&S.multiCurrent<2){
+    if(S.gameMode==='multi'&&S.multiTargets&&S.multiCurrent<S.multiTargets.length-1){
       // Multi-target: advance to next target
       S.multiCurrent++;
       S.targetLat=S.multiTargets[S.multiCurrent].lat;
@@ -3287,7 +3285,7 @@ async function sendPosUpdateQueued(manual=false){
       // Update Firebase target so host/spectator map shows new target
       await gRef().update({targetLat:S.targetLat,targetLon:S.targetLon});
       playArrivalSound();haptic('heavy');
-      toast('Target '+S.multiArrived+'/3 found! Next target set.',3000);
+      toast('Target '+S.multiArrived+'/'+S.multiTargets.length+' found! Next target set.',3000);
       // Reset startDist for new leg
       S.startDist=null;
     } else {
