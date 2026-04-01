@@ -24,6 +24,11 @@ The core tension: you can only figure out which direction to go by moving and wa
 - 🧭 **Live GPS distance** — straight-line, updated continuously, reliable on both iOS and Android
 - 👁 **Spectator mode** — full live map with driving routes per player, colour-coded, updating as players move
 - ⚡ **Elimination mode** — furthest player knocked out every 5 minutes
+- 🎯 **Multi-Target mode** — 3 hidden targets at increasing distances; find them all to win
+- 🔄 **Dynamic Target mode** — target moves every 3 minutes; you must keep adjusting
+- 👂 **Whisper mode** — distance hidden most of the time, revealed for 8 seconds once per minute
+- 🌡️ **Hot & Cold mode** — no distance shown; velocity-based pulse feedback tells you if you're getting warmer
+- 🧭 **Sailor mode** — compass needle always points toward the target; pure directional navigation
 - 🙈 **Blind start** — distance stays hidden until you've moved 300m straight-line from your start
 - 🏁 **Blind finish** — game continues after first arrival so everyone can finish
 - 👻 **Exclude host** — hide the host from the results leaderboard
@@ -36,8 +41,9 @@ The core tension: you can only figure out which direction to go by moving and wa
 - 🔥 **Real-time** — Firebase Realtime Database, instant updates, no polling
 - 📲 **PWA** — installable to home screen for best experience
 - 🔄 **Rejoin** — reconnect to an active game after a page reload (4-hour window)
-- 📤 **Share result card** — generate a shareable image of the final leaderboard
+- 📤 **Share result card** — generate a vertical shareable image of the final leaderboard
 - ▶ **Route replay** — watch all player trails animate on the results map
+- 📊 **Persistent stats** — tracks your games, wins, best time, and average efficiency across sessions
 - 🔋 **Battery & offline detection** — warnings for low battery and connection loss
 
 ---
@@ -76,6 +82,8 @@ The core tension: you can only figure out which direction to go by moving and wa
 | 👂 **Whisper** | Distance is hidden most of the time and revealed dramatically for 8 seconds once per minute. |
 | 🌡️ **Hot & Cold** | No distance shown at all. A pulsing ring gives velocity-based feedback: **HOT** when closing fast, **COLD** when moving away, **Same** when stationary. Navigate by feel. |
 | 🧭 **Sailor** | A compass needle always points toward the target. No distance, no proximity info — pure directional navigation. Hold the phone flat and follow the red tip. |
+| 🎯 **Multi-Target** | 3 hidden targets at increasing distances. Find the first, get a new distance to the second, and so on. First to complete all 3 wins. |
+| 🔄 **Dynamic** | The target moves 50–100m in a random direction every 3 minutes. You must keep adjusting — never fully lock on. |
 
 ### Distance display
 
@@ -87,9 +95,9 @@ Always straight-line (Haversine). Never driving distance.
 < 1 000 m  →  XXX M
 ```
 
-In Standard mode, colour shifts from neutral → orange (< 2 km) → green (< 500 m) as you close in.
+In Standard mode, colour shifts from neutral → orange (< 1 km) → green (< 200 m) as you close in.
 
-In Whisper mode the distance is hidden except during timed reveals. In Hot & Cold and Sailor modes, no distance is shown at all.
+In Whisper mode the distance is hidden except during timed reveals. In Hot & Cold, Sailor, and Dynamic modes, no distance is shown at all. In Multi-Target mode, the eyebrow shows which target you're on ("Target 1/3").
 
 ### GPS indicator
 
@@ -114,6 +122,18 @@ Behind the distance number, rings pulse outward on every GPS event:
 ---
 
 ## Game modes in detail
+
+### Multi-Target
+
+Three hidden targets are placed at increasing distances from your start point (approximately 60%, 100%, and 140% of the ideal drive time distance). In Smart mode, the algorithm generates all 3 targets automatically. In Manual mode, you place the first target and the other 2 are generated at different bearings.
+
+When you arrive at a target, a toast announces "Target 1/3 found! Next target set" and a new distance appears. The first player to find all 3 targets wins. The eyebrow on the navigator screen shows which target you're currently pursuing.
+
+### Dynamic
+
+The target position moves 50–100m in a random direction every 3 minutes. Both the host and players receive the updated position via Firebase. A toast and sound effect notify all players when the target moves.
+
+This mode is impossible to "lock onto" — you must continuously drive toward where the target *was* and adjust as it shifts.
 
 ### Hot & Cold
 
@@ -147,6 +167,21 @@ No distance is shown. No proximity feedback. Pure directional navigation.
 ### Whisper
 
 The distance number stays hidden as dashes. Once per minute it dramatically reveals for 8 seconds, then vanishes again. A countdown in the game bar shows when the next reveal will happen.
+
+---
+
+## Results and sharing
+
+After the game ends, a results screen shows:
+
+- **Winner** — with a mode-appropriate subtitle
+- **Stats grid** — distance, best time, player count
+- **Leaderboard** — all players sorted by arrival time, with colour-coded dots and team tags in teams mode
+- **Route stats** — your walked distance, efficiency (%), and rank
+- **Share card** — a vertical (600×800) image with map snapshot, game mode badge, stats, and leaderboard, ready to share on social media
+- **Route replay** — animated replay of all player trails on the map
+
+**Persistent stats** are tracked in localStorage across sessions: games played, wins, best time, average efficiency, and total distance walked. Access them from the landing page.
 
 ---
 
