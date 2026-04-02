@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232196f3'/%3E%3Cstop offset='1' stop-color='%230050c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='60' cy='60' r='14' fill='white'/%3E%3Ccircle cx='60' cy='60' r='28' stroke='white' stroke-width='3' fill='none' opacity='.55'/%3E%3Ccircle cx='60' cy='60' r='42' stroke='white' stroke-width='2' fill='none' opacity='.28'/%3E%3Cline x1='60' y1='12' x2='60' y2='28' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='108' y1='60' x2='92' y2='60' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='60' y1='108' x2='60' y2='92' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='12' y1='60' x2='28' y2='60' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" alt="Luftlinie" width="120" height="120">
+  <img src="logo.svg" alt="Luftlinie" width="120" height="120">
 </p>
 
 <h1 align="center">Luftlinie</h1>

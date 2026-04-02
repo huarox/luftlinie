@@ -86,7 +86,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .top-bar{display:flex;align-items:center;padding:10px 14px;height:var(--topbar);flex-shrink:0;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
 .top-bar>*+*{margin-left:6px}
 .top-title{flex:1;text-align:center;font-size:17px;font-weight:600;color:var(--t1)}
-.back-btn{display:flex;align-items:center;gap:2px;background:none;border:none;color:var(--blue);font-size:17px;font-weight:400;cursor:pointer;font-family:var(--font);padding:8px 4px;min-height:44px;border-radius:6px;transition:opacity .15s;white-space:nowrap;min-width:70px;-webkit-tap-highlight-color:transparent}
+.back-btn{display:flex;align-items:center;background:none;border:none;color:var(--blue);font-size:17px;font-weight:400;cursor:pointer;font-family:var(--font);padding:8px 4px;min-height:44px;border-radius:6px;transition:opacity .15s;white-space:nowrap;min-width:70px;-webkit-tap-highlight-color:transparent}
+.back-btn>*+*{margin-left:2px}
 .back-btn:active{opacity:.45}
 .back-btn svg{width:18px;height:18px}
 .body-scroll{flex:1;overflow-y:auto;padding:16px 16px 48px;padding:16px 16px max(48px,calc(env(safe-area-inset-bottom,0px) + 32px));-webkit-overflow-scrolling:touch}
@@ -127,16 +128,19 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .star:hover{transform:scale(1.1)}
 .star:active{transform:scale(.95)}
 .diff-text{font-size:13px;color:var(--t2);padding:0 14px 12px;line-height:1.5}
-.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 22px;border-radius:var(--r20);border:none;background:var(--blue);color:white;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:all .14s;white-space:nowrap;box-shadow:0 2px 8px rgba(0,122,255,.3)}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:var(--r20);border:none;background:var(--blue);color:white;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;transition:all .14s;white-space:nowrap;box-shadow:0 2px 8px rgba(0,122,255,.3)}
+.btn-primary>*+*{margin-left:7px}
 .btn-primary:hover{background:var(--blue-lt);transform:translateY(-1px)}
 .btn-primary:active{transform:scale(.97)!important;opacity:.9}
 .btn-primary:disabled{opacity:.42;cursor:default;transform:none!important;box-shadow:none}
 .btn-primary.btn-lg{font-size:16px;padding:14px 26px}.btn-primary.btn-full{width:100%}
-.btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--r20);background:var(--surf2);color:var(--blue);border:1px solid var(--border);font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;transition:all .13s;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;padding:9px 18px;border-radius:var(--r20);background:var(--surf2);color:var(--blue);border:1px solid var(--border);font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;transition:all .13s;backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur)}
+.btn-secondary>*+*{margin-left:6px}
 .btn-secondary:active{transform:scale(.97);opacity:.85}
 .btn-secondary:hover{background:var(--surf1)}
 .btn-secondary.btn-sm{font-size:13px;padding:7px 14px}.btn-secondary.btn-full{width:100%}
-.btn-green{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 22px;border-radius:var(--r20);border:none;background:var(--green);color:white;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(52,199,89,.3);transition:all .14s}
+.btn-green{display:inline-flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:var(--r20);border:none;background:var(--green);color:white;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(52,199,89,.3);transition:all .14s}
+.btn-green>*+*{margin-left:7px}
 .btn-green:hover{filter:brightness(1.07);transform:translateY(-1px)}
 .btn-green:active{transform:scale(.97)!important;filter:none}
 .btn-green.btn-lg{font-size:16px;padding:14px 26px}.btn-green.btn-full{width:100%}
@@ -163,9 +167,12 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .land-actions>*+*{margin-top:9px}
 .land-actions .btn-text{align-self:center}
 /* Compact icon buttons for toolbars */
-.toolbar-btn{width:36px;height:36px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .14s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.toolbar-btn{width:36px;height:36px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .18s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.toolbar-btn:hover{transform:scale(1.08);box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .toolbar-btn:active{transform:scale(.88);opacity:.7}
-.toolbar-btn.active{background:rgba(0,122,255,.12);border-color:rgba(0,122,255,.35)}
+.toolbar-btn.active{background:rgba(0,122,255,.15);border-color:rgba(0,122,255,.4);box-shadow:0 0 0 3px rgba(0,122,255,.12)}
+.toolbar-btn.view-toggle{background:rgba(0,122,255,.1);border-color:rgba(0,122,255,.25);color:var(--blue)}
+.toolbar-btn.view-toggle:hover{background:rgba(0,122,255,.18);border-color:rgba(0,122,255,.4)}
 .land-foot{position:absolute;bottom:24px;bottom:max(24px,env(safe-area-inset-bottom,24px));font-size:13px;color:var(--t3);letter-spacing:.3px;text-align:center}
 .map-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
 .map-back-btn{width:44px;height:44px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--blue);cursor:pointer;transition:all .14s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
@@ -260,19 +267,18 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .gps-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
 .na-center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;isolation:isolate;padding:24px 16px;transition:background .8s ease}
 .na-dist-wrapper{display:flex;flex-direction:column;align-items:center;position:relative;z-index:2}
-.na-dist{font-family:var(--mono);font-size:clamp(48px,15vw,80px);font-weight:700;color:var(--t1);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+.na-dist{font-family:var(--mono);font-size:48px;font-size:clamp(48px,15vw,80px);font-weight:700;color:var(--t1);line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-1px}
 .na-dist.blind-num{letter-spacing:4px}
 /* proximity tint goes on na-center itself, very subtle */
 .na-center.prox-close{background:rgba(255,159,10,.06)!important}
 .na-center.prox-very-close{background:rgba(52,199,89,.07)!important}
 [data-theme="dark"] .na-center.prox-close{background:rgba(255,159,10,.09)!important}
 [data-theme="dark"] .na-center.prox-very-close{background:rgba(52,199,89,.10)!important}
-.na-dist-row{display:flex;align-items:flex-end;position:relative;z-index:3}
-.na-dist-row>*+*{margin-left:8px}
+.na-dist-row{display:flex;align-items:baseline;position:relative;z-index:3;gap:6px}
 .na-dist.updating{animation:dist-flash .3s ease}
 @keyframes dist-flash{0%,100%{opacity:1}50%{opacity:.35}}
 /* na-eyebrow is BELOW the number — status messages only (blind start, whisper) */
-.na-unit{font-family:var(--mono);font-size:18px;font-size:clamp(18px,5.5vw,30px);font-weight:400;color:var(--t3);letter-spacing:2px;margin-bottom:5px}
+.na-unit{font-family:var(--mono);font-size:18px;font-size:clamp(18px,5.5vw,30px);font-weight:400;color:var(--t3);letter-spacing:2px;margin-bottom:0}
 .na-ripples{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;display:flex;align-items:center;justify-content:center;z-index:1}
 @keyframes rip-out{0%{transform:translate(-50%,-50%) scale(0.25);opacity:1}100%{transform:translate(-50%,-50%) scale(2.8);opacity:0}}
 .na-eyebrow{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--t3);margin-top:10px;min-height:16px;text-align:center;position:relative;z-index:3}
@@ -473,7 +479,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .spec-req-btns{display:flex;flex-shrink:0}
 .spec-req-btns>*+*{margin-left:6px}
 /* ── TEAM RESULT BANNER ──────────────────────────────────── */
-.team-result-banner{display:flex;align-items:center;gap:12px;padding:13px 14px;background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.2);border-radius:var(--r10);margin-bottom:12px}
+.team-result-banner{display:flex;align-items:center;padding:13px 14px;background:rgba(0,122,255,.08);border:1px solid rgba(0,122,255,.2);border-radius:var(--r10);margin-bottom:12px}
+.team-result-banner>*+*{margin-left:12px}
 [data-theme="dark"] .team-result-banner{background:rgba(0,122,255,.12);border-color:rgba(0,122,255,.35)}
 .team-result-banner.hidden{display:none!important}
 .team-result-ico{font-size:28px;flex-shrink:0}
@@ -502,7 +509,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .team-btn.team-red.active{background:var(--red);color:white;border-color:var(--red);box-shadow:0 3px 12px rgba(255,59,48,.4)}
 .team-btn.team-blue{background:rgba(0,122,255,.1);color:var(--blue);border-color:rgba(0,122,255,.2)}
 .team-btn.team-blue.active{background:var(--blue);color:white;border-color:var(--blue);box-shadow:0 3px 12px rgba(0,122,255,.4)}
-.team-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.team-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700}
+.team-badge>*+*{margin-left:4px}
 /* ── PERSISTENT STATS CARD ───────────────────────────────── */
 .stats-card{width:calc(100% - 32px);max-width:340px;margin-top:16px;background:var(--surf1);border:1px solid rgba(255,255,255,.7);border-radius:var(--r16);box-shadow:var(--sh-md);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);overflow:hidden}
 [data-theme="dark"] .stats-card{border-color:var(--border)}
@@ -511,7 +519,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .stats-card-title{font-size:14px;font-weight:700;color:var(--t1)}
 .stats-card-chevron{font-size:12px;color:var(--t3);transition:transform .2s}
 .stats-card-chevron.open{transform:rotate(180deg)}
-.stats-card-body{display:flex;gap:6px;padding:0 12px 14px;flex-wrap:wrap}
+.stats-card-body{display:flex;padding:0 12px 14px;flex-wrap:wrap}
+.stats-card-body>*{margin:3px}
 .stats-card-body.hidden{display:none!important}
 .sc-stat{flex:1;min-width:60px;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r8);padding:8px 6px;text-align:center}
 .sc-stat-v{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--t1);display:block}
@@ -549,23 +558,24 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 /* overflow menu removed — QR/Copy Link moved to host panel */
 .omenu-item.destruct{color:var(--red)}
 /* ── REFRESH demoted to a text link ─────────────────────── */
-.refresh-link{display:inline-flex;align-items:center;justify-content:center;gap:5px;margin-top:20px;font-size:12px;color:var(--t3);cursor:pointer;transition:color .14s;background:none;border:none;font-family:var(--font);padding:6px;-webkit-tap-highlight-color:transparent;position:relative;z-index:3}
+.refresh-link{display:inline-flex;align-items:center;justify-content:center;margin-top:20px;font-size:12px;color:var(--t3);cursor:pointer;transition:color .14s;background:none;border:none;font-family:var(--font);padding:6px;-webkit-tap-highlight-color:transparent;position:relative;z-index:3}
+.refresh-link>*+*{margin-left:5px}
 .refresh-link:active{color:var(--blue)}
 .refresh-link svg{width:11px;height:11px;flex-shrink:0}
 .refresh-link.spinning svg{animation:spin .6s linear infinite}
 /* ── HOT & COLD — PULSE MODE ─────────────────────────────── */
 .hc-screen{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;transition:background 1.4s ease,backdrop-filter 1.4s ease}
-.hc-ring-wrap{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center}
-.hc-ring{position:absolute;top:0;right:0;bottom:0;left:0;border-radius:50%;border:1.5px solid currentColor;animation:hc-pulse var(--hc-dur,5s) cubic-bezier(.4,0,.6,1) infinite;will-change:transform,opacity}
+.hc-ring-wrap{position:relative;width:240px;height:240px;display:flex;align-items:center;justify-content:center}
+.hc-ring{position:absolute;top:0;right:0;bottom:0;left:0;border-radius:50%;border:2px solid currentColor;animation:hc-pulse var(--hc-dur,5s) cubic-bezier(.4,0,.6,1) infinite;will-change:transform,opacity}
 .hc-ring:nth-child(2){animation-delay:calc(var(--hc-dur,5s) / -3)}
 .hc-ring:nth-child(3){animation-delay:calc(var(--hc-dur,5s) / -3 * 2)}
 @keyframes hc-pulse{
-  0%{transform:scale(.28);opacity:.85}
-  70%{opacity:.18}
-  100%{transform:scale(1);opacity:0}
+  0%{transform:scale(.25);opacity:0.9;filter:blur(0px)}
+  50%{filter:blur(1px)}
+  100%{transform:scale(1.1);opacity:0;filter:blur(2px)}
 }
-.hc-core{width:72px;height:72px;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;transition:background 1s ease,box-shadow 1s ease}
-.hc-word{position:relative;z-index:3;font-size:13px;font-weight:800;letter-spacing:3.5px;text-transform:uppercase;margin-top:32px;transition:color 1s ease;opacity:.75}
+.hc-core{width:80px;height:80px;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;transition:background 0.8s ease,box-shadow 0.8s ease;box-shadow:0 0 30px currentColor,0 0 60px currentColor}
+.hc-word{position:relative;z-index:3;font-size:14px;font-weight:800;letter-spacing:4px;text-transform:uppercase;margin-top:36px;transition:color 0.6s ease;text-shadow:0 0 20px currentColor;opacity:.85}
 /* ── PEER SCREEN DISSOLVE (nav↔host↔spec) ────────────────── */
 .sc.dissolve{transform:none!important}
 /* ── SAILOR COMPASS ──────────────────────────────────────── */
@@ -573,9 +583,14 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .sailor-compass{position:relative;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.1),rgba(255,255,255,.02));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.1),0 0 60px rgba(0,122,255,.15),0 0 100px rgba(0,122,255,.08)}
 .sailor-compass::before{content:'';position:absolute;top:10px;right:10px;bottom:10px;left:10px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
 .sailor-compass::after{content:'';position:absolute;top:20px;right:20px;bottom:20px;left:20px;border-radius:50%;border:1px dashed rgba(255,255,255,.06)}
+/* Glowing ring animations */
+.sailor-glow-ring{position:absolute;top:-10px;right:-10px;bottom:-10px;left:-10px;border-radius:50%;border:2px solid transparent;background:conic-gradient(from 0deg,transparent,rgba(0,122,255,.3),transparent,rgba(255,59,48,.3),transparent);animation:glow-rotate 4s linear infinite;opacity:0.6}
+@keyframes glow-rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.sailor-pulse-ring{position:absolute;top:-20px;right:-20px;bottom:-20px;left:-20px;border-radius:50%;border:1px solid rgba(0,122,255,.2);animation:pulse-expand 2s ease-out infinite}
+@keyframes pulse-expand{0%{transform:scale(0.8);opacity:0.5}100%{transform:scale(1.3);opacity:0}}
 .sailor-ticks{position:absolute;top:0;right:0;bottom:0;left:0}
 .s-tick{position:absolute;font-size:13px;font-weight:700;color:rgba(255,255,255,.4);font-family:var(--mono);letter-spacing:1px}
-.s-n{top:14px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);text-shadow:0 0 10px rgba(0,122,255,.5)}
+.s-n{top:14px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.9);text-shadow:0 0 15px rgba(0,122,255,.8),0 0 30px rgba(0,122,255,.4)}
 .s-e{right:14px;top:50%;transform:translateY(-50%)}
 .s-s{bottom:14px;left:50%;transform:translateX(-50%)}
 .s-w{left:14px;top:50%;transform:translateY(-50%)}
@@ -583,14 +598,19 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .s-se{bottom:24px;right:36px;font-size:10px;color:rgba(255,255,255,.25)}
 .s-sw{bottom:24px;left:36px;font-size:10px;color:rgba(255,255,255,.25)}
 .s-nw{top:24px;left:36px;font-size:10px;color:rgba(255,255,255,.25)}
-.sailor-needle{position:relative;width:4px;height:140px;transform-origin:center center;transition:transform .15s cubic-bezier(.4,0,.2,1);will-change:transform}
-.sailor-needle.aligned{animation:sailor-pulse 1.5s ease-in-out infinite}
-@keyframes sailor-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,59,48,.5)) drop-shadow(0 0 20px rgba(255,59,48,.3))}50%{filter:drop-shadow(0 0 16px rgba(255,59,48,.8)) drop-shadow(0 0 40px rgba(255,59,48,.5))}}
-.needle-tip{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:60px solid #FF3B30;filter:drop-shadow(0 0 8px rgba(255,59,48,.6))}
-.needle-tail{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:60px solid rgba(255,255,255,.25)}
-.sailor-center-dot{position:absolute;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.9),rgba(255,255,255,.5));z-index:3;box-shadow:0 0 12px rgba(0,0,0,.3),0 0 20px rgba(0,122,255,.3)}
-.sailor-distance{position:absolute;bottom:-50px;font-family:var(--mono);font-size:16px;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
-.sailor-hint{margin-top:50px;font-size:13px;color:rgba(255,255,255,.5);letter-spacing:.5px;text-align:center}
+/* Tick marks around the compass */
+.sailor-marks{position:absolute;top:0;right:0;bottom:0;left:0}
+.s-mark{position:absolute;width:1px;height:8px;background:rgba(255,255,255,.3);transform-origin:center 110px}
+.sailor-needle{position:relative;width:4px;height:140px;transform-origin:center center;transition:transform .12s cubic-bezier(.4,0,.2,1);will-change:transform}
+.sailor-needle::before{content:'';position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,rgba(255,59,48,.4),transparent);animation:needle-glow 1.5s ease-in-out infinite}
+@keyframes needle-glow{0%,100%{opacity:0.3;transform:translateX(-50%) scale(0.8)}50%{opacity:0.8;transform:translateX(-50%) scale(1.2)}}
+.sailor-needle.aligned{animation:sailor-pulse 1.2s ease-in-out infinite}
+@keyframes sailor-pulse{0%,100%{filter:drop-shadow(0 0 10px rgba(255,59,48,.6)) drop-shadow(0 0 30px rgba(255,59,48,.4))}50%{filter:drop-shadow(0 0 20px rgba(255,59,48,1)) drop-shadow(0 0 50px rgba(255,59,48,.6))}}
+.needle-tip{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:65px solid #FF3B30;filter:drop-shadow(0 0 12px rgba(255,59,48,.8))}
+.needle-tail{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:65px solid rgba(255,255,255,.2)}
+.sailor-center-dot{position:absolute;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,1),rgba(255,255,255,.6));z-index:3;box-shadow:0 0 15px rgba(0,0,0,.4),0 0 30px rgba(0,122,255,.5),0 0 50px rgba(0,122,255,.2)}
+.sailor-distance{position:absolute;bottom:-55px;font-family:var(--mono);font-size:20px;font-weight:700;color:rgba(255,255,255,.9);letter-spacing:1px;text-shadow:0 2px 10px rgba(0,0,0,.4),0 0 20px rgba(0,122,255,.3)}
+.sailor-hint{margin-top:55px;font-size:14px;color:rgba(255,255,255,.6);letter-spacing:.5px;text-align:center}
 </style>
 </head>
 <body>
@@ -887,9 +907,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="game-bar-right">
       <div class="na-gps" id="ha-gps"><span class="gps-dot"></span><span id="ha-gps-txt">GPS</span></div>
       <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
-      <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="Compass orientation">🧭</button>
-      <button class="toolbar-btn" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()" title="Switch to navigator view">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+      <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="Map orientation">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+      </button>
+      <button class="toolbar-btn view-toggle" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()" title="Switch to navigator view">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
       </button>
       <button class="btn-destruct sm" id="ha-end-btn" onclick="haptic('medium');App.abortGame()">End</button>
     </div>
@@ -906,8 +928,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
       <span class="badge blue" id="ha-nbadge">0</span>
     </div>
     <div id="ha-cards" class="nav-card-grid"></div>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn-secondary btn-sm btn-full" onclick="haptic('light');App.showQR()" style="flex:1">
+    <div style="display:flex;margin-top:10px">
+      <button class="btn-secondary btn-sm btn-full" onclick="haptic('light');App.showQR()" style="flex:1;margin-right:8px">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/></svg>
         QR Code
       </button>
@@ -937,7 +959,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="game-bar-right">
       <div class="na-gps" id="sp-gps"><span class="gps-dot"></span><span id="sp-gps-txt">GPS</span></div>
       <button class="toolbar-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
-      <button class="toolbar-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="Compass orientation">🧭</button>
+      <button class="toolbar-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="Map orientation">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+      </button>
       <button class="btn-destruct sm" id="spec-leave-btn" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
     </div>
   </div>
@@ -1031,8 +1055,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <div class="game-bar-right">
       <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
       <button class="toolbar-btn sound-btn active" id="sound-btn" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
-      <button class="toolbar-btn" id="btn-host-back" onclick="haptic('medium');App.goHostView()" title="Switch to host view" style="display:none">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"/></svg>
+      <button class="toolbar-btn view-toggle" id="btn-host-back" onclick="haptic('medium');App.goHostView()" title="Back to host view" style="display:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </button>
       <button class="btn-destruct sm" id="na-leave-btn" onclick="haptic('medium');App.leaveGame()">Leave</button>
     </div>
@@ -1069,6 +1093,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <!-- Sailor compass — directional only, no distance -->
     <div class="sailor-screen hidden" id="sailor-screen">
       <div class="sailor-compass">
+        <div class="sailor-glow-ring"></div>
+        <div class="sailor-pulse-ring"></div>
         <div class="sailor-ticks">
           <span class="s-tick s-n">N</span>
           <span class="s-tick s-e">E</span>
