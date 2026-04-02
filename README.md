@@ -1,6 +1,23 @@
-# Luftlinie
+<p align="center">
+  <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232196f3'/%3E%3Cstop offset='1' stop-color='%230050c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='60' cy='60' r='14' fill='white'/%3E%3Ccircle cx='60' cy='60' r='28' stroke='white' stroke-width='3' fill='none' opacity='.55'/%3E%3Ccircle cx='60' cy='60' r='42' stroke='white' stroke-width='2' fill='none' opacity='.28'/%3E%3Cline x1='60' y1='12' x2='60' y2='28' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='108' y1='60' x2='92' y2='60' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='60' y1='108' x2='60' y2='92' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3Cline x1='12' y1='60' x2='28' y2='60' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" alt="Luftlinie" width="120" height="120">
+</p>
 
-**You know how far. You don't know where.**
+<h1 align="center">Luftlinie</h1>
+
+<p align="center"><strong>You know how far. You don't know where.</strong></p>
+
+<p align="center">
+  Luftlinie is a real-world multiplayer navigation game. Players race to find a secret target using only distance feedback — no map, no compass, just the number getting smaller.
+</p>
+
+<p align="center">
+  <a href="https://huarox.github.io/luftlinie/">Play Now</a> •
+  <a href="#features">Features</a> •
+  <a href="#game-modes">Game Modes</a> •
+  <a href="#technical">Technical</a>
+</p>
+
+---
 
 Luftlinie (German: *as the crow flies*) is a real-world multiplayer navigation game. Players drive to a hidden target knowing only the straight-line distance to it — updated live via GPS. No map. No compass. No route. Just the number getting smaller.
 
@@ -8,13 +25,13 @@ Luftlinie (German: *as the crow flies*) is a real-world multiplayer navigation g
 
 ---
 
-## How it works
+## How It Works
 
-The **host** picks a secret target location and shares a game code. **Navigators** join on their phones and start driving. The only feedback is a single large number — the straight-line distance in kilometres or metres — which updates as their GPS position changes. The goal is to reach the target within the time limit.
+The **host** picks a secret target location and shares a 6-character game code. **Navigators** join on their phones and start driving. The only feedback is a single large number — the straight-line distance — which updates in real-time via GPS.
 
-**Spectators** can watch a live map of all players with colour-coded driving routes.
+**Spectators** watch a live map with colour-coded routes for each player.
 
-The core tension: you can only figure out which direction to go by moving and watching the number go up or down.
+> The core tension: you can only figure out which direction to go by moving and watching the number change.
 
 ---
 
@@ -121,7 +138,7 @@ Behind the distance number, rings pulse outward on every GPS event:
 
 ---
 
-## Game modes in detail
+## Game Modes In Detail
 
 ### Multi-Target
 
