@@ -580,31 +580,30 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .sc.dissolve{transform:none!important}
 /* ── SAILOR COMPASS ──────────────────────────────────────── */
 .sailor-screen{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10}
-.sailor-compass{position:relative;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.1),rgba(255,255,255,.02));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.1),0 0 60px rgba(0,122,255,.15),0 0 100px rgba(0,122,255,.08)}
-.sailor-compass::before{content:'';position:absolute;top:10px;right:10px;bottom:10px;left:10px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
-.sailor-compass::after{content:'';position:absolute;top:20px;right:20px;bottom:20px;left:20px;border-radius:50%;border:1px dashed rgba(255,255,255,.06)}
-/* Elegant ring decorations */
-.sailor-ring-outer{position:absolute;top:-8px;right:-8px;bottom:-8px;left:-8px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
-.sailor-ring-glow{position:absolute;top:-15px;right:-15px;bottom:-15px;left:-15px;border-radius:50%;background:radial-gradient(circle,transparent 45%,rgba(0,122,255,.08) 70%,transparent 100%);animation:breathe 3s ease-in-out infinite}
-@keyframes breathe{0%,100%{opacity:0.4;transform:scale(0.95)}50%{opacity:0.8;transform:scale(1.05)}}
+.sailor-compass{position:relative;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.06)}
+/* Tick marks */
 .sailor-ticks{position:absolute;top:0;right:0;bottom:0;left:0}
-.s-tick{position:absolute;font-size:13px;font-weight:700;color:rgba(255,255,255,.4);font-family:var(--mono);letter-spacing:1px}
-.s-n{top:14px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.9);text-shadow:0 0 15px rgba(0,122,255,.8),0 0 30px rgba(0,122,255,.4)}
-.s-e{right:14px;top:50%;transform:translateY(-50%)}
-.s-s{bottom:14px;left:50%;transform:translateX(-50%)}
-.s-w{left:14px;top:50%;transform:translateY(-50%)}
-.s-ne{top:24px;right:36px;font-size:10px;color:rgba(255,255,255,.25)}
-.s-se{bottom:24px;right:36px;font-size:10px;color:rgba(255,255,255,.25)}
-.s-sw{bottom:24px;left:36px;font-size:10px;color:rgba(255,255,255,.25)}
-.s-nw{top:24px;left:36px;font-size:10px;color:rgba(255,255,255,.25)}
-/* Needle - elegant arrow design */
-.sailor-needle{position:relative;width:3px;height:130px;transform-origin:center center;transition:transform .15s cubic-bezier(.4,0,.2,1);will-change:transform}
-.sailor-needle.aligned .needle-tip{filter:drop-shadow(0 0 8px rgba(255,59,48,.6))}
-.needle-tip{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:55px solid #FF3B30;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));transition:filter .3s ease}
-.needle-tail{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:55px solid rgba(255,255,255,.15)}
-.sailor-center-dot{position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.95),rgba(255,255,255,.7));z-index:3;box-shadow:0 2px 8px rgba(0,0,0,.3),0 0 15px rgba(0,122,255,.2)}
-.sailor-distance{position:absolute;bottom:-50px;font-family:var(--mono);font-size:18px;font-weight:600;color:rgba(255,255,255,.85);letter-spacing:1px}
-.sailor-hint{margin-top:50px;font-size:13px;color:rgba(255,255,255,.5);letter-spacing:.3px;text-align:center}
+.s-tick{position:absolute;font-size:12px;font-weight:600;color:rgba(255,255,255,.35);font-family:var(--mono);letter-spacing:.5px}
+.s-n{top:12px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);font-weight:700}
+.s-e{right:12px;top:50%;transform:translateY(-50%)}
+.s-s{bottom:12px;left:50%;transform:translateX(-50%)}
+.s-w{left:12px;top:50%;transform:translateY(-50%)}
+.s-ne{top:22px;right:30px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-se{bottom:22px;right:30px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-sw{bottom:22px;left:30px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-nw{top:22px;left:30px;font-size:9px;color:rgba(255,255,255,.2)}
+/* Small tick marks around edge */
+.sailor-marks{position:absolute;top:0;right:0;bottom:0;left:0}
+.s-mark{position:absolute;top:0;left:50%;width:1px;height:6px;background:rgba(255,255,255,.15);transform-origin:center 120px}
+.s-mark.major{height:10px;background:rgba(255,255,255,.25)}
+/* Needle */
+.sailor-needle{position:relative;width:2px;height:100px;transform-origin:center center;transition:transform .2s cubic-bezier(.4,0,.2,1);will-change:transform}
+.needle-tip{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:45px solid #FF3B30}
+.needle-tail{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-top:45px solid rgba(255,255,255,.15)}
+.sailor-center-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.8);z-index:3;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+/* Distance below compass */
+.sailor-distance{margin-top:20px;font-family:var(--mono);font-size:16px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.5px}
+.sailor-hint{margin-top:12px;font-size:12px;color:rgba(255,255,255,.35);letter-spacing:.3px;text-align:center}
 </style>
 </head>
 <body>
@@ -1093,8 +1092,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <!-- Sailor compass — directional only, no distance -->
     <div class="sailor-screen hidden" id="sailor-screen">
       <div class="sailor-compass">
-        <div class="sailor-ring-outer"></div>
-        <div class="sailor-ring-glow"></div>
+        <div class="sailor-marks" id="sailor-marks"></div>
         <div class="sailor-ticks">
           <span class="s-tick s-n">N</span>
           <span class="s-tick s-e">E</span>
@@ -3312,6 +3310,16 @@ function startSailor(){
 function _startSailorListener(){
   S._sailorSmoothHeading=0;
   S._sailorHeadingCount=0;
+  // Generate tick marks around compass edge
+  var marks=el('sailor-marks');
+  if(marks&&!marks.children.length){
+    for(var i=0;i<72;i++){
+      var mark=document.createElement('div');
+      mark.className=i%9===0?'s-mark major':'s-mark';
+      mark.style.transform='rotate('+i*5+'deg)';
+      marks.appendChild(mark);
+    }
+  }
   
   S._sailorListener=function(e){
     var rawHeading=e.webkitCompassHeading!=null?e.webkitCompassHeading:(360-(e.alpha||0))%360;
