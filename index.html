@@ -119,7 +119,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 [data-theme="dark"] .slider{background:linear-gradient(to right,var(--blue) var(--pct,25%),rgba(255,255,255,.15) var(--pct,25%))}
 .slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--surf1);cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.22),0 0 0 .5px rgba(0,0,0,.08);transition:transform .15s var(--spring),box-shadow .15s ease}
 .slider::-webkit-slider-thumb:active{transform:scale(1.15);box-shadow:0 2px 8px rgba(0,0,0,.28),0 0 0 .5px rgba(0,0,0,.08)}
-.slider-marks{display:flex;justify-content:space-between;padding:0 14px 12px;font-size:11px;color:var(--t3)}
+.slider-marks{display:flex;justify-content:space-between;padding:0 14px 12px;font-size:11px;color:var(--t3);margin-left:0;margin-right:0}
 .stars-row{display:flex;padding:8px 14px 6px}
 .stars-row>*+*{margin-left:2px}
 .star{background:none;border:none;font-size:28px;cursor:pointer;color:rgba(0,0,0,.13);line-height:1;padding:8px 6px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--spring),color .2s ease;-webkit-tap-highlight-color:transparent}
@@ -156,7 +156,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .badge.blue{background:rgba(0,122,255,.1);color:var(--blue)}
 .badge.green{background:rgba(52,199,89,.1);color:var(--green)}
 #sc-land{justify-content:center;align-items:center;flex-direction:column;padding-bottom:60px}
-.land-glass{display:flex;flex-direction:column;align-items:center;padding:32px 28px;text-align:center;width:calc(100% - 32px);max-width:340px;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.7);border-radius:var(--r20);box-shadow:var(--sh-lg)}
+.land-glass{display:flex;flex-direction:column;align-items:center;padding:32px 28px 80px;text-align:center;width:calc(100% - 32px);max-width:340px;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.7);border-radius:var(--r20);box-shadow:var(--sh-lg)}
 [data-theme="dark"] .land-glass{border-color:rgba(255,255,255,.12)}
 .land-icon{width:84px;height:84px;border-radius:22px;background:linear-gradient(145deg,#2196f3 0%,#0050c8 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,80,200,.45),inset 0 1px 0 rgba(255,255,255,.2);margin-bottom:18px;padding:16px;animation:float 4s ease-in-out infinite}
 .land-icon svg{width:100%;height:100%}
@@ -702,9 +702,13 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
 <div class="section-label">How Far?</div>
 <div class="card" style="margin-bottom:22px">
-  <div class="card-row"><span class="row-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
+  <div class="seg-ctrl" id="seg-travel" style="margin:10px 14px 6px">
+    <button class="seg active" data-v="drive" onclick="App.setTravel('drive')">🚗 Drive</button>
+    <button class="seg" data-v="walk" onclick="App.setTravel('walk')">🚶 Walk</button>
+  </div>
+  <div class="card-row"><span class="row-label" id="sv-travel-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
   <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
-  <div class="slider-marks"><span>10 min</span><span>30</span><span>60</span><span>90 min</span></div>
+  <div class="slider-marks" id="slider-marks"><span>10 min</span><span>30</span><span>60</span><span>90 min</span></div>
   <div class="timelimit-row">
     <span class="tl-lbl">Player time limit</span><span class="tl-val" id="sv-limit">60 min</span>
   </div>
@@ -1298,7 +1302,7 @@ const S = {
   /* setup */
   idealMin:30, diff:3, arrRadius:50, mode:'manual', hostRole:'spectator', role:'navigator',
   elimMode:false, blindStart:false, blindFinish:true, excludeHost:true,
-  gameMode:'standard', whisperMode:false, teamsMode:false, myTeam:null,
+  gameMode:'standard', travelMode:'drive', whisperMode:false, teamsMode:false, myTeam:null,
   /* identity */
   gameCode:null, isHost:false, myToken:null, myName:'You',
   hostPlayerToken:null, hostViewActive:true,
@@ -1498,11 +1502,35 @@ function goHome(){ stopAutoZoom(); stopDynamicTarget(); clearSession(); resetGam
 
 /* ── SETUP ───────────────────────────────────────────────── */
 function upSetup(){
-  const t=+(el('sl-time')?el('sl-time').value:'30'); S.idealMin=t;
-  const pct=((t-10)/80*100).toFixed(1);
-  const sl=el('sl-time'); if(sl)sl.style.setProperty('--pct',pct+'%');
-  set('sv-time',t+' min'); set('sv-limit',Math.round(t*DIFF.mult[S.diff])+' min');
+  const travel=S.travelMode||'drive';
+  const slider=el('sl-time');
+  if(!slider)return;
+  const t=+slider.value;
+  S.idealMin=t;
+  // Calculate slider fill percentage
+  const minVal=travel==='walk'?5:10;
+  const maxVal=travel==='walk'?45:90;
+  const pct=((t-minVal)/(maxVal-minVal)*100).toFixed(1);
+  slider.style.setProperty('--pct',pct+'%');
+  set('sv-time',t+' min');
+  set('sv-limit',Math.round(t*DIFF.mult[S.diff])+' min');
+  set('sv-travel-label',travel==='drive'?'Drive time':'Walk time');
   updateRangeRing();
+}
+function setTravel(m){
+  S.travelMode=m;
+  document.querySelectorAll('#seg-travel .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===m));
+  const slider=el('sl-time');
+  if(m==='walk'){
+    slider.min=5;slider.max=45;
+    slider.value=Math.min(+slider.value||30,45);
+    document.getElementById('slider-marks').innerHTML='<span>5 min</span><span>15</span><span>30</span><span>45 min</span>';
+  } else {
+    slider.min=10;slider.max=90;
+    slider.value=Math.max(+slider.value||30,10);
+    document.getElementById('slider-marks').innerHTML='<span>10 min</span><span>30</span><span>60</span><span>90 min</span>';
+  }
+  upSetup();
 }
 function setDiff(d){
   S.diff=d;
@@ -3308,49 +3336,15 @@ function startSailor(){
 }
 
 function _startSailorListener(){
-  S._sailorSmoothHeading=0;
-  S._sailorHeadingCount=0;
-  // Generate tick marks around compass edge
-  var marks=el('sailor-marks');
-  if(marks&&!marks.children.length){
-    for(var i=0;i<72;i++){
-      var mark=document.createElement('div');
-      mark.className=i%9===0?'s-mark major':'s-mark';
-      mark.style.transform='rotate('+i*5+'deg)';
-      marks.appendChild(mark);
-    }
-  }
-  
+  S._sailorHeading=0;
   S._sailorListener=function(e){
-    var rawHeading=e.webkitCompassHeading!=null?e.webkitCompassHeading:(360-(e.alpha||0))%360;
+    var heading=e.webkitCompassHeading!=null?e.webkitCompassHeading:(360-(e.alpha||0))%360;
     // Car browsers may fire events with all zeros — detect and warn
-    if(rawHeading===0&&e.alpha===0&&e.webkitCompassHeading==null){
+    if(heading===0&&e.alpha===0&&e.webkitCompassHeading==null){
       el('sailor-hint').textContent='Compass unavailable — rotate device to calibrate';
       return;
     }
-    
-    // Detect and reject obviously bad readings (jumps > 30 degrees)
-    if(S._sailorHeadingCount > 0){
-      let diff = rawHeading - S._sailorSmoothHeading;
-      if(diff > 180) diff -= 360;
-      if(diff < -180) diff += 360;
-      if(Math.abs(diff) > 30){
-        // Reject this reading - likely a glitch
-        return;
-      }
-    }
-    
-    // Low-pass filter: smooth = 0.85 * smooth + 0.15 * raw
-    S._sailorSmoothHeading = S._sailorSmoothHeading * 0.85 + rawHeading * 0.15;
-    
-    // Handle wrap-around
-    let diff = rawHeading - S._sailorSmoothHeading;
-    if(diff > 180) S._sailorSmoothHeading += 360;
-    if(diff < -180) S._sailorSmoothHeading -= 360;
-    
-    S._sailorHeading=S._sailorSmoothHeading;
-    S._sailorHeadingCount++;
-    
+    S._sailorHeading=heading;
     el('sailor-hint').textContent='';
     updateSailorNeedle();
   };
@@ -3656,9 +3650,16 @@ async function shareResult(){
     if(S.resMap){
       try{
         const bounds=S.resMap.getBounds();
+        // Use proper Mercator projection for accurate coordinate conversion
         const toXY=function(lat,lon){
-          const nx=(lon-bounds.getWest())/(bounds.getEast()-bounds.getWest());
-          const ny=1-(lat-bounds.getSouth())/(bounds.getNorth()-bounds.getSouth());
+          const south=bounds.getSouth(),north=bounds.getNorth();
+          const west=bounds.getWest(),east=bounds.getEast();
+          const latRad=lat*Math.PI/180;
+          const mercN=Math.log(Math.tan(Math.PI/4+latRad/2));
+          const mercS=Math.log(Math.tan(Math.PI/4+south*Math.PI/360));
+          const mercN2=Math.log(Math.tan(Math.PI/4+north*Math.PI/360));
+          const nx=(lon-west)/(east-west);
+          const ny=1-(mercN-mercS)/(mercN2-mercS);
           return[mapX+nx*mapW,mapY+ny*mapH];
         };
         // Draw trails
@@ -3824,7 +3825,7 @@ function toggleAdvanced(){
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
-  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,updateGoMapBtn,upSetup,toggleAdvanced,
+  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,setTravel,updateGoMapBtn,upSetup,toggleAdvanced,
   goMap,smartPick,confirmTarget,
   copyLink,copyCodeTap,showQR,hideQR,lockStart,toggleMyView,goHostView,leaveOrHostView,abortGame,confirmAbort,cancelAbort,
   joinGame,leaveGame,
