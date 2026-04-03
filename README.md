@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.svg" alt="Luftlinie" width="120" height="120">
+  <img src="logo.svg" alt="Luftlinie" width="120" height="120" style="border-radius: 22px;">
 </p>
 
 <h1 align="center">Luftlinie</h1>
