@@ -702,13 +702,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
 <div class="section-label">How Far?</div>
 <div class="card" style="margin-bottom:22px">
-  <div class="seg-ctrl" id="seg-travel" style="margin:10px 14px 6px">
-    <button class="seg active" data-v="drive" onclick="App.setTravel('drive')">🚗 Drive</button>
-    <button class="seg" data-v="walk" onclick="App.setTravel('walk')">🚶 Walk</button>
-  </div>
-  <div class="card-row"><span class="row-label" id="sv-travel-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
+  <div class="card-row"><span class="row-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
   <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
-  <div class="slider-marks" id="slider-marks"><span>10 min</span><span>30</span><span>60</span><span>90 min</span></div>
+  <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90</span></div>
   <div class="timelimit-row">
     <span class="tl-lbl">Player time limit</span><span class="tl-val" id="sv-limit">60 min</span>
   </div>
@@ -1302,7 +1298,7 @@ const S = {
   /* setup */
   idealMin:30, diff:3, arrRadius:50, mode:'manual', hostRole:'spectator', role:'navigator',
   elimMode:false, blindStart:false, blindFinish:true, excludeHost:true,
-  gameMode:'standard', travelMode:'drive', whisperMode:false, teamsMode:false, myTeam:null,
+  gameMode:'standard', whisperMode:false, teamsMode:false, myTeam:null,
   /* identity */
   gameCode:null, isHost:false, myToken:null, myName:'You',
   hostPlayerToken:null, hostViewActive:true,
@@ -1502,35 +1498,11 @@ function goHome(){ stopAutoZoom(); stopDynamicTarget(); clearSession(); resetGam
 
 /* ── SETUP ───────────────────────────────────────────────── */
 function upSetup(){
-  const travel=S.travelMode||'drive';
-  const slider=el('sl-time');
-  if(!slider)return;
-  const t=+slider.value;
-  S.idealMin=t;
-  // Calculate slider fill percentage
-  const minVal=travel==='walk'?5:10;
-  const maxVal=travel==='walk'?45:90;
-  const pct=((t-minVal)/(maxVal-minVal)*100).toFixed(1);
-  slider.style.setProperty('--pct',pct+'%');
-  set('sv-time',t+' min');
-  set('sv-limit',Math.round(t*DIFF.mult[S.diff])+' min');
-  set('sv-travel-label',travel==='drive'?'Drive time':'Walk time');
+  const t=+(el('sl-time')?el('sl-time').value:'30'); S.idealMin=t;
+  const pct=((t-10)/80*100).toFixed(1);
+  const sl=el('sl-time'); if(sl)sl.style.setProperty('--pct',pct+'%');
+  set('sv-time',t+' min'); set('sv-limit',Math.round(t*DIFF.mult[S.diff])+' min');
   updateRangeRing();
-}
-function setTravel(m){
-  S.travelMode=m;
-  document.querySelectorAll('#seg-travel .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===m));
-  const slider=el('sl-time');
-  if(m==='walk'){
-    slider.min=5;slider.max=45;
-    slider.value=Math.min(+slider.value||30,45);
-    document.getElementById('slider-marks').innerHTML='<span>5 min</span><span>15</span><span>30</span><span>45 min</span>';
-  } else {
-    slider.min=10;slider.max=90;
-    slider.value=Math.max(+slider.value||30,10);
-    document.getElementById('slider-marks').innerHTML='<span>10 min</span><span>30</span><span>60</span><span>90 min</span>';
-  }
-  upSetup();
 }
 function setDiff(d){
   S.diff=d;
@@ -3825,7 +3797,7 @@ function toggleAdvanced(){
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
-  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,setTravel,updateGoMapBtn,upSetup,toggleAdvanced,
+  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,updateGoMapBtn,upSetup,toggleAdvanced,
   goMap,smartPick,confirmTarget,
   copyLink,copyCodeTap,showQR,hideQR,lockStart,toggleMyView,goHostView,leaveOrHostView,abortGame,confirmAbort,cancelAbort,
   joinGame,leaveGame,
