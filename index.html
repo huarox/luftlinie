@@ -119,7 +119,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 [data-theme="dark"] .slider{background:linear-gradient(to right,var(--blue) var(--pct,25%),rgba(255,255,255,.15) var(--pct,25%))}
 .slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--surf1);cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.22),0 0 0 .5px rgba(0,0,0,.08);transition:transform .15s var(--spring),box-shadow .15s ease}
 .slider::-webkit-slider-thumb:active{transform:scale(1.15);box-shadow:0 2px 8px rgba(0,0,0,.28),0 0 0 .5px rgba(0,0,0,.08)}
-.slider-marks{display:flex;justify-content:space-between;padding:0 14px 12px;font-size:11px;color:var(--t3)}
+.slider-marks{display:flex;justify-content:space-between;padding:0 14px 12px;font-size:11px;color:var(--t3);margin-left:0;margin-right:0}
 .stars-row{display:flex;padding:8px 14px 6px}
 .stars-row>*+*{margin-left:2px}
 .star{background:none;border:none;font-size:28px;cursor:pointer;color:rgba(0,0,0,.13);line-height:1;padding:8px 6px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--spring),color .2s ease;-webkit-tap-highlight-color:transparent}
@@ -155,8 +155,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
 .badge.blue{background:rgba(0,122,255,.1);color:var(--blue)}
 .badge.green{background:rgba(52,199,89,.1);color:var(--green)}
-#sc-land{justify-content:center;align-items:center;flex-direction:column}
-.land-glass{display:flex;flex-direction:column;align-items:center;padding:32px 28px;text-align:center;width:calc(100% - 32px);max-width:340px;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.7);border-radius:var(--r20);box-shadow:var(--sh-lg)}
+#sc-land{justify-content:center;align-items:center;flex-direction:column;padding-bottom:60px}
+.land-glass{display:flex;flex-direction:column;align-items:center;padding:32px 28px 80px;text-align:center;width:calc(100% - 32px);max-width:340px;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid rgba(255,255,255,.7);border-radius:var(--r20);box-shadow:var(--sh-lg)}
 [data-theme="dark"] .land-glass{border-color:rgba(255,255,255,.12)}
 .land-icon{width:84px;height:84px;border-radius:22px;background:linear-gradient(145deg,#2196f3 0%,#0050c8 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,80,200,.45),inset 0 1px 0 rgba(255,255,255,.2);margin-bottom:18px;padding:16px;animation:float 4s ease-in-out infinite}
 .land-icon svg{width:100%;height:100%}
@@ -173,7 +173,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .toolbar-btn.active{background:rgba(0,122,255,.15);border-color:rgba(0,122,255,.4);box-shadow:0 0 0 3px rgba(0,122,255,.12)}
 .toolbar-btn.view-toggle{background:rgba(0,122,255,.1);border-color:rgba(0,122,255,.25);color:var(--blue)}
 .toolbar-btn.view-toggle:hover{background:rgba(0,122,255,.18);border-color:rgba(0,122,255,.4)}
-.land-foot{position:absolute;bottom:24px;bottom:max(24px,env(safe-area-inset-bottom,24px));font-size:13px;color:var(--t3);letter-spacing:.3px;text-align:center}
+.land-foot{position:absolute;bottom:20px;bottom:max(20px,env(safe-area-inset-bottom,20px));font-size:12px;color:var(--t3);letter-spacing:.3px;text-align:center;width:100%;z-index:1}
 .map-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;flex-shrink:0;position:relative;z-index:500;background:var(--surf1);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border-bottom:1px solid var(--border)}
 .map-back-btn{width:44px;height:44px;border-radius:50%;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--blue);cursor:pointer;transition:all .14s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .map-back-btn:active{transform:scale(.9);opacity:.7}
@@ -580,37 +580,30 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 .sc.dissolve{transform:none!important}
 /* ── SAILOR COMPASS ──────────────────────────────────────── */
 .sailor-screen{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10}
-.sailor-compass{position:relative;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.1),rgba(255,255,255,.02));backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(0,0,0,.2),inset 0 2px 0 rgba(255,255,255,.1),0 0 60px rgba(0,122,255,.15),0 0 100px rgba(0,122,255,.08)}
-.sailor-compass::before{content:'';position:absolute;top:10px;right:10px;bottom:10px;left:10px;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
-.sailor-compass::after{content:'';position:absolute;top:20px;right:20px;bottom:20px;left:20px;border-radius:50%;border:1px dashed rgba(255,255,255,.06)}
-/* Glowing ring animations */
-.sailor-glow-ring{position:absolute;top:-10px;right:-10px;bottom:-10px;left:-10px;border-radius:50%;border:2px solid transparent;background:conic-gradient(from 0deg,transparent,rgba(0,122,255,.3),transparent,rgba(255,59,48,.3),transparent);animation:glow-rotate 4s linear infinite;opacity:0.6}
-@keyframes glow-rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-.sailor-pulse-ring{position:absolute;top:-20px;right:-20px;bottom:-20px;left:-20px;border-radius:50%;border:1px solid rgba(0,122,255,.2);animation:pulse-expand 2s ease-out infinite}
-@keyframes pulse-expand{0%{transform:scale(0.8);opacity:0.5}100%{transform:scale(1.3);opacity:0}}
+.sailor-compass{position:relative;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.04);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.15),inset 0 1px 0 rgba(255,255,255,.06)}
+/* Tick marks */
 .sailor-ticks{position:absolute;top:0;right:0;bottom:0;left:0}
-.s-tick{position:absolute;font-size:13px;font-weight:700;color:rgba(255,255,255,.4);font-family:var(--mono);letter-spacing:1px}
-.s-n{top:14px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.9);text-shadow:0 0 15px rgba(0,122,255,.8),0 0 30px rgba(0,122,255,.4)}
-.s-e{right:14px;top:50%;transform:translateY(-50%)}
-.s-s{bottom:14px;left:50%;transform:translateX(-50%)}
-.s-w{left:14px;top:50%;transform:translateY(-50%)}
-.s-ne{top:24px;right:36px;font-size:10px;color:rgba(255,255,255,.25)}
-.s-se{bottom:24px;right:36px;font-size:10px;color:rgba(255,255,255,.25)}
-.s-sw{bottom:24px;left:36px;font-size:10px;color:rgba(255,255,255,.25)}
-.s-nw{top:24px;left:36px;font-size:10px;color:rgba(255,255,255,.25)}
-/* Tick marks around the compass */
+.s-tick{position:absolute;font-size:12px;font-weight:600;color:rgba(255,255,255,.35);font-family:var(--mono);letter-spacing:.5px}
+.s-n{top:12px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.7);font-weight:700}
+.s-e{right:12px;top:50%;transform:translateY(-50%)}
+.s-s{bottom:12px;left:50%;transform:translateX(-50%)}
+.s-w{left:12px;top:50%;transform:translateY(-50%)}
+.s-ne{top:22px;right:30px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-se{bottom:22px;right:30px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-sw{bottom:22px;left:30px;font-size:9px;color:rgba(255,255,255,.2)}
+.s-nw{top:22px;left:30px;font-size:9px;color:rgba(255,255,255,.2)}
+/* Small tick marks around edge */
 .sailor-marks{position:absolute;top:0;right:0;bottom:0;left:0}
-.s-mark{position:absolute;width:1px;height:8px;background:rgba(255,255,255,.3);transform-origin:center 110px}
-.sailor-needle{position:relative;width:4px;height:140px;transform-origin:center center;transition:transform .12s cubic-bezier(.4,0,.2,1);will-change:transform}
-.sailor-needle::before{content:'';position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,rgba(255,59,48,.4),transparent);animation:needle-glow 1.5s ease-in-out infinite}
-@keyframes needle-glow{0%,100%{opacity:0.3;transform:translateX(-50%) scale(0.8)}50%{opacity:0.8;transform:translateX(-50%) scale(1.2)}}
-.sailor-needle.aligned{animation:sailor-pulse 1.2s ease-in-out infinite}
-@keyframes sailor-pulse{0%,100%{filter:drop-shadow(0 0 10px rgba(255,59,48,.6)) drop-shadow(0 0 30px rgba(255,59,48,.4))}50%{filter:drop-shadow(0 0 20px rgba(255,59,48,1)) drop-shadow(0 0 50px rgba(255,59,48,.6))}}
-.needle-tip{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:65px solid #FF3B30;filter:drop-shadow(0 0 12px rgba(255,59,48,.8))}
-.needle-tail{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:65px solid rgba(255,255,255,.2)}
-.sailor-center-dot{position:absolute;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,1),rgba(255,255,255,.6));z-index:3;box-shadow:0 0 15px rgba(0,0,0,.4),0 0 30px rgba(0,122,255,.5),0 0 50px rgba(0,122,255,.2)}
-.sailor-distance{position:absolute;bottom:-55px;font-family:var(--mono);font-size:20px;font-weight:700;color:rgba(255,255,255,.9);letter-spacing:1px;text-shadow:0 2px 10px rgba(0,0,0,.4),0 0 20px rgba(0,122,255,.3)}
-.sailor-hint{margin-top:55px;font-size:14px;color:rgba(255,255,255,.6);letter-spacing:.5px;text-align:center}
+.s-mark{position:absolute;top:0;left:50%;width:1px;height:6px;background:rgba(255,255,255,.15);transform-origin:center 120px}
+.s-mark.major{height:10px;background:rgba(255,255,255,.25)}
+/* Needle */
+.sailor-needle{position:relative;width:2px;height:100px;transform-origin:center center;transition:transform .2s cubic-bezier(.4,0,.2,1);will-change:transform}
+.needle-tip{position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:45px solid #FF3B30}
+.needle-tail{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;border-top:45px solid rgba(255,255,255,.15)}
+.sailor-center-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.8);z-index:3;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+/* Distance below compass */
+.sailor-distance{margin-top:20px;font-family:var(--mono);font-size:16px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.5px}
+.sailor-hint{margin-top:12px;font-size:12px;color:rgba(255,255,255,.35);letter-spacing:.3px;text-align:center}
 </style>
 </head>
 <body>
@@ -711,7 +704,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div class="card" style="margin-bottom:22px">
   <div class="card-row"><span class="row-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
   <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
-  <div class="slider-marks"><span>10 min</span><span>30</span><span>60</span><span>90 min</span></div>
+  <div class="slider-marks"><span>10</span><span>30</span><span>60</span><span>90</span></div>
   <div class="timelimit-row">
     <span class="tl-lbl">Player time limit</span><span class="tl-val" id="sv-limit">60 min</span>
   </div>
@@ -906,7 +899,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <div class="game-bar-right">
       <div class="na-gps" id="ha-gps"><span class="gps-dot"></span><span id="ha-gps-txt">GPS</span></div>
-      <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
+      <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
       <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="Map orientation">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
       </button>
@@ -958,7 +953,9 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <div class="game-bar-right">
       <div class="na-gps" id="sp-gps"><span class="gps-dot"></span><span id="sp-gps-txt">GPS</span></div>
-      <button class="toolbar-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
+      <button class="toolbar-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
       <button class="toolbar-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="Map orientation">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
       </button>
@@ -1054,9 +1051,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     </div>
     <div class="game-bar-right">
       <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
-      <button class="toolbar-btn sound-btn active" id="sound-btn" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
+      <button class="toolbar-btn sound-btn active" id="sound-btn" onclick="haptic('light');App.toggleSound()" title="Sound">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
       <button class="toolbar-btn view-toggle" id="btn-host-back" onclick="haptic('medium');App.goHostView()" title="Back to host view" style="display:none">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </button>
       <button class="btn-destruct sm" id="na-leave-btn" onclick="haptic('medium');App.leaveGame()">Leave</button>
     </div>
@@ -1093,8 +1092,7 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
     <!-- Sailor compass — directional only, no distance -->
     <div class="sailor-screen hidden" id="sailor-screen">
       <div class="sailor-compass">
-        <div class="sailor-glow-ring"></div>
-        <div class="sailor-pulse-ring"></div>
+        <div class="sailor-marks" id="sailor-marks"></div>
         <div class="sailor-ticks">
           <span class="s-tick s-n">N</span>
           <span class="s-tick s-e">E</span>
@@ -2029,7 +2027,7 @@ function updateHostMapDots(players){
     const trail=S.playerTrails[p.id],pt=[+p.lat,+p.lon];
     const last=trail[trail.length-1];
     if(!last||hav(last[0],last[1],pt[0],pt[1])>5)trail.push(pt);
-    if(trail.length>1){if(S.hostTrails[p.id])S.hostMap.removeLayer(S.hostTrails[p.id]);S.hostTrails[p.id]=L.polyline(trail,{color:PCOLS[i%PCOLS.length],weight:2,opacity:.55,dashArray:'5 4'}).addTo(S.hostMap);}
+    if(trail.length>1){if(S.hostTrails[p.id])S.hostMap.removeLayer(S.hostTrails[p.id]);S.hostTrails[p.id]=L.polyline(trail,{color:PCOLS[i%PCOLS.length],weight:3,opacity:.7}).addTo(S.hostMap);}
     S.hostDots[p.id]=L.marker(pt,{icon:dotIcon(PCOLS[i%PCOLS.length],13,true)}).bindTooltip(escHtml(p.name),{permanent:false,direction:'top'}).addTo(S.hostMap);
   });
 }
@@ -2236,7 +2234,7 @@ async function fetchRoute(playerId,fromPt,toLat,toLon,col){
     const latlngs=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
     if(!S.specMap){S._routePending[playerId]=false;return;}
     if(S.specRoutes[playerId])S.specMap.removeLayer(S.specRoutes[playerId]);
-    S.specRoutes[playerId]=L.polyline(latlngs,{color:col,weight:3.5,opacity:.75}).addTo(S.specMap);
+    S.specRoutes[playerId]=L.polyline(latlngs,{color:col,weight:3,opacity:.7}).addTo(S.specMap);
     S.specRoutes[playerId].bringToBack();
     S._lastRoutePos[playerId]=fromPt;
   }catch(_){clearTimeout(timer);}
@@ -3126,7 +3124,10 @@ function startHotCold(){
   var rb3=el('refresh-btn');if(rb3)rb3.classList.add('hidden');
   // Init history with current dist if known
   if(!S._hcHistory) S._hcHistory=[];
-  if(S.lastDist) S._hcHistory=[{dist:S.lastDist,ts:Date.now()}];
+  if(S.lastDist){
+    S._hcHistory=[{dist:S.lastDist,ts:Date.now()}];
+    S._hcStartDist=S.lastDist; // Store initial distance for progress calculation
+  }
   updateHotColdTrend();
 }
 
@@ -3140,49 +3141,70 @@ function updateHotColdTrend(){
   const hist=S._hcHistory||[];
   // Need at least 2 readings with meaningful time gap
   if(hist.length<2){
-    _applyHCState('neutral',2.5);
+    _applyHCState(0,0,2.5); // neutral
     return;
   }
   const oldest=hist[0], newest=hist[hist.length-1];
   const dtSec=(newest.ts-oldest.ts)/1000;
   if(dtSec<0.5){
-    _applyHCState('neutral',2.5);
+    _applyHCState(0,0,2.5); // neutral
     return;
   }
+  
   // Velocity in m/s: positive = closing in, negative = moving away
   const velMs=(oldest.dist-newest.dist)/dtSec;
-
-  // Map velocity to labels and intensity
-  // HOT: closing >1.5 m/s, Warmer: 0.5-1.5, Same: -0.5 to 0.5, Cooler: -0.5 to -1.5, COLD: moving away >1.5
-  let t; // +1=hot(closing fast), 0=neutral, -1=cold(moving away fast)
-  if(velMs>1.5) t=1;
-  else if(velMs>0.5) t=0.5+(velMs-0.5)/1; // maps 0.5..1.5 → 0.5..1 (Warmer→HOT)
-  else if(velMs>0.15) t=(velMs-0.15)/0.35; // maps 0.15..0.5 → 0..0.5 (Warmer)
-  else if(velMs>-0.15) t=0; // Same
-  else if(velMs>-0.5) t=-((0.15+velMs)/0.35); // maps -0.15..-0.5 → 0..-0.5 (Cooler)
-  else if(velMs>-1.5) t=-0.5-(-0.5-velMs)/1; // maps -0.5..-1.5 → -0.5..-1 (Cooler→COLD)
-  else t=-1; // COLD
-
-  // Pulse duration: HOT=0.5s, neutral=2.5s, COLD=4s
-  const dur=2.5-t*1.5; // maps [-1..1] → [4.0s..1.0s]
-
-  _applyHCState(t,dur);
+  
+  // Overall progress: how much of the journey completed (0-1)
+  const startDist=S._hcStartDist||oldest.dist;
+  const progress=startDist>0?Math.max(0,1-(newest.dist/startDist)):0;
+  
+  // Map velocity to value (-1 to +1)
+  let velVal;
+  if(velMs>2) velVal=1;         // Inferno (super fast closing)
+  else if(velMs>1.2) velVal=0.75;  // Very Hot
+  else if(velMs>0.6) velVal=0.5;   // Hot
+  else if(velMs>0.2) velVal=0.25;  // Warm
+  else if(velMs>-0.2) velVal=0;    // Same
+  else if(velMs>-0.6) velVal=-0.25; // Cool
+  else if(velMs>-1.2) velVal=-0.5;  // Cold
+  else if(velMs>-2) velVal=-0.75;   // Very Cold
+  else velVal=-1;                    // Freezing (super fast away)
+  
+  // Pulse duration based on velocity
+  const dur=2.5-velVal*1.5; // maps [-1..1] → [4.0s..1.0s]
+  
+  _applyHCState(velVal,dur,progress);
 }
 
-function _applyHCState(t,dur){
-  // t: -1=cold, 0=neutral, +1=hot (or 'neutral' string for init)
-  const isNeutral=(t==='neutral');
-  const tNum=isNeutral?0:t;
-
-  // Clamp to [0,1] for color (0=cold, 1=hot)
-  const c=(tNum+1)/2; // 0=cold, 1=hot
-
-  // Color gradient cold→neutral→hot
+function _applyHCState(velVal,dur,progress){
+  // velVal: -1=freezing, 0=neutral, +1=inferno
+  // progress: 0-1, how much of journey completed
+  
+  const isInit=velVal===0&&dur===2.5&&progress===0;
+  
+  // Clamp velocity to [0,1] for color gradient
+  const c=Math.max(0,Math.min(1,(velVal+1)/2));
+  
+  // Extended color gradient: deep blue → blue → cyan → gray → orange → red → magenta
   const lerpC=(a,b,f)=>a.map((v,i)=>Math.round(v+(b[i]-v)*f));
-  const cold=[59,130,246],neutral=[120,120,130],hot=[239,68,68];
+  const colors={
+    freezing:[30,80,200],     // deep blue
+    cold:[59,130,246],        // blue
+    cool:[100,200,220],       // cyan
+    neutral:[140,140,150],    // gray
+    warm:[255,180,80],        // orange
+    hot:[239,68,68],          // red
+    inferno:[200,40,120]      // magenta/deep red
+  };
+  
   let rgb;
-  if(c<0.5) rgb=lerpC(cold,neutral,c*2);
-  else rgb=lerpC(neutral,hot,(c-0.5)*2);
+  if(c<0.25) rgb=lerpC(colors.freezing,colors.cold,c/0.25);
+  else if(c<0.4) rgb=lerpC(colors.cold,colors.cool,(c-0.25)/0.15);
+  else if(c<0.6) rgb=lerpC(colors.cool,colors.neutral,(c-0.4)/0.2);
+  else if(c<0.75) rgb=lerpC(colors.neutral,colors.warm,(c-0.6)/0.15);
+  else if(c<0.9) rgb=lerpC(colors.warm,colors.hot,(c-0.75)/0.15);
+  else rgb=lerpC(colors.hot,colors.inferno,(c-0.9)/0.1);
+  
   const [r,g,b]=rgb;
   const col=`rgb(${r},${g},${b})`;
   const rgbA=(a)=>`rgba(${r},${g},${b},${a})`;
@@ -3191,9 +3213,46 @@ function _applyHCState(t,dur){
   const screen=el('hc-screen');
   if(screen){
     screen.style.setProperty('--hc-dur',dur+'s');
-    screen.style.background=isNeutral?''
-      :`radial-gradient(ellipse at 50% 50%, ${rgbA(0.06+c*0.08)} 0%, transparent 70%)`;
+    screen.style.background=isInit?''
+      :`radial-gradient(ellipse at 50% 50%, ${rgbA(0.08+c*0.12)} 0%, transparent 70%)`;
   }
+  [el('hc-ring1'),el('hc-ring2'),el('hc-ring3')].forEach(ring=>{
+    if(ring) ring.style.color=col;
+  });
+  const core=el('hc-core');
+  if(core){
+    core.style.background=`radial-gradient(circle at 40% 35%, ${rgbA(0.25)}, ${rgbA(0.08)})`;
+    core.style.boxShadow=`0 0 ${20+Math.round(c*40)}px ${rgbA(0.3)}, inset 0 0 ${10+Math.round(c*20)}px ${rgbA(0.15)}`;
+    core.style.border=`2px solid ${rgbA(0.25)}`;
+  }
+
+  // Word label — extended temperature scale
+  const word=el('hc-word');
+  if(word){
+    if(isInit||Math.abs(velVal)<0.08){ word.textContent='Steady'; word.style.color=''; }
+    else if(velVal>0.9){ word.textContent='INFERNO'; word.style.color=col; }
+    else if(velVal>0.6){ word.textContent='Very Hot'; word.style.color=col; }
+    else if(velVal>0.3){ word.textContent='Hot'; word.style.color=col; }
+    else if(velVal>0.1){ word.textContent='Warm'; word.style.color=col; }
+    else if(velVal<-0.9){ word.textContent='FREEZING'; word.style.color=col; }
+    else if(velVal<-0.6){ word.textContent='Very Cold'; word.style.color=col; }
+    else if(velVal<-0.3){ word.textContent='Cold'; word.style.color=col; }
+    else if(velVal<-0.1){ word.textContent='Cool'; word.style.color=col; }
+    else { word.textContent='Steady'; word.style.color=''; }
+  }
+  
+  // Progress indicator (if progress > 0)
+  const hint=el('hc-bearing-hint');
+  if(hint&&progress>0){
+    const pct=Math.round(progress*100);
+    hint.textContent=`${pct}% of journey`;
+  }
+  
+  // Haptic on strong hot signal
+  if(velVal>0.7&&Date.now()-(S._hcHapticTs||0)>Math.max(600,dur*600)){
+    haptic('light'); S._hcHapticTs=Date.now();
+  }
+}
   [el('hc-ring1'),el('hc-ring2'),el('hc-ring3')].forEach(ring=>{
     if(ring) ring.style.color=col;
   });
@@ -3543,7 +3602,22 @@ async function shareResult(){
     const mapX=40,mapY=140,mapW=W-80,mapH=220;
     ctx.save();
     ctx.beginPath();ctx.roundRect?ctx.roundRect(mapX,mapY,mapW,mapH,12):ctx.rect(mapX,mapY,mapW,mapH);ctx.clip();
-    ctx.fillStyle=dark?'#0f1a2a':'#d4e8f0';ctx.fillRect(mapX,mapY,mapW,mapH);
+    // Map background - gradient simulating terrain
+    const mapGrad=ctx.createLinearGradient(mapX,mapY,mapX+mapW,mapY+mapH);
+    if(dark){
+      mapGrad.addColorStop(0,'#1a2a3a');mapGrad.addColorStop(0.5,'#1f2d3d');mapGrad.addColorStop(1,'#0f1a2a');
+    } else {
+      mapGrad.addColorStop(0,'#c8e0f0');mapGrad.addColorStop(0.5,'#d8e8f4');mapGrad.addColorStop(1,'#e8f0f8');
+    }
+    ctx.fillStyle=mapGrad;ctx.fillRect(mapX,mapY,mapW,mapH);
+    // Grid pattern for map texture
+    ctx.strokeStyle=dark?'rgba(255,255,255,.04)':'rgba(0,0,0,.04)';ctx.lineWidth=1;
+    for(let i=0;i<10;i++){
+      const gx=mapX+(mapW/10)*i;
+      const gy=mapY+(mapH/10)*i;
+      ctx.beginPath();ctx.moveTo(gx,mapY);ctx.lineTo(gx,mapY+mapH);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(mapX,gy);ctx.lineTo(mapX+mapW,gy);ctx.stroke();
+    }
 
     if(S.resMap){
       try{

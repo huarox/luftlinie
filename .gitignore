@@ -15,4 +15,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.bak
-_working_version.html
+
+#logs
+*.log
