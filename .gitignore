@@ -1,6 +1,9 @@
 # Ignore CLAUDE.md (internal documentation)
 CLAUDE.md
 
+# Ignore TESTING folder
+_testing
+
 # OS files
 .DS_Store
 Thumbs.db
