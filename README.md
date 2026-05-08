@@ -2,7 +2,7 @@
 
 **A GPS navigation game.** Find your way to a hidden target without turn-by-turn directions. Distance is your only guide.
 
-Play it live: [https://fq5e2fnh37m6u.kimi.page](https://fq5e2fnh37m6u.kimi.page)
+Play it live: [https://huarox.github.io/luftlinie/])
 
 ---
 
