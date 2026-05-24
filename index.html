@@ -709,7 +709,11 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 
 <div class="section-label">How Far?</div>
 <div class="card" style="margin-bottom:22px">
-  <div class="card-row"><span class="row-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
+  <div class="card-row"><span class="row-label" id="sv-time-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
+  <div class="seg-ctrl" id="seg-travel" style="margin:10px 14px 0">
+    <button class="seg active" data-v="drive" onclick="App.setTransportMode('drive')">🚗 Drive</button>
+    <button class="seg" data-v="walk" onclick="App.setTransportMode('walk')">🚶 Walk</button>
+  </div>
   <input type="range" class="slider" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
   <div class="slider-marks"><span>10 min</span><span>30</span><span>60</span><span>90 min</span></div>
   <div class="timelimit-row">
@@ -1213,8 +1217,8 @@ body{background:var(--bg);color:var(--t1);transition:background .3s}
 <div class="overlay hidden" id="ov-speed">
   <div class="warn-box">
     <div class="warn-ico">⚠️</div>
-    <div class="warn-title">Passenger Mode Only</div>
-    <p class="warn-body">Do not interact with this app while driving.</p>
+    <div class="warn-title" id="speed-warn-title">Passenger Mode Only</div>
+    <p class="warn-body" id="speed-warn-body">Do not interact with this app while driving.</p>
     <button class="btn-primary" onclick="haptic('light');App.dismissSpeed()">Understood</button>
   </div>
 </div>
@@ -1298,7 +1302,7 @@ const DIFF  = {
 /* ── STATE ───────────────────────────────────────────────── */
 const S = {
   /* setup */
-  idealMin:30, diff:3, arrRadius:50, mode:'manual', hostRole:'spectator', role:'navigator',
+  idealMin:30, diff:3, arrRadius:50, mode:'manual', transportMode:'drive', hostRole:'spectator', role:'navigator',
   elimMode:false, blindStart:false, blindFinish:true, excludeHost:true,
   gameMode:'standard', whisperMode:false, teamsMode:false, myTeam:null,
   /* identity */
@@ -1479,7 +1483,7 @@ function resetGameState(){
   S.resMap=null;S.myTrail=[];S.playerTrails={};S._lastRoutePos={};S._routePending={};
   S.gameCode=null;S.isHost=false;S.myToken=null;S.hostPlayerToken=null;S.hostViewActive=true;
   S.targetLat=null;S.targetLon=null;S.noiseSeed=0.5;
-  S.timeLimitSec=3600;S.startedAt=null;S.status='idle';
+  S.timeLimitSec=3600;S.startedAt=null;S.status='idle';S.transportMode='drive';
   S.startDist=null;S.lastDist=null;S.arrived=false;S.arrivalElapsed=null;
   S.eliminated=false;S.blindStartDist=0;S.blindUnlocked=false;S.blindStartLat=null;S.blindStartLon=null;
   S.speedKmh=0;S.speedWarnShown=false;
@@ -1499,24 +1503,44 @@ function resetGameState(){
 function goHome(){ stopAutoZoom(); stopDynamicTarget(); clearSession(); resetGameState(); goScreen('land'); renderStats(); }
 
 /* ── SETUP ───────────────────────────────────────────────── */
+function transportMeta(){
+  return S.transportMode==='walk'
+    ? {key:'walk', icon:'🚶', timeLabel:'Walking time', noun:'walking time', ring:'walk', speedKmh:5, smart:'walkable path'}
+    : {key:'drive', icon:'🚗', timeLabel:'Drive time', noun:'drive time', ring:'drive', speedKmh:40, smart:'road'};
+}
+function diffDesc(d){
+  const m=DIFF.mult[d];
+  return `${DIFF.labels[d]} — ${m}× the ideal ${transportMeta().noun}`;
+}
+function setTransportMode(m){
+  S.transportMode=(m==='walk')?'walk':'drive';
+  document.querySelectorAll('#seg-travel .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===S.transportMode));
+  S.speedWarnShown=false;
+  hide('ov-speed');
+  upSetup();
+  setMode(S.mode);
+  updateRangeRing();
+}
 function upSetup(){
   const t=+(el('sl-time')?el('sl-time').value:'30'); S.idealMin=t;
   const pct=((t-10)/80*100).toFixed(1);
   const sl=el('sl-time'); if(sl)sl.style.setProperty('--pct',pct+'%');
+  set('sv-time-label',transportMeta().timeLabel);
   set('sv-time',t+' min'); set('sv-limit',Math.round(t*DIFF.mult[S.diff])+' min');
+  set('diff-txt',diffDesc(S.diff));
   updateRangeRing();
 }
 function setDiff(d){
   S.diff=d;
   document.querySelectorAll('#stars .star').forEach(s=>s.classList.toggle('on',+s.dataset.v<=d));
-  set('diff-txt',DIFF.descs[d]); upSetup();
+  set('diff-txt',diffDesc(d)); upSetup();
 }
 function setMode(m){
   S.mode=m;
   document.querySelectorAll('#seg-mode .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===m));
   set('mode-hint',m==='manual'
     ?"You'll tap the map to drop the secret target. A range ring shows the ideal distance."
-    :"A target will be auto-placed on a real road at a realistic drive distance.");
+    :`A target will be auto-placed on a real ${transportMeta().smart} at a realistic ${transportMeta().noun}.`);
   updateGoMapBtn();
 }
 function setHostRole(r){
@@ -1568,7 +1592,7 @@ function dotIcon(col,sz=12,glow=false){
 }
 
 /* ── RANGE RING ──────────────────────────────────────────── */
-function idealRangeM(){ return(S.idealMin/60)*40*1000; }
+function idealRangeM(){ return(S.idealMin/60)*transportMeta().speedKmh*1000; }
 function updateRangeRing(){
   if(!S.leafMap)return;
   const center=[S.myLat||HOME.lat,S.myLon||HOME.lon],r=idealRangeM();
@@ -1576,7 +1600,7 @@ function updateRangeRing(){
   S.rangeRing=L.circle(center,{radius:r,color:'#007AFF',weight:1.5,dashArray:'8 6',fillColor:'#007AFF',fillOpacity:.04,interactive:false}).addTo(S.leafMap);
   const labelLat=center[0]+(r/111000);
   if(S._ringLabel)S.leafMap.removeLayer(S._ringLabel);
-  S._ringLabel=L.marker([labelLat,center[1]],{icon:L.divIcon({html:`<div class="ring-lbl">~${S.idealMin} min drive</div>`,iconSize:[120,20],iconAnchor:[60,10],className:''}),interactive:false}).addTo(S.leafMap);
+  S._ringLabel=L.marker([labelLat,center[1]],{icon:L.divIcon({html:`<div class="ring-lbl">~${S.idealMin} min ${transportMeta().ring}</div>`,iconSize:[120,20],iconAnchor:[60,10],className:''}),interactive:false}).addTo(S.leafMap);
 }
 
 /* ── LEAF MAP ────────────────────────────────────────────── */
@@ -1617,8 +1641,11 @@ async function findSmartTarget(myLat,myLon,idealKm){
       const bear=Math.random()*360,rad=bear*Math.PI/180;
       const cLat=myLat+(idealKm/111)*Math.cos(rad);
       const cLon=myLon+(idealKm/(111*Math.cos(myLat*Math.PI/180)))*Math.sin(rad);
-      // Improved access filter regex
-      const q=`[out:json][timeout:14];(way[highway~"^(living_street|residential|unclassified|tertiary|service)$"][access!~"^(private|no|customers|permit|military|restricted|destination|delivery)$"][motor_vehicle!~"^(no|private)$"](around:${searchRadius},${cLat.toFixed(5)},${cLon.toFixed(5)}););out geom 50;`;
+      // Access filter depends on travel mode.
+      const walkMode=S.transportMode==='walk';
+      const q=walkMode
+        ? `[out:json][timeout:14];(way[highway~"^(footway|path|pedestrian|living_street|residential|unclassified|tertiary|service|track|steps|cycleway)$"][access!~"^(private|no|customers|permit|military|restricted)$"][foot!~"^(no|private)$"](around:${searchRadius},${cLat.toFixed(5)},${cLon.toFixed(5)}););out geom 50;`
+        : `[out:json][timeout:14];(way[highway~"^(living_street|residential|unclassified|tertiary|service)$"][access!~"^(private|no|customers|permit|military|restricted|destination|delivery)$"][motor_vehicle!~"^(no|private)$"](around:${searchRadius},${cLat.toFixed(5)},${cLon.toFixed(5)}););out geom 50;`;
       try{
         const ctrl=new AbortController();
         const timer=setTimeout(()=>ctrl.abort(),12000);
@@ -1628,8 +1655,8 @@ async function findSmartTarget(myLat,myLon,idealKm){
         const data=await res.json();
         const ways=(data.elements||[]).filter(w=>{const t=w.tags||{};return!t.barrier&&(!t.access||!/private|no|customers|permit|military|restricted|destination|delivery/i.test(t.access));});
         if(!ways.length)continue;
-        // Improved priority: living_street > residential > unclassified > tertiary > service
-        const tp={living_street:0,residential:1,unclassified:2,tertiary:3,service:4};
+        // Improved priority, adapted for drive vs. walk.
+        const tp=walkMode?{footway:0,path:1,pedestrian:2,steps:3,living_street:4,residential:5,cycleway:6,track:7,service:8,unclassified:9,tertiary:10}:{living_street:0,residential:1,unclassified:2,tertiary:3,service:4};
         ways.sort((a,b)=>{
           var ta2=a.tags&&a.tags.highway?tp[a.tags.highway]:9;
           var tb2=b.tags&&b.tags.highway?tp[b.tags.highway]:9;
@@ -1652,7 +1679,10 @@ async function findSmartTarget(myLat,myLon,idealKm){
     const bear=Math.random()*360,rad=bear*Math.PI/180;
     const fallbackLat=myLat+(idealKm/111)*Math.cos(rad);
     const fallbackLon=myLon+(idealKm/(111*Math.cos(myLat*Math.PI/180)))*Math.sin(rad);
-    const q=`[out:json][timeout:10];way[highway~"^(living_street|residential|unclassified|tertiary|service)$"](around:2000,${fallbackLat.toFixed(5)},${fallbackLon.toFixed(5)});out geom;`;
+    const walkMode=S.transportMode==='walk';
+    const q=walkMode
+      ? `[out:json][timeout:10];way[highway~"^(footway|path|pedestrian|living_street|residential|unclassified|tertiary|service|track|steps|cycleway)$"][access!~"^(private|no|customers|permit|military|restricted)$"][foot!~"^(no|private)$"](around:2000,${fallbackLat.toFixed(5)},${fallbackLon.toFixed(5)});out geom;`
+      : `[out:json][timeout:10];way[highway~"^(living_street|residential|unclassified|tertiary|service)$"](around:2000,${fallbackLat.toFixed(5)},${fallbackLon.toFixed(5)});out geom;`;
     const ctrl=new AbortController();
     const timer=setTimeout(()=>ctrl.abort(),10000);
     const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q),signal:ctrl.signal});
@@ -1682,7 +1712,7 @@ async function findSmartTarget(myLat,myLon,idealKm){
 
 async function smartPick(){
   const btn=el('smart-btn');btn.textContent='⟳';btn.disabled=true;
-  set('map-hint','Finding road near ideal distance…');
+  set('map-hint',`Finding ${transportMeta().smart} near ideal distance…`);
   const picked=await findSmartTarget(S.myLat||HOME.lat,S.myLon||HOME.lon,idealRangeM()/1000);
   placeTarget(picked.lat,picked.lon);
   btn.textContent='✦ Smart';btn.disabled=false;
@@ -1696,7 +1726,7 @@ async function createGameFB(){
   S.gameCode=code; S.noiseSeed=Math.random();
   S.timeLimitSec=Math.round(S.idealMin*DIFF.mult[S.diff]*60);
   await gRef().set({
-    status:'lobby',idealMin:S.idealMin,diff:S.diff,arrRadius:S.arrRadius,
+    status:'lobby',idealMin:S.idealMin,diff:S.diff,arrRadius:S.arrRadius,transportMode:S.transportMode,
     timeLimitSec:S.timeLimitSec,noiseSeed:S.noiseSeed,hostRole:S.hostRole,
     elimMode:S.elimMode,blindStart:S.blindStart,blindFinish:S.blindFinish,excludeHost:S.excludeHost,
     gameMode:S.gameMode,whisperMode:S.whisperMode,teamsMode:S.teamsMode,
@@ -1787,7 +1817,7 @@ function renderHLobby(){
   set('hl-diff',DIFF.labels[S.diff]);
   set('hl-radius',S.arrRadius+'m');
   const modeLabels={standard:'🎯 Standard',elimination:'⚡ Elimination',whisper:'👂 Whisper'};
-  set('hl-mode',modeLabels[S.gameMode]||S.gameMode);
+  set('hl-mode',(S.transportMode==='walk'?'🚶 Walking · ':'🚗 Driving · ')+(modeLabels[S.gameMode]||S.gameMode));
   set('hl-blind',S.blindStart?'🙈 On':'Off');
   set('hl-blindfinish',S.blindFinish?'🏁 On':'Off');
   set('hl-excludehost',S.excludeHost?'👻 On':'Off');
@@ -2148,7 +2178,7 @@ async function joinGame(){
     S.gameCode=code;S.myName=name;
     // Persist nickname
     localStorage.setItem('ll_nickname',name);
-    S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;
+    S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;S.transportMode=g.transportMode||'drive';
     S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;S.gameMode=g.gameMode||'standard';S.whisperMode=!!g.whisperMode;S.teamsMode=!!g.teamsMode;S.elimMode=S.gameMode==='elimination';
     // Show team picker if teams mode
     if(S.teamsMode&&S.role==='navigator'){var tpf=el('team-pick-field');if(tpf)tpf.classList.remove('hidden');}
@@ -2270,7 +2300,12 @@ function handleGPSPos(pos){
   if(S.prevLat!=null){
     const d=hav(S.prevLat,S.prevLon,lat,lon),dt=(now-S.prevGPSTime)/1000;
     if(dt>0)S.speedKmh=(d/dt)*3.6;
-    if(S.speedKmh>80&&!S.speedWarnShown){el('ov-speed').classList.remove('hidden');S.speedWarnShown=true;}
+    const speedLimit=S.transportMode==='walk'?18:80;
+    if(S.speedKmh>speedLimit&&!S.speedWarnShown){
+      set('speed-warn-title',S.transportMode==='walk'?'Walking Mode':'Passenger Mode Only');
+      set('speed-warn-body',S.transportMode==='walk'?'You seem to be moving faster than walking pace. Walking mode is intended for players on foot.':'Do not interact with this app while driving.');
+      el('ov-speed').classList.remove('hidden');S.speedWarnShown=true;
+    }
   }
   S.prevLat=lat;S.prevLon=lon;S.prevGPSTime=now;S.myLat=lat;S.myLon=lon;S.lastAccuracy=acc;
   // Blind start: record the first GPS fix as the "start" point
@@ -2879,7 +2914,7 @@ async function doRejoin(){
   const g=snap.val();
   if(g.status!=='active'&&g.status!=='lobby'){toast('Game has ended');clearSession();return;}
   S.gameCode=code;S.myToken=token;S.myName=name;S.role=role;
-  S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;
+  S.arrRadius=g.arrRadius;S.timeLimitSec=g.timeLimitSec;S.transportMode=g.transportMode||'drive';
   S.noiseSeed=g.noiseSeed;S.elimMode=!!g.elimMode;S.blindStart=!!g.blindStart;
   S.blindFinish=g.blindFinish!==false;S.excludeHost=g.excludeHost!==false;
   S.gameMode=g.gameMode||'standard';S.whisperMode=!!g.whisperMode;
@@ -3746,7 +3781,7 @@ function toggleAdvanced(){
 /* ── EXPOSE ──────────────────────────────────────────────── */
 window.toggleTheme=toggleTheme;
 const App={
-  setMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,updateGoMapBtn,upSetup,toggleAdvanced,
+  setMode,setTransportMode,setDiff,setRadius,setRole,setHostRole,setElimMode,setBlindStart,setBlindFinish,setExcludeHost,setGameMode,setTeamsMode,setTeam,updateGoMapBtn,upSetup,toggleAdvanced,
   goMap,smartPick,confirmTarget,
   copyLink,copyCodeTap,showQR,hideQR,lockStart,toggleMyView,goHostView,leaveOrHostView,abortGame,confirmAbort,cancelAbort,
   joinGame,leaveGame,
