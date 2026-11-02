@@ -22,3 +22,8 @@ Thumbs.db
 #logs
 *.log
 _working_version.html
+
+node_modules/
+dist/
+.wrangler/
+.env*
