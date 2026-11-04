@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Luftlinie design candidates</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Inter:wght@100;200;300;400;500;600;700&family=Nunito:wght@600;800;900&family=Figtree:wght@400;500;600;700;800;900&family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:#E9E9EC;color:#111;padding:40px 24px 80px}
+.page-h{max-width:1200px;margin:0 auto 32px}
+.page-h h1{font:800 44px/1 "Inter Tight";letter-spacing:-.03em}
+.page-h p{margin-top:10px;color:#555;max-width:70ch;line-height:1.5}
+.cand{max-width:1200px;margin:0 auto 56px;padding:28px;border-radius:28px;background:#fff}
+.cand-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:8px}
+.cand-h h2{font:800 30px/1 "Inter Tight";letter-spacing:-.02em}
+.tag{font-size:14px;color:#666}
+.cand>p{color:#444;max-width:75ch;line-height:1.5;font-size:15px}
+.tokens{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 22px}
+.sw{display:flex;align-items:center;gap:6px;font-size:12px;color:#444;padding:4px 10px 4px 4px;border-radius:99px;background:#F3F3F5}
+.sw i{width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.1)}
+.phones{display:flex;gap:22px;overflow-x:auto;padding-bottom:8px}
+.phone{flex:none;width:300px;height:620px;border-radius:44px;overflow:hidden;position:relative;box-shadow:0 0 0 9px #1a1a1c,0 30px 60px -20px rgba(0,0,0,.45);margin:9px}
+.cap{font-size:12px;color:#777;text-align:center;margin-top:14px}
+.ph-wrap{flex:none}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:96px;height:28px;border-radius:20px;background:#000;z-index:5}
+.status{position:absolute;top:14px;left:26px;right:26px;display:flex;justify-content:space-between;font:600 13px Inter;z-index:4}
+
+/* ── A · KEYNOTE ── */
+.a{background:#fff;color:#1d1d1f;font-family:"Inter Tight",-apple-system,sans-serif}
+.a.dark{background:#000;color:#f5f5f7}
+.a .in{position:absolute;inset:56px 26px 30px;display:flex;flex-direction:column}
+.a .hero{font-weight:800;font-size:58px;line-height:.95;letter-spacing:-.045em;margin-top:30px}
+.a .hero em{font-style:normal;background:linear-gradient(100deg,#0071e3,#a14bf5 55%,#ff5e7e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.a .lede{margin-top:18px;font:500 16px/1.4 Inter;color:#6e6e73}
+.a .cta{margin-top:auto;display:grid;gap:10px}
+.a .btn{height:52px;border-radius:99px;display:grid;place-items:center;font:600 16px Inter}
+.a .btn.p{background:#0071e3;color:#fff}.a .btn.s{color:#0071e3}
+.a .big{margin:auto 0;text-align:center}
+.a .big .n{font-weight:800;font-size:150px;line-height:.85;letter-spacing:-.07em;background:linear-gradient(180deg,#fff 30%,#8e8e93);-webkit-background-clip:text;background-clip:text;color:transparent}
+.a .big .u{font:600 22px Inter;color:#86868b;margin-top:10px}
+.a .top{display:flex;justify-content:space-between;font:600 14px Inter;color:#86868b}
+.a .top b{color:#f5f5f7;font-variant-numeric:tabular-nums}
+.a .bar{height:4px;border-radius:2px;background:#1d1d1f;margin-top:auto}
+.a .bar i{display:block;height:100%;width:62%;border-radius:2px;background:linear-gradient(90deg,#0071e3,#a14bf5,#ff5e7e)}
+.a .code{font-weight:800;font-size:64px;letter-spacing:-.02em;margin-top:24px}
+.a .eye{font:600 15px Inter;color:#6e6e73;margin-top:40px}
+.a .list{margin-top:28px;border-top:1px solid #e5e5ea}
+.a .row{display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid #e5e5ea;font:500 15px Inter}
+.a .row span{color:#6e6e73}
+
+/* ── B · GLASS ── */
+.b{font-family:Figtree,-apple-system,sans-serif;color:#fff;background:
+  radial-gradient(120% 80% at 20% 10%,#5b8cff 0%,transparent 55%),radial-gradient(90% 70% at 90% 30%,#ff7ac6 0%,transparent 55%),radial-gradient(100% 80% at 50% 100%,#2ee6c5 0%,transparent 60%),#2a2350}
+.b .map{position:absolute;inset:0;opacity:.35;background:
+  repeating-linear-gradient(28deg,transparent 0 38px,rgba(255,255,255,.35) 38px 40px),repeating-linear-gradient(-62deg,transparent 0 54px,rgba(255,255,255,.25) 54px 56px)}
+.b .glass{background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);border:1px solid rgba(255,255,255,.35);border-radius:30px}
+.b .in{position:absolute;inset:56px 18px 22px;display:flex;flex-direction:column;gap:12px}
+.b .hero{font-weight:900;font-size:54px;line-height:.95;letter-spacing:-.035em;margin:40px 8px 0}
+.b .lede{margin:14px 8px 0;font-size:16px;line-height:1.4;opacity:.85}
+.b .cta{margin-top:auto;padding:12px;display:grid;gap:8px}
+.b .btn{height:52px;border-radius:20px;display:grid;place-items:center;font-weight:700;font-size:16px}
+.b .btn.p{background:#fff;color:#2a2350}.b .btn.s{background:rgba(255,255,255,.14)}
+.b .read{margin:auto 0;padding:28px 20px;text-align:center}
+.b .read .n{font-weight:900;font-size:120px;line-height:.85;letter-spacing:-.06em;font-variant-numeric:tabular-nums}
+.b .read .u{font-weight:600;font-size:18px;opacity:.8;margin-top:8px}
+.b .pill{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;font-weight:600;font-size:15px}
+.b .pill b{font-size:22px;font-variant-numeric:tabular-nums}
+.b .codebox{padding:26px 20px;text-align:center;margin-top:30px}
+.b .codebox .c{font-weight:900;font-size:58px;letter-spacing:.02em}
+.b .codebox small{opacity:.8;font-size:14px}
+.b .people{padding:8px 16px}
+.b .person{display:flex;align-items:center;gap:12px;padding:10px 0;font-weight:600}
+.b .person i{width:30px;height:30px;border-radius:50%;background:#fff;opacity:.9}
+
+/* ── C · ULTRA (wayfinder) ── */
+.c{background:#000;color:#fff;font-family:Nunito,ui-rounded,"SF Pro Rounded",sans-serif}
+.c .in{position:absolute;inset:56px 22px 26px;display:flex;flex-direction:column}
+.c .hero{font-weight:900;font-size:56px;line-height:.95;letter-spacing:-.02em;margin-top:34px}
+.c .hero span{display:block;color:#FF7A1A}
+.c .lede{margin-top:16px;font:600 16px/1.4 Nunito;color:#9a9a9f}
+.c .cta{margin-top:auto;display:grid;gap:10px}
+.c .btn{height:54px;border-radius:99px;display:grid;place-items:center;font-weight:800;font-size:17px}
+.c .btn.p{background:#FF7A1A;color:#000}.c .btn.s{background:#1c1c1e}
+.c .dial{position:relative;width:256px;height:256px;margin:auto}
+.c .dial svg{position:absolute;inset:0}
+.c .dial .n{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.c .dial .n b{font-weight:900;font-size:92px;line-height:.9;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.c .dial .n small{font-weight:800;font-size:16px;color:#FF7A1A}
+.c .comp{display:flex;justify-content:space-between}
+.c .comp div{font-weight:800;font-size:13px;color:#8e8e93}
+.c .comp b{display:block;font-size:22px;color:#fff;font-variant-numeric:tabular-nums}
+.c .code{display:flex;gap:6px;margin-top:30px}
+.c .code b{flex:1;height:70px;border-radius:16px;background:#1c1c1e;display:grid;place-items:center;font-weight:900;font-size:34px}
+.c .code b:nth-child(4){margin-left:8px}
+.c .eye{font-weight:800;font-size:15px;color:#FF7A1A;margin-top:36px}
+.c .row{display:flex;align-items:center;gap:12px;margin-top:16px;font-weight:800}
+.c .row i{width:12px;height:12px;border-radius:50%}
+
+/* ── D · COLORFIELD ── */
+.d{font-family:"Inter Tight",-apple-system,sans-serif;color:#fff}
+.d.f1{background:#FF5A36}.d.f2{background:#3E4BFF}.d.f3{background:#0F8F5F}
+.d .in{position:absolute;inset:56px 24px 28px;display:flex;flex-direction:column}
+.d .hero{font-weight:900;font-size:76px;line-height:.86;letter-spacing:-.055em;margin-top:28px}
+.d .lede{margin-top:18px;font:500 16px/1.4 Inter;opacity:.9}
+.d .cta{margin-top:auto;display:grid;gap:10px}
+.d .btn{height:54px;border-radius:18px;display:grid;place-items:center;font:700 16px Inter}
+.d .btn.p{background:#fff;color:#111}.d .btn.s{box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}
+.d .n{margin-top:auto;font-weight:900;font-size:148px;line-height:.78;letter-spacing:-.08em;font-variant-numeric:tabular-nums}
+.d .u{font-weight:800;font-size:36px;letter-spacing:-.03em;opacity:.75}
+.d .meta{display:flex;justify-content:space-between;font:600 14px Inter;opacity:.85}
+.d .meta b{font-size:20px;font-variant-numeric:tabular-nums}
+.d .codebig{font-weight:900;font-size:96px;line-height:.85;letter-spacing:-.05em;margin-top:40px;word-break:break-all}
+.d .chip{align-self:flex-start;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.2);font:600 13px Inter}
+
+/* ── E · LIVE ACTIVITY ── */
+.e{background:linear-gradient(160deg,#3b4a6b,#1b2130 60%,#0d1018);color:#fff;font-family:Inter,-apple-system,sans-serif}
+.e .wall{position:absolute;inset:0;background:radial-gradient(80% 50% at 70% 20%,rgba(255,170,120,.35),transparent 60%)}
+.e .in{position:absolute;inset:56px 14px 22px;display:flex;flex-direction:column;align-items:center}
+.e .clock{font:200 86px/1 Inter;letter-spacing:-.03em;margin-top:18px}
+.e .date{font:500 16px Inter;opacity:.8}
+.e .island{position:absolute;top:10px;left:50%;transform:translateX(-50%);height:28px;border-radius:20px;background:#000;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:0 12px;width:200px;font:700 13px Inter}
+.e .island .dot{width:14px;height:14px;border-radius:50%;border:2.5px solid #FF9F0A}
+.e .island b{color:#FF9F0A;font-variant-numeric:tabular-nums}
+.e .la{margin-top:auto;width:100%;border-radius:26px;background:rgba(20,20,24,.55);-webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px);padding:16px 18px}
+.e .la-top{display:flex;justify-content:space-between;font:600 13px Inter;opacity:.7}
+.e .la-mid{display:flex;align-items:baseline;justify-content:space-between;margin-top:6px}
+.e .la-mid b{font:700 40px/1 "Inter Tight";white-space:nowrap;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.e .la-mid span{font:600 15px Inter;color:#FF9F0A}
+.e .track{height:6px;border-radius:3px;background:rgba(255,255,255,.15);margin-top:12px;position:relative}
+.e .track i{position:absolute;left:0;top:0;bottom:0;width:69%;border-radius:3px;background:#FF9F0A}
+.e .track u{position:absolute;right:-4px;top:-5px;width:16px;height:16px;border-radius:50%;border:3px solid #fff;text-decoration:none}
+.e .expanded{position:absolute;top:10px;left:12px;right:12px;border-radius:44px;background:#000;z-index:6;padding:20px 22px 22px;color:#fff}
+.e .expanded .row{display:flex;justify-content:space-between;align-items:flex-end}
+.e .expanded b{font:800 50px/1 "Inter Tight";white-space:nowrap;letter-spacing:-.05em}
+.e .expanded small{font:600 13px Inter;color:#8e8e93}
+.e .appbody{position:absolute;inset:0;background:#f2f2f7}
+.e .appbody .t{position:absolute;top:200px;left:22px;right:22px;color:#1d1d1f;font:500 15px/1.45 Inter}
+
+/* ── F · LIQUID GLASS over the real map ── */
+.f{font-family:-apple-system,"Inter",sans-serif;color:#111;background:#e8eadf}
+.f .map{position:absolute;inset:0;background:
+  linear-gradient(115deg,transparent 46%,#fff 46% 49%,transparent 49%),linear-gradient(25deg,transparent 60%,#fff 60% 62.5%,transparent 62.5%),
+  linear-gradient(170deg,transparent 30%,#ffe9a8 30% 33%,transparent 33%),radial-gradient(40% 25% at 30% 70%,#bfe3b4 0 99%,transparent),
+  radial-gradient(30% 20% at 80% 25%,#a9d4f5 0 99%,transparent),#ecece4}
+.f .lg{background:rgba(255,255,255,.28);-webkit-backdrop-filter:blur(6px) saturate(180%) brightness(1.05);backdrop-filter:blur(6px) saturate(180%) brightness(1.05);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),inset 0 -1px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.45),0 10px 30px -8px rgba(0,0,0,.25);border-radius:999px}
+.f .in{position:absolute;inset:56px 14px 22px;display:flex;flex-direction:column;gap:10px}
+.f .bubble{align-self:center;margin:auto 0;width:220px;height:220px;border-radius:50%;display:grid;place-content:center;text-align:center}
+.f .bubble b{font:800 82px/1 "Inter Tight";letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.f .bubble small{font:600 14px Inter;color:#3c3c43}
+.f .tabs{display:flex;justify-content:space-around;align-items:center;height:60px;padding:0 10px;font:600 13px Inter}
+.f .tabs span{padding:8px 14px;border-radius:99px}
+.f .tabs span.on{background:rgba(0,0,0,.08)}
+.f .chiprow{display:flex;justify-content:space-between}
+.f .chip{height:40px;padding:0 16px;display:flex;align-items:center;font:700 15px Inter;font-variant-numeric:tabular-nums}
+.f .sheet{margin-top:auto;border-radius:34px;padding:20px}
+.f .sheet h3{font:800 34px/1 "Inter Tight";letter-spacing:-.03em}
+.f .sheet p{font:500 14px/1.4 Inter;color:#3c3c43;margin-top:8px}
+.f .sheet .btn{margin-top:16px;height:50px;border-radius:99px;background:#111;color:#fff;display:grid;place-items:center;font:600 16px Inter}
+.f .pin{position:absolute;left:58%;top:38%;width:26px;height:26px;border-radius:50%;background:#FF3B30;box-shadow:0 0 0 5px #fff,0 6px 14px rgba(0,0,0,.3)}
+
+/* ── G · SKY ── */
+.g{color:#fff;font-family:Inter,-apple-system,sans-serif}
+.g.far{background:linear-gradient(180deg,#0b1f4a 0%,#1d3f8a 55%,#4f6fb8 100%)}
+.g.mid{background:linear-gradient(180deg,#2c4f9e 0%,#d77a8c 70%,#f2b07a 100%)}
+.g.near{background:linear-gradient(180deg,#5aa0e6 0%,#a8d3f2 60%,#ffe6b0 100%);color:#0b1f4a}
+.g .in{position:absolute;inset:60px 24px 26px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.g .place{font:500 24px Inter;margin-top:26px}
+.g .n{font:100 124px/1 Inter;letter-spacing:-.04em;font-variant-numeric:tabular-nums;margin-left:18px}
+.g .n sup{font-size:.28em;font-weight:300;vertical-align:top;position:relative;top:.5em;margin-left:4px}
+.g .cond{font:500 18px Inter;opacity:.9}
+.g .hl{font:500 15px Inter;opacity:.8;margin-top:2px}
+.g .card{margin-top:auto;width:100%;border-radius:18px;background:rgba(255,255,255,.14);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);padding:12px 14px;text-align:left}
+.g.near .card{background:rgba(255,255,255,.45)}
+.g .card small{font:600 11px Inter;opacity:.7;letter-spacing:.02em}
+.g .hours{display:flex;justify-content:space-between;margin-top:10px;font:500 13px Inter}
+.g .hours div{display:grid;gap:6px;justify-items:center}
+.g .hours i{width:6px;border-radius:3px;background:currentColor;opacity:.75}
+.g .stars{position:absolute;inset:0;background:radial-gradient(1px 1px at 20% 15%,#fff,transparent),radial-gradient(1px 1px at 70% 8%,#fff,transparent),radial-gradient(1.5px 1.5px at 85% 22%,#fff,transparent),radial-gradient(1px 1px at 40% 30%,#fff,transparent);opacity:.8}
+
+/* ── H · RINGS ── */
+.h{background:#000;color:#fff;font-family:"Inter Tight",-apple-system,sans-serif}
+.h .in{position:absolute;inset:56px 22px 26px;display:flex;flex-direction:column}
+.h .rings{width:240px;height:240px;margin:20px auto 0}
+.h .legend{display:grid;gap:14px;margin-top:auto}
+.h .lrow{display:flex;justify-content:space-between;align-items:baseline}
+.h .lrow span{font:600 15px Inter}
+.h .lrow b{font-weight:800;font-size:30px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.h .hero{font-weight:900;font-size:50px;line-height:.95;letter-spacing:-.04em;margin-top:6px}
+.h .btn{height:52px;border-radius:99px;display:grid;place-items:center;font:700 16px Inter;background:#FA114F;color:#fff;margin-top:12px}
+.h .btn.s{background:#1c1c1e}
+
+/* ── I · HAIRLINE ── */
+.i{background:#F5F5F7;color:#1d1d1f;font-family:Inter,-apple-system,sans-serif}
+.i.dk{background:#0a0a0a;color:#f5f5f7}
+.i .in{position:absolute;inset:56px 26px 28px;display:flex;flex-direction:column}
+.i .hero{font:200 54px/1.02 Inter;letter-spacing:-.045em;margin-top:30px}
+.i .hero b{font-weight:600}
+.i .rule{height:1px;background:currentColor;opacity:.18;margin:26px 0}
+.i .lede{font:400 15px/1.5 Inter;color:#6e6e73}
+.i .cta{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font:500 16px Inter}
+.i .cta .p{height:48px;padding:0 24px;border-radius:99px;display:grid;place-items:center;background:#1d1d1f;color:#fff}
+.i .n{font:100 136px/.8 Inter;letter-spacing:-.07em;margin-top:auto;font-variant-numeric:tabular-nums}
+.i .meta{display:grid;grid-template-columns:1fr 1fr;gap:18px 12px;margin-top:22px}
+.i .meta div{font:400 12px Inter;opacity:.55}
+.i .meta b{display:block;font:300 24px Inter;opacity:1;letter-spacing:-.02em;color:#f5f5f7;margin-top:2px;font-variant-numeric:tabular-nums}
+.i .tick{position:absolute;left:26px;right:26px;top:110px;height:30px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.35) 0 1px,transparent 1px 10px);-webkit-mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);mask:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
+.i .tick::after{content:"";position:absolute;left:50%;top:-6px;width:2px;height:42px;background:#FF453A}
+.i .code{font:100 92px/.9 Inter;letter-spacing:-.04em;margin-top:30px}
+
+/* ── REFERENCE · current build ── */
+.r{background:#F3F5F0;color:#1B1F23;font-family:Archivo,sans-serif}
+.r .in{position:absolute;inset:56px 20px 26px;display:flex;flex-direction:column}
+.r .hero{font-weight:850;font-stretch:64%;font-size:62px;line-height:.9;margin-top:24px}
+.r .hero span{color:#80888D;display:block}
+.r .n{margin:auto;font-weight:900;font-stretch:62%;font-size:150px;line-height:.82}
+.r .n small{font-size:34px;font-weight:800;color:#4A5258}
+.r .btn{height:52px;border-radius:14px;display:grid;place-items:center;font-weight:650;background:#1B1F23;color:#fff;margin-top:auto}
+.r .circle{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px;border:3px solid #B4166F;border-radius:50%;opacity:.4}
+</style>
+</head>
+<body>
+<header class="page-h">
+  <h1>Nine directions for Luftlinie</h1>
+  <p>Each shows the same three screens: the landing, the live distance (the screen players stare at), and the lobby code. All follow “maximalist minimalism”: almost nothing on screen, but what’s there is huge, confident and finished. Pick one, or combine parts (for example C’s dial with A’s type).</p>
+</header>
+
+<!-- A -->
+<section class="cand">
+  <div class="cand-h"><h2>A. Keynote</h2><span class="tag">Apple product page. White and black, one gradient, giant type.</span></div>
+  <p>Light landing, dark game. The only colour is a blue-to-pink gradient used on exactly one thing per screen: a headline word on the landing, the time bar in game. The distance is a 150 px chrome numeral fading into the dark.</p>
+  <div class="tokens"><span class="sw"><i style="background:#fff"></i>#FFFFFF</span><span class="sw"><i style="background:#000"></i>#000000</span><span class="sw"><i style="background:#1d1d1f"></i>#1D1D1F</span><span class="sw"><i style="background:#0071e3"></i>#0071E3</span><span class="sw"><i style="background:linear-gradient(90deg,#0071e3,#a14bf5,#ff5e7e)"></i>signal gradient</span><span class="sw">Inter Tight 800 / Inter</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone a"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div style="font:700 17px Inter">Luftlinie</div>
+      <div class="hero">You know how far. <em>Not where.</em></div>
+      <p class="lede">One hidden place. A distance that changes with every step you take.</p>
+      <div class="cta"><div class="btn p">Host a game</div><div class="btn s">Join with a code</div></div>
+    </div></div><div class="cap">Landing</div></div>
+    <div class="ph-wrap"><div class="phone a dark"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="top"><span>3 navigators</span><b>38:12</b></div>
+      <div class="big"><div class="n">742</div><div class="u">metres, as the crow flies</div></div>
+      <div class="bar"><i></i></div>
+    </div></div><div class="cap">Navigating</div></div>
+    <div class="ph-wrap"><div class="phone a"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="eye">Game code</div><div class="code">ABC·234</div>
+      <div class="list"><div class="row">Mira<span>Navigator</span></div><div class="row">Jonas<span>Navigator</span></div><div class="row">Ute<span>Watching</span></div></div>
+      <div class="cta"><div class="btn p">Start the game</div></div>
+    </div></div><div class="cap">Lobby</div></div>
+  </div>
+</section>
+
+<!-- B -->
+<section class="cand">
+  <div class="cand-h"><h2>B. Glass</h2><span class="tag">visionOS materials. Frosted panels floating over a living colour field.</span></div>
+  <p>Everything sits on blurred glass above a soft aurora that slowly shifts hue as you get closer (cool far away, warm near). Rich, tactile, still very empty. Heaviest on GPU, so it needs a reduced-transparency fallback.</p>
+  <div class="tokens"><span class="sw"><i style="background:#2a2350"></i>#2A2350</span><span class="sw"><i style="background:#5b8cff"></i>#5B8CFF</span><span class="sw"><i style="background:#ff7ac6"></i>#FF7AC6</span><span class="sw"><i style="background:#2ee6c5"></i>#2EE6C5</span><span class="sw"><i style="background:rgba(255,255,255,.4)"></i>glass 16%</span><span class="sw">Figtree 900 / 500</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone b"><div class="map"></div><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="hero">You know how far. Not where.</div>
+      <p class="lede">One hidden place. A distance that changes with every step.</p>
+      <div class="cta glass"><div class="btn p">Host a game</div><div class="btn s">Join with a code</div></div>
+    </div></div><div class="cap">Landing</div></div>
+    <div class="ph-wrap"><div class="phone b" style="background:radial-gradient(120% 80% at 50% 40%,#ff9a5b 0%,transparent 60%),radial-gradient(90% 70% at 10% 90%,#ff5e9a 0%,transparent 55%),#3a1d40"><div class="map"></div><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="glass pill"><span>Time left</span><b>38:12</b></div>
+      <div class="glass read"><div class="n">742</div><div class="u">metres away</div></div>
+      <div class="glass pill"><span>Getting warmer</span><span>3 navigators</span></div>
+    </div></div><div class="cap">Navigating (warm = close)</div></div>
+    <div class="ph-wrap"><div class="phone b"><div class="map"></div><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="glass codebox"><small>Game code</small><div class="c">ABC 234</div><small>Tap to copy</small></div>
+      <div class="glass people"><div class="person"><i></i>Mira</div><div class="person"><i></i>Jonas</div><div class="person"><i></i>Ute</div></div>
+      <div class="cta glass"><div class="btn p">Start the game</div></div>
+    </div></div><div class="cap">Lobby</div></div>
+  </div>
+</section>
+
+<!-- C -->
+<section class="cand">
+  <div class="cand-h"><h2>C. Wayfinder</h2><span class="tag">Apple Watch Ultra. Pure black, one orange, rounded numerals, a dial.</span></div>
+  <p>Built for outdoors and night: OLED black saves battery, and the single international-orange accent reads in sunlight. The distance lives inside a dial whose arc fills as you close in. Feels like a piece of kit, not a website.</p>
+  <div class="tokens"><span class="sw"><i style="background:#000"></i>#000000</span><span class="sw"><i style="background:#1c1c1e"></i>#1C1C1E</span><span class="sw"><i style="background:#8e8e93"></i>#8E8E93</span><span class="sw"><i style="background:#FF7A1A"></i>#FF7A1A</span><span class="sw"><i style="background:#fff"></i>#FFFFFF</span><span class="sw">Nunito 900 (SF Rounded on Apple)</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone c"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="hero">You know how far.<span>Not where.</span></div>
+      <p class="lede">One hidden place. A distance that changes with every step.</p>
+      <div class="cta"><div class="btn p">Host a game</div><div class="btn s">Join with a code</div></div>
+    </div></div><div class="cap">Landing</div></div>
+    <div class="ph-wrap"><div class="phone c"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="comp"><div>TIME<b>38:12</b></div><div style="text-align:right">PLACE<b>2 of 3</b></div></div>
+      <div class="dial"><svg viewBox="0 0 256 256"><circle cx="128" cy="128" r="112" fill="none" stroke="#1c1c1e" stroke-width="14"/><circle cx="128" cy="128" r="112" fill="none" stroke="#FF7A1A" stroke-width="14" stroke-linecap="round" stroke-dasharray="704" stroke-dashoffset="250" transform="rotate(-90 128 128)"/><g stroke="#3a3a3c" stroke-width="2">
+        <line x1="128" y1="8" x2="128" y2="2"/><line x1="248" y1="128" x2="254" y2="128"/><line x1="128" y1="248" x2="128" y2="254"/><line x1="8" y1="128" x2="2" y2="128"/></g></svg>
+        <div class="n"><b>742</b><small>METRES</small></div></div>
+      <div class="comp"><div>START<b>2.41 km</b></div><div style="text-align:right">SPEED<b>5 km/h</b></div></div>
+    </div></div><div class="cap">Navigating</div></div>
+    <div class="ph-wrap"><div class="phone c"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="eye">GAME CODE</div>
+      <div class="code"><b>A</b><b>B</b><b>C</b><b>2</b><b>3</b><b>4</b></div>
+      <div class="row"><i style="background:#FF7A1A"></i>Mira</div><div class="row"><i style="background:#64D2FF"></i>Jonas</div><div class="row"><i style="background:#30D158"></i>Ute</div>
+      <div class="cta"><div class="btn p">Start the game</div></div>
+    </div></div><div class="cap">Lobby</div></div>
+  </div>
+</section>
+
+<!-- D -->
+<section class="cand">
+  <div class="cand-h"><h2>D. Colorfield</h2><span class="tag">iPhone colourways. Every screen is one saturated colour and one enormous number.</span></div>
+  <p>The loudest option. Each game mode owns a colour (Standard red-orange, Whisper indigo, Sailor green), the whole screen floods with it, and the number is set so large it nearly touches the edges. Unmistakable in a screenshot.</p>
+  <div class="tokens"><span class="sw"><i style="background:#FF5A36"></i>#FF5A36</span><span class="sw"><i style="background:#3E4BFF"></i>#3E4BFF</span><span class="sw"><i style="background:#0F8F5F"></i>#0F8F5F</span><span class="sw"><i style="background:#fff"></i>#FFFFFF</span><span class="sw"><i style="background:#111"></i>#111111</span><span class="sw">Inter Tight 900</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone d f1"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="hero">How far. Not where.</div>
+      <p class="lede">One hidden place. A distance that changes with every step.</p>
+      <div class="cta"><div class="btn p">Host a game</div><div class="btn s">Join with a code</div></div>
+    </div></div><div class="cap">Landing</div></div>
+    <div class="ph-wrap"><div class="phone d f2"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="meta"><span>Whisper</span><b>38:12</b></div>
+      <div class="n">742</div><div class="u">metres</div>
+      <div class="meta" style="margin-top:18px"><span>Next signal in 0:41</span><span>3 navigators</span></div>
+    </div></div><div class="cap">Navigating (Whisper mode)</div></div>
+    <div class="ph-wrap"><div class="phone d f3"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <span class="chip">Sailor, on foot</span>
+      <div class="codebig">ABC 234</div>
+      <p class="lede">Mira, Jonas and Ute are in.</p>
+      <div class="cta"><div class="btn p">Start the game</div></div>
+    </div></div><div class="cap">Lobby</div></div>
+  </div>
+</section>
+
+<!-- E -->
+<section class="cand">
+  <div class="cand-h"><h2>E. Live Activity</h2><span class="tag">The game leaves the app. It lives on the lock screen and in the Dynamic Island.</span></div>
+  <p>The biggest UX idea here, not only a look: players keep the phone locked in a pocket and glance at the lock screen. The in-app screens can then be almost empty. A progress track shows how much of the starting distance you have closed. On the web this becomes a persistent notification plus a pinned mini-bar; true Live Activities need a native wrapper later.</p>
+  <div class="tokens"><span class="sw"><i style="background:#000"></i>#000000</span><span class="sw"><i style="background:#FF9F0A"></i>#FF9F0A</span><span class="sw"><i style="background:#1b2130"></i>wallpaper</span><span class="sw"><i style="background:rgba(20,20,24,.6)"></i>blur 30</span><span class="sw">Inter 200 clock / Inter Tight 700</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone e"><div class="wall"></div><div class="island"><span class="dot"></span><b>742 m</b></div><div class="in">
+      <div class="date">Wednesday 4 November</div><div class="clock">9:41</div>
+      <div class="la"><div class="la-top"><span>Luftlinie, game ABC 234</span><span>38:12 left</span></div>
+        <div class="la-mid"><b>742 m</b><span>getting closer</span></div>
+        <div class="track"><i></i><u></u></div></div>
+    </div></div><div class="cap">Lock screen</div></div>
+    <div class="ph-wrap"><div class="phone e"><div class="appbody"><div class="t">Any app stays usable underneath. A long press on the island expands it.</div></div>
+      <div class="expanded"><div class="row"><div><small>Straight line</small><br><b>742 m</b></div><div style="text-align:right"><small>Time left</small><br><b style="font-size:30px">38:12</b></div></div>
+      <div class="track" style="height:6px;border-radius:3px;background:#2c2c2e;margin-top:16px;position:relative"><i style="position:absolute;left:0;top:0;bottom:0;width:69%;border-radius:3px;background:#FF9F0A"></i></div></div>
+    </div><div class="cap">Expanded island</div></div>
+  </div>
+</section>
+
+<!-- F -->
+<section class="cand">
+  <div class="cand-h"><h2>F. Liquid Glass</h2><span class="tag">iOS 26 material. Clear, lens-like glass floating over the real map.</span></div>
+  <p>Unlike B, the background is the actual map, always there. Controls are clear glass capsules that bend the map beneath them. In game the map stays blurred under a big glass bubble so navigators can’t see where the target is. Fits iPhones today perfectly.</p>
+  <div class="tokens"><span class="sw"><i style="background:#ecece4"></i>map ground</span><span class="sw"><i style="background:rgba(255,255,255,.4)"></i>clear glass 28%</span><span class="sw"><i style="background:#111"></i>#111111</span><span class="sw"><i style="background:#FF3B30"></i>#FF3B30</span><span class="sw">SF Pro / Inter Tight 800</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone f"><div class="map"></div><div class="pin"></div><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="lg sheet"><h3>You know how far. Not where.</h3><p>Hide a place on this map. Your friends only get the distance.</p><div class="btn">Host a game</div></div>
+      <div class="lg tabs"><span class="on">Host</span><span>Join</span><span>Record</span></div>
+    </div></div><div class="cap">Landing</div></div>
+    <div class="ph-wrap"><div class="phone f"><div class="map" style="filter:blur(14px) saturate(1.3);transform:scale(1.15)"></div><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="chiprow"><span class="lg chip">38:12</span><span class="lg chip">3 navigators</span></div>
+      <div class="lg bubble"><b>742</b><small>metres away</small></div>
+      <div class="lg tabs"><span class="on">Distance</span><span>Sound</span><span>Leave</span></div>
+    </div></div><div class="cap">Navigating (map blurred)</div></div>
+  </div>
+</section>
+
+<!-- G -->
+<section class="cand">
+  <div class="cand-h"><h2>G. Sky</h2><span class="tag">Apple Weather. The sky changes from night to sunrise as you get closer.</span></div>
+  <p>The distance is set like a temperature, in a hairline 100-weight numeral. The whole background is a sky: deep night when you are far, dusk in the middle, bright morning when you are almost there. Beautiful and instantly readable as “am I close?” without reading the number. The hourly strip becomes a recent-distance chart.</p>
+  <div class="tokens"><span class="sw"><i style="background:#0b1f4a"></i>far</span><span class="sw"><i style="background:#d77a8c"></i>getting close</span><span class="sw"><i style="background:#ffe6b0"></i>almost there</span><span class="sw"><i style="background:rgba(255,255,255,.3)"></i>glass card</span><span class="sw">Inter 100 / 500</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone g far"><div class="stars"></div><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="place">Target</div><div class="n">4.2<sup>km</sup></div><div class="cond">Far away</div><div class="hl">Started at 5.1 km</div>
+      <div class="card"><small>LAST TEN MINUTES</small><div class="hours"><div><i style="height:30px"></i>-10</div><div><i style="height:28px"></i>-8</div><div><i style="height:27px"></i>-6</div><div><i style="height:25px"></i>-4</div><div><i style="height:24px"></i>-2</div><div><i style="height:22px"></i>now</div></div></div>
+    </div></div><div class="cap">Far: night</div></div>
+    <div class="ph-wrap"><div class="phone g mid"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="place">Target</div><div class="n">742<sup>m</sup></div><div class="cond">Getting closer</div><div class="hl">−310 m in the last 5 min</div>
+      <div class="card"><small>LAST TEN MINUTES</small><div class="hours"><div><i style="height:34px"></i>-10</div><div><i style="height:30px"></i>-8</div><div><i style="height:24px"></i>-6</div><div><i style="height:19px"></i>-4</div><div><i style="height:15px"></i>-2</div><div><i style="height:12px"></i>now</div></div></div>
+    </div></div><div class="cap">Closing in: dusk</div></div>
+    <div class="ph-wrap"><div class="phone g near"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div class="place">Target</div><div class="n">48<sup>m</sup></div><div class="cond">Almost there</div><div class="hl">Look around you</div>
+      <div class="card"><small>LAST TEN MINUTES</small><div class="hours"><div><i style="height:30px"></i>-10</div><div><i style="height:22px"></i>-8</div><div><i style="height:14px"></i>-6</div><div><i style="height:9px"></i>-4</div><div><i style="height:5px"></i>-2</div><div><i style="height:3px"></i>now</div></div></div>
+    </div></div><div class="cap">Near: morning</div></div>
+  </div>
+</section>
+
+<!-- H -->
+<section class="cand">
+  <div class="cand-h"><h2>H. Rings</h2><span class="tag">Apple Fitness. Three neon rings close as the game goes on.</span></div>
+  <p>Outer ring: distance closed. Middle ring: time used. Inner ring: checkpoints or the next elimination. It turns a game into something you “close”, and the results screen becomes a satisfying set of completed rings that is very shareable.</p>
+  <div class="tokens"><span class="sw"><i style="background:#FA114F"></i>#FA114F distance</span><span class="sw"><i style="background:#A6FF00"></i>#A6FF00 time</span><span class="sw"><i style="background:#00F0FF"></i>#00F0FF checkpoints</span><span class="sw"><i style="background:#000"></i>#000000</span><span class="sw">Inter Tight 800</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone h"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <svg class="rings" viewBox="0 0 240 240"><g fill="none" stroke-width="22" stroke-linecap="round" transform="rotate(-90 120 120)">
+        <circle cx="120" cy="120" r="105" stroke="#3a0716"/><circle cx="120" cy="120" r="105" stroke="#FA114F" stroke-dasharray="660" stroke-dashoffset="205"/>
+        <circle cx="120" cy="120" r="80" stroke="#263a00"/><circle cx="120" cy="120" r="80" stroke="#A6FF00" stroke-dasharray="503" stroke-dashoffset="320"/>
+        <circle cx="120" cy="120" r="55" stroke="#003a3d"/><circle cx="120" cy="120" r="55" stroke="#00F0FF" stroke-dasharray="346" stroke-dashoffset="115"/></g></svg>
+      <div class="legend">
+        <div class="lrow"><span style="color:#FA114F">Distance</span><b>742 m</b></div>
+        <div class="lrow"><span style="color:#A6FF00">Time left</span><b>38:12</b></div>
+        <div class="lrow"><span style="color:#00F0FF">Checkpoints</span><b>2 of 3</b></div>
+      </div>
+    </div></div><div class="cap">Navigating</div></div>
+    <div class="ph-wrap"><div class="phone h"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <svg class="rings" viewBox="0 0 240 240" style="width:160px;height:160px;margin:10px 0 0"><g fill="none" stroke-width="22" stroke-linecap="round" transform="rotate(-90 120 120)">
+        <circle cx="120" cy="120" r="105" stroke="#FA114F"/><circle cx="120" cy="120" r="80" stroke="#A6FF00" stroke-dasharray="503" stroke-dashoffset="190"/><circle cx="120" cy="120" r="55" stroke="#00F0FF"/></g></svg>
+      <div class="hero">Mira closed it in 25:34.</div>
+      <div class="legend"><div class="lrow"><span>You</span><b>2nd</b></div><div class="btn">Share rings</div><div class="btn s">Done</div></div>
+    </div></div><div class="cap">Results</div></div>
+  </div>
+</section>
+
+<!-- I -->
+<section class="cand">
+  <div class="cand-h"><h2>I. Hairline</h2><span class="tag">Pro Display XDR page. Ultra-thin type, hairline rules, near-nothing.</span></div>
+  <p>The most restrained option: Inter at weight 100, one-pixel rules, a precision tick ruler with one red index line, and generous emptiness. Light landing, black game. Feels like a high-end instrument; less playful than the others.</p>
+  <div class="tokens"><span class="sw"><i style="background:#F5F5F7"></i>#F5F5F7</span><span class="sw"><i style="background:#1d1d1f"></i>#1D1D1F</span><span class="sw"><i style="background:#0a0a0a"></i>#0A0A0A</span><span class="sw"><i style="background:#FF453A"></i>#FF453A index</span><span class="sw">Inter 100 / 200 / 600</span></div>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone i"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div style="font:600 15px Inter">Luftlinie</div>
+      <div class="hero">You know <b>how far.</b> Not where.</div><div class="rule"></div>
+      <p class="lede">One hidden place. A distance that changes with every step.</p>
+      <div class="cta"><span>Join</span><span class="p">Host a game</span></div>
+    </div></div><div class="cap">Landing</div></div>
+    <div class="ph-wrap"><div class="phone i dk"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="tick"></div><div class="in">
+      <div class="n">742</div><div style="font:200 22px Inter;opacity:.6;margin-top:6px">metres</div>
+      <div class="meta"><div>Time left<b>38:12</b></div><div>From start<b>−1.67 km</b></div><div>Navigators<b>3</b></div><div>Accuracy<b>±6 m</b></div></div>
+    </div></div><div class="cap">Navigating</div></div>
+    <div class="ph-wrap"><div class="phone i"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in">
+      <div style="font:400 13px Inter;color:#6e6e73;margin-top:30px">Game code</div><div class="code">ABC<br>234</div><div class="rule"></div>
+      <p class="lede">Mira, Jonas and Ute are in.</p>
+      <div class="cta"><span>Share link</span><span class="p">Start</span></div>
+    </div></div><div class="cap">Lobby</div></div>
+  </div>
+</section>
+
+<!-- Reference -->
+<section class="cand">
+  <div class="cand-h"><h2>Reference. What’s built now</h2><span class="tag">Orienteering map: control circle, magenta course, condensed Archivo.</span></div>
+  <p>The version currently in the repo, for comparison. More editorial than Apple-like.</p>
+  <div class="phones">
+    <div class="ph-wrap"><div class="phone r"><div class="notch"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in"><div class="hero">You know how far.<span>Not where.</span></div><div class="btn">Host a game</div></div></div><div class="cap">Landing</div></div>
+    <div class="ph-wrap"><div class="phone r"><div class="notch"></div><div class="circle"></div><div class="status"><span>9:41</span><span>●●●</span></div><div class="in"><div class="n">742<small>m</small></div></div></div><div class="cap">Navigating</div></div>
+  </div>
+</section>
+</body>
+</html>

@@ -1,6 +1,13 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: geolocation=(self), camera=(), microphone=()
+  Permissions-Policy: geolocation=(self), accelerometer=(self), gyroscope=(self), magnetometer=(self), camera=(), microphone=()
   X-Frame-Options: DENY
   Cache-Control: public, max-age=0, must-revalidate
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://www.gstatic.com https://*.firebasedatabase.app https://*.firebaseio.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.tile.openstreetmap.org https://tile.openstreetmap.org https://cdnjs.cloudflare.com; connect-src 'self' https://*.firebasedatabase.app wss://*.firebasedatabase.app https://*.firebaseio.com wss://*.firebaseio.com https://overpass-api.de https://overpass.private.coffee https://maps.mail.ru https://routing.openstreetmap.de; media-src 'self' data:; frame-src https://*.firebasedatabase.app https://*.firebaseio.com; worker-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+
+/sw.js
+  Cache-Control: no-cache
+
+/api/*
+  X-Robots-Tag: noindex

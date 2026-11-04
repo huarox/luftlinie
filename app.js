@@ -5,11 +5,15 @@ const storage = { getItem(key){try{return localStorage.getItem(key);}catch(_){re
 let serverOffset=0;
 const serverNow=()=>Date.now()+serverOffset;
 
-/* ── ERROR BOUNDARY — shows visible message instead of blank page ── */
-window.onerror=function(){
+/* ── ERROR BOUNDARY ──────────────────────────────────────────
+   Only a failure while booting (a CDN script missing, Firebase unreachable) blanks the app.
+   A stray runtime error mid-game used to cover the whole screen and end the player's run; now it is logged. */
+let booted=false;
+window.onerror=function(message){
+  if(booted&&window.firebase&&window.L){console.warn('Luftlinie runtime error:',message);return false;}
   if(document.getElementById('load-error'))return false;
   const box=document.createElement('div');box.id='load-error';box.className='load-error';box.setAttribute('role','alert');
-  box.innerHTML='<div><p class="eyebrow">CONNECTION INTERRUPTED</p><h1>Let’s reconnect.</h1><p>A part of Luftlinie couldn’t load. Check your connection, then reload. Your saved game will be available to rejoin.</p><button class="btn-primary" onclick="location.reload()">Reload Luftlinie</button></div>';
+  box.innerHTML='<div><h1>Luftlinie couldn’t load</h1><p>Part of the app didn’t arrive. Check your connection and reload. A game you were in can be rejoined afterwards.</p><button class="btn-primary" onclick="location.reload()">Reload</button></div>';
   document.body.appendChild(box);return false;
 };
 /* ═══════════════════════════════════════════════════════════
@@ -34,7 +38,16 @@ const db = firebase.database();
 const SV = firebase.database.ServerValue;
 db.ref(".info/serverTimeOffset").on("value",snap=>{serverOffset=Number(snap.val())||0;});
 
-const PCOLS = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFB347','#C39BD3','#A8E6CF','#FF8B94'];
+// Player colours: distinct on the map and readable on light and dark ground.
+const PCOLS = ['#D9480F','#1971C2','#2B8A3E','#7048E8','#C2255C','#0C8599','#E67700','#5C940D'];
+const cssVar=(name,fallback)=>{try{return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||fallback;}catch(_){return fallback;}};
+// Leaflet writes colours into SVG attributes, where CSS variables don't resolve, so read the live theme value.
+const INK = {get control(){return cssVar('--magenta','#B4166F');}};
+// Stable colour per player: assigned by join order, so a colour never changes when someone is eliminated or leaves.
+function colorFor(id){
+  const ids=playerEntries(S.latestPlayers).filter(p=>p.role==='navigator'||p.id===id).sort((a,b)=>(a.joinedAt||0)-(b.joinedAt||0)||String(a.id).localeCompare(String(b.id))).map(p=>p.id);
+  const i=ids.indexOf(id);return PCOLS[(i<0?0:i)%PCOLS.length];
+}
 const HOME  = { lat:48.210, lon:16.363 }; // Vienna city centre fallback
 const DIFF  = {
   labels: ['','Easy','Normal','Medium','Hard','Expert'],
@@ -74,7 +87,7 @@ const S = {
   hostMap:null, hostTgtM:null, hostArrCircle:null, hostDots:{}, hostTrails:{},
   specMap:null, specDots:{}, specRoutes:{}, specTgtM:null, specArrCircle:null,
   resMap:null, myTrail:[], playerTrails:{},
-  _lastRoutePos:{}, _routePending:{},
+  _lastRoutePos:{}, _routePending:{}, _routeAt:{}, _userPannedAt:0,
   _autoZoomIv:null,
   /* Firebase */
   gameListener:null, playersListener:null,
@@ -110,8 +123,12 @@ const S = {
 
 /* ── UTILS ───────────────────────────────────────────────── */
 function hav(a,b,c,d){ return Core.distance(a,b,c,d); }
-function fmtDist(m){ if(m==null||isNaN(m))return'—'; if(m>=10000)return(m/1000).toFixed(1); if(m>=1000)return(m/1000).toFixed(2); return Math.round(m)+''; }
-function distUnit(m){ return(m==null||m>=1000)?'KM':'M'; }
+// 999.6 m used to render as "1000 M"; anything that rounds to a kilometre now switches unit.
+function fmtDist(m){ if(m==null||isNaN(m))return'—'; if(m>=9995)return(m/1000).toFixed(1); if(m>=999.5)return(m/1000).toFixed(2); return Math.round(m)+''; }
+function distUnit(m){ return(m==null||isNaN(m)||m>=999.5)?'km':'m'; }
+function fmtLen(m){ return m>=999.5?(m/1000).toFixed(1)+' km':Math.round(m)+' m'; }
+// Keep a button's markup (icons included) while it shows a busy label.
+function busy(btn,label){ if(!btn)return ()=>{}; if(btn._idle==null)btn._idle=btn.innerHTML; btn.disabled=true; btn.textContent=label; return ()=>{btn.disabled=false;btn.innerHTML=btn._idle;}; }
 function fmtTime(s){ s=Math.max(0,Math.floor(s||0)); return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
 function noiseDist(dist,seed){ return Math.max(0,dist+(seed-0.5)*60); }
 function randCode(){ const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';return Array.from(crypto.getRandomValues(new Uint8Array(6)),n=>c[n%c.length]).join(''); }
@@ -169,18 +186,20 @@ function startClientTimer(){
       const e=el(id); if(e){e.textContent=txt;e.classList.toggle('urgent',rem<300);}
     });
     // Urgent timer beeps: single beep at 60s, rapid double-beep at 10s
-    if(rem<=60&&rem>59.5){ playTimerWarningSound(); haptic('light'); }
+    if(rem<=60&&rem>0&&!S._lastWarn60&&S.status==='active'){ S._lastWarn60=true; playTimerWarningSound(); haptic('light'); }
     if(rem<=10&&rem>0&&Math.floor(rem)!==S._lastUrgentBeep){
       S._lastUrgentBeep=Math.floor(rem);
       playTone(880,0.05,0.12);
       setTimeout(()=>playTone(880,0.05,0.10),120);
     }
     // Elim countdown display
-    if(S.elimMode&&S.nextElimTime>0){
+    // Every client derives the next round from the shared start time; navigators previously never saw it.
+    if(S.elimMode&&S.startedAt&&S.status==='active'&&serverNow()>=S.startedAt){
+      S.nextElimTime=Core.elimRoundAt(serverNow(),S.startedAt);
       const toElim=Math.max(0,(S.nextElimTime-serverNow())/1000);
-      const cdTxt='⚡ '+fmtTime(toElim);
-      ['ha-elim-cd','sp-elim-cd'].forEach(id=>{
-        const e=el(id);if(e){e.textContent=cdTxt;e.classList.toggle('hidden',toElim<=0);}
+      const cdTxt='Next cut '+fmtTime(toElim);
+      ['ha-elim-cd','sp-elim-cd','na-elim-cd'].forEach(id=>{
+        const e=el(id);if(e){e.textContent=cdTxt;e.classList.remove('hidden');e.classList.toggle('urgent',toElim<=30);}
       });
       // Warning beep 30s before elimination
       if(toElim<=30&&toElim>29.5) playTone(330,0.08,0.12,'triangle');
@@ -212,7 +231,7 @@ function goScreen(id){
     if(dissolve) sc.classList.add('dissolve'); else sc.classList.remove('dissolve');
     requestAnimationFrame(()=>{if(S.screen===id)sc.classList.add('active');});
   }
-  S.screen=id;
+  S.screen=id;document.body.dataset.screen=id;
   if(id==='hactive'||id==='spectator'){
     const navs=playerEntries(S.latestPlayers).filter(p=>p.role==='navigator'&&!p.eliminated&&!p.withdrawn);
     const prefix=id==='hactive'?'ha':'sp';set(prefix+'-nbadge',navs.length);renderNavCards(prefix+'-cards',navs);
@@ -232,13 +251,14 @@ function toggleTheme(){
   const html=document.documentElement;
   const dark=html.getAttribute('data-theme')==='dark';
   html.setAttribute('data-theme',dark?'light':'dark');
-  set('theme-label',dark?'Dark mode':'Light mode');storage.setItem('ll_theme',dark?'light':'dark');
+  set('theme-label',dark?'Dark mode':'Light mode');storage.setItem('ll_theme',dark?'light':'dark');syncThemeMeta();
   [S.leafMap,S.hostMap,S.specMap,S.resMap].forEach(m=>{
     if(!m)return; m.eachLayer(l=>{if(l._url)m.removeLayer(l);}); addTiles(m);
   });
 }
 window.toggleTheme=toggleTheme;
 
+function syncThemeMeta(){const m=el('meta-theme');if(m)m.setAttribute('content',cssVar('--ground','#F3F5F0'));}
 /* ── STATE RESET ─────────────────────────────────────────── */
 function resetGameState(){
   S._presence?.cancel().catch(()=>{});S._presence=null;S._eliminating=false;S._dynamicPicking=false;
@@ -251,7 +271,7 @@ function resetGameState(){
   S.leafMap=null;S.leafTgtM=null;S.rangeRing=null;S._ringLabel=null;
   S.hostMap=null;S.hostTgtM=null;S.hostArrCircle=null;S.hostDots={};S.hostTrails={};
   S.specMap=null;S.specDots={};S.specRoutes={};S.specTgtM=null;S.specArrCircle=null;
-  S.resMap=null;S.myTrail=[];S.playerTrails={};S._lastRoutePos={};S._routePending={};
+  S.resMap=null;S.myTrail=[];S.playerTrails={};S._lastRoutePos={};S._routePending={};S._routeAt={};S._userPannedAt=0;S._lastWarn60=false;
   S.gameCode=null;S.isHost=false;S.myToken=null;S.hostPlayerToken=null;S.hostViewActive=true;
   S.targetLat=null;S.targetLon=null;S.noiseSeed=0.5;
   S.timeLimitSec=3600;S.startedAt=null;S.status='idle';
@@ -263,7 +283,7 @@ function resetGameState(){
   S.latestPlayers={};S.lastProximityBeep=0;
   S._hcHistory=[];S._hcHapticTs=0;S._sailorHeading=0;
   S.multiTargets=[];S.multiCurrent=0;S.multiArrived=0;
-  S._dynamicMoveIv=null;S._dynamicMoveCount=0;
+  S._dynamicMoveIv=null;S._dynamicMoveCount=0;S._dynamicTried=0;
   S._whisperShowing=false;clearTimeout(S._whisperHideTimeout);S._whisperHideTimeout=null;
   S._lastLobbyHtml=null;S._lastNWaitHtml=null;
   S.lastAccuracy=null;S.prevLat=null;S.prevLon=null;S.prevGPSTime=null;S._lastFix=0;S._lastPositionTimestamp=0;S._lastSent=0;S._lastTrailSent=0;S._writePending=false;S._arrivalPending=false;S._statsSaved=false;S._specListening=false;S._offlineQueue=[];S._epoch=(S._epoch||0)+1;
@@ -274,7 +294,17 @@ function resetGameState(){
   stopMapOrientation();
   S.mapOrientMode={host:false,spec:false};S._lastUrgentBeep=-1;S._lastElimBeep=-1;S.nextElimTime=0;
 }
-function goHome(){ if(S.gameCode&&S.myToken)pRef().transaction(me=>me?{...me,online:false,withdrawn:!me.arrived}:undefined,undefined,false).catch(()=>{});stopAutoZoom(); stopDynamicTarget(); clearSession(); resetGameState(); goScreen('land'); renderStats(); }
+function goHome(){
+  if(S.gameCode&&S.myToken&&['lobby','active'].includes(S.status)){
+    const room=gRef(),token=S.myToken,wasHost=S.isHost,inLobby=S.status==='lobby';
+    // A host leaving the lobby used to leave every waiting player stuck on "Waiting for host". Close the lobby instead.
+    if(wasHost&&inLobby)room.transaction(g=>g&&g.status==='lobby'&&g.hostToken===token?{...g,status:'aborted'}:undefined,undefined,false).catch(()=>{});
+    else pRef().transaction(me=>me?{...me,online:false,withdrawn:!me.arrived}:undefined,undefined,false).catch(()=>{});
+  }
+  stopAutoZoom(); stopDynamicTarget(); clearSession(); resetGameState();
+  if(new URLSearchParams(location.search).has('join'))try{history.replaceState(null,'',location.pathname);}catch(_){}
+  goScreen('land'); renderStats();
+}
 
 /* ── SETUP ───────────────────────────────────────────────── */
 function transportMeta(){
@@ -284,7 +314,7 @@ function transportMeta(){
 }
 function diffDesc(d){
   const m=DIFF.mult[d];
-  return `${DIFF.labels[d]} — ${m}× the ideal ${transportMeta().noun}`;
+  return `${DIFF.labels[d]}: ${m}× the ${transportMeta().noun} to find it`;
 }
 function setTransportMode(m){
   S.transportMode=(m==='walk')?'walk':'drive';
@@ -327,7 +357,8 @@ function setRadius(r){
 }
 function setRole(r){
   S.role=r;
-  document.querySelectorAll('#seg-role .seg').forEach(b=>b.classList.toggle('active',b.dataset.v===r));
+  document.querySelectorAll('#seg-role .seg').forEach(b=>{b.classList.toggle('active',b.dataset.v===r);b.setAttribute('aria-pressed',String(b.dataset.v===r));});
+  el('team-pick-field')?.classList.toggle('hidden',!S.teamsMode||r!=='navigator');
 }
 function setElimMode(on){
   S.elimMode=!!on;
@@ -349,19 +380,49 @@ function setExcludeHost(on){
 }
 function updateGoMapBtn(){
   const btn=el('btn-go-map'); if(!btn)return;
-  btn.textContent=S.mode==='smart'?'Find Smart Target →':'Place Target on Map →';
+  btn._idle=null;btn.textContent=S.mode==='smart'?'Find a target for me':'Choose the target on the map';
 }
 
 /* ── MAP TILES ───────────────────────────────────────────── */
 function tileUrl(){
   return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 }
-function addTiles(map){ map.attributionControl?.remove(); L.tileLayer(tileUrl(),{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map); }
-function pinIcon(col,sz=20){
-  return L.divIcon({html:`<div style="width:${sz}px;height:${sz}px;background:${col};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid white;box-shadow:0 2px 8px rgba(0,0,0,.35)"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz],className:''});
+function addTiles(map){ map.attributionControl?.setPrefix?.(false); L.tileLayer(tileUrl(),{maxZoom:19,className:'osm-tiles',attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map); }
+// Target: a red dot in a white ring with a slow glass halo. Start: a small ink dot in a ring.
+function controlIcon(sz=40){
+  return L.divIcon({html:`<span class="tgt-pin" aria-hidden="true"><i></i></span>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],className:'map-sym'});
 }
-function dotIcon(col,sz=12,glow=false){
-  return L.divIcon({html:`<div style="width:${sz}px;height:${sz}px;background:${col};border-radius:50%;border:2px solid white;${glow?`box-shadow:0 0 10px ${col}`:'box-shadow:0 1px 4px rgba(0,0,0,.3)'}"></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],className:''});
+function startIcon(sz=22){
+  return L.divIcon({html:`<span class="start-pin" aria-hidden="true"></span>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],className:'map-sym'});
+}
+
+/* ── BACKDROP MAP ───────────────────────────────────────────
+   One real map sits behind every non-map screen. Glass panels float over it; each screen sets
+   how blurred it is (sharp on the landing, frosted in forms, heavily blurred while navigating so it
+   only gives a feel of the surroundings, never the target). It follows the player, not the target. */
+let bgMap=null;
+function initBackdrop(){
+  if(bgMap||!el('bgmap')||typeof L==='undefined')return;
+  try{
+    bgMap=L.map('bgmap',{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false,tap:false,zoomSnap:.25,fadeAnimation:true});
+    bgMap.setView?.([HOME.lat,HOME.lon],14);addTiles(bgMap);
+    // Only use a location the browser already allows; the landing never triggers a permission prompt.
+    navigator.permissions?.query({name:'geolocation'}).then(p=>{if(p.state==='granted')navigator.geolocation.getCurrentPosition(pos=>{S.myLat??=pos.coords.latitude;S.myLon??=pos.coords.longitude;moveBackdrop(pos.coords.latitude,pos.coords.longitude,false);},()=>{},{maximumAge:600000,timeout:8000});}).catch(()=>{});
+  }catch(_){bgMap=null;}
+}
+function moveBackdrop(lat,lon,animate=true){
+  if(!bgMap||!Core.validPoint(lat,lon))return;
+  try{animate?bgMap.panTo?.([lat,lon],{animate:true,duration:1.2}):bgMap.setView?.([lat,lon],14,{animate:false});}catch(_){}
+}
+function pinIcon(){ return controlIcon(); }
+function dotIcon(col,sz=12,ring=false){
+  return L.divIcon({html:`<span class="map-dot${ring?' live':''}" style="--c:${col};--s:${sz}px"></span>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],className:'map-sym'});
+}
+// Auto-fit pauses for 30 s whenever someone pans or zooms by hand, instead of yanking the map back every 10 s.
+function watchUserPan(map){
+  if(!map?.getContainer)return;
+  const mark=()=>{S._userPannedAt=Date.now();};
+  map.on('dragstart',mark);const c=map.getContainer();['wheel','touchstart','dblclick'].forEach(ev=>c.addEventListener(ev,mark,{passive:true}));
 }
 
 /* ── RANGE RING ──────────────────────────────────────────── */
@@ -370,10 +431,10 @@ function updateRangeRing(){
   if(!S.leafMap)return;
   const center=[S.myLat??HOME.lat,S.myLon??HOME.lon],r=idealRangeM();
   if(S.rangeRing)S.leafMap.removeLayer(S.rangeRing);
-  S.rangeRing=L.circle(center,{radius:r,color:'#007AFF',weight:1.5,dashArray:'8 6',fillColor:'#007AFF',fillOpacity:.04,interactive:false}).addTo(S.leafMap);
+  S.rangeRing=L.circle(center,{radius:r,color:INK.control,weight:1.5,dashArray:'2 6',fillColor:INK.control,fillOpacity:.03,interactive:false}).addTo(S.leafMap);
   const labelLat=center[0]+(r/111000);
   if(S._ringLabel)S.leafMap.removeLayer(S._ringLabel);
-  S._ringLabel=L.marker([labelLat,center[1]],{icon:L.divIcon({html:`<div class="ring-lbl">~${S.idealMin} min ${transportMeta().ring}</div>`,iconSize:[120,20],iconAnchor:[60,10],className:''}),interactive:false}).addTo(S.leafMap);
+  S._ringLabel=L.marker([labelLat,center[1]],{icon:L.divIcon({html:`<div class="ring-lbl">about ${S.idealMin} min ${transportMeta().ring}</div>`,iconSize:[140,22],iconAnchor:[70,11],className:''}),interactive:false}).addTo(S.leafMap);
 }
 
 /* ── LEAF MAP ────────────────────────────────────────────── */
@@ -382,7 +443,7 @@ function initLeafMap(){
   const center=[S.myLat??HOME.lat,S.myLon??HOME.lon],zoom=12;
   S.leafMap=L.map('leafmap',{center,zoom});
   addTiles(S.leafMap);
-  if(S.myLat!=null) L.marker([S.myLat,S.myLon],{icon:dotIcon('#007AFF',11)}).bindPopup('<b>Your position</b>').addTo(S.leafMap);
+  if(S.myLat!=null) L.marker([S.myLat,S.myLon],{icon:startIcon()}).bindPopup('You are here').addTo(S.leafMap);
   S.leafMap.on('click',e=>placeTarget(e.latlng.lat,e.latlng.lng));
   updateRangeRing();
   if(S.targetLat!=null)placeTarget(S.targetLat,S.targetLon);
@@ -392,48 +453,70 @@ function placeTarget(lat,lon){
   if(!S.leafMap)return;
   S.targetLat=lat;S.targetLon=lon;
   if(S.leafTgtM)S.leafMap.removeLayer(S.leafTgtM);
-  S.leafTgtM=L.marker([lat,lon],{icon:pinIcon('#007AFF',22)}).bindPopup('<b>🎯 Target</b>').addTo(S.leafMap);
+  S.leafTgtM=L.marker([lat,lon],{icon:controlIcon()}).bindPopup('Target').addTo(S.leafMap);
   S.leafMap.flyTo([lat,lon],13,{duration:.7,animate:!window.matchMedia('(prefers-reduced-motion: reduce)').matches});
   const myLat=S.myLat??HOME.lat,myLon=S.myLon??HOME.lon;
   const dKm=hav(myLat,myLon,lat,lon)/1000,idealKm=idealRangeM()/1000,pct=Math.round(dKm/idealKm*100);
   const pill=el('map-hint');
-  if(pct>140){pill.textContent=`⚠ ${dKm.toFixed(1)} km — ${pct}% of ideal.`;pill.style.cssText='background:rgba(255,59,48,.15);border-color:rgba(255,59,48,.4);color:var(--red)';}
-  else if(pct<50){pill.textContent=`⚠ ${dKm.toFixed(1)} km — too close (${pct}%).`;pill.style.cssText='background:rgba(255,159,10,.15);border-color:rgba(255,159,10,.4);color:var(--orange)';}
-  else{pill.textContent=`Target set · ${dKm.toFixed(1)} km · ${pct}% of ideal`;pill.style.cssText='';}
+  pill.dataset.tone=pct>140?'far':pct<50?'near':'ok';
+  pill.textContent=pct>140?`${dKm.toFixed(1)} km away, much further than the ${S.idealMin} min you set`:pct<50?`${dKm.toFixed(1)} km away, closer than the ${S.idealMin} min you set`:`${dKm.toFixed(1)} km away, a good fit for ${S.idealMin} min`;
   set('map-info',`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
   el('btn-confirm').disabled=false;
 }
 
 /* ── SMART TARGET FINDER ─────────────────────────────────── */
+/* ── PUBLIC MAP SERVICES ─────────────────────────────────────
+   On Cloudflare, /api/* (functions/) proxies Overpass and OSRM with caching, mirror fallback and a
+   proper User-Agent. Anywhere else (local dev, a static host) the browser calls public mirrors itself. */
+const OVERPASS_MIRRORS=['https://overpass-api.de/api/interpreter','https://overpass.private.coffee/api/interpreter','https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+const ROUTERS={drive:'https://routing.openstreetmap.de/routed-car/route/v1/driving/',walk:'https://routing.openstreetmap.de/routed-foot/route/v1/driving/'};
+let proxyState=location.protocol==='https:'||location.protocol==='http:'?'unknown':'absent';
+async function fetchJSON(url,init={},ms=10000){
+  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),ms);
+  try{const res=await fetch(url,{...init,signal:ctrl.signal});if(!res.ok){const e=new Error('HTTP '+res.status);e.status=res.status;throw e;}return await res.json();}
+  finally{clearTimeout(timer);}
+}
+async function viaProxy(path,ms=12000){
+  if(proxyState==='absent')return null;
+  try{const data=await fetchJSON(path,{},ms);proxyState='present';return data;}
+  // First failure (404, HTML fallback page, no network) means this host has no proxy; later failures are transient.
+  catch(e){if(proxyState==='unknown')proxyState='absent';return null;}
+}
+async function roadPoints(lat,lon,radius,mode){
+  const proxied=await viaProxy(`/api/roads?lat=${lat.toFixed(5)}&lon=${lon.toFixed(5)}&radius=${Math.round(radius)}&mode=${mode}`,32000);
+  if(proxied?.points)return proxied.points;
+  const q=Core.overpassQuery(lat,lon,radius,mode);
+  for(const mirror of OVERPASS_MIRRORS){
+    try{const data=await fetchJSON(mirror,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q)},9000);return Core.roadPointsFrom(data);}
+    catch(_){} // rate-limited (429/504) or unreachable: try the next mirror
+  }
+  return [];
+}
 async function findSmartTarget(myLat,myLon,idealKm){
-  const walk=S.transportMode==='walk';
-  const types=walk?'footway|path|pedestrian|living_street|residential|unclassified|tertiary|service':'living_street|residential|unclassified|tertiary|service';
+  const mode=S.transportMode==='walk'?'walk':'drive';
   for(let attempt=0;attempt<3;attempt++){
     const centre=Core.destination(myLat,myLon,idealKm*1000,Math.random()*360);
     const radius=Math.max(150,Math.min(2000,idealKm*600));
-    const q='[out:json][timeout:8];way[highway~"^('+types+')$"][access!~"^(private|no|customers|permit|military|restricted|destination|delivery)$"]["'+(walk?'foot':'motor_vehicle')+'"!~"^(no|private)$"](around:'+radius+','+centre.lat+','+centre.lon+');out geom 60;';
-    const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),9000);
-    try{
-      const res=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'data='+encodeURIComponent(q),signal:ctrl.signal});
-      if(!res.ok)continue;
-      const data=await res.json();const candidates=[];
-      for(const way of data.elements||[]){
-        if(way.tags?.barrier||way.tags?.motorcar==='no'||way.tags?.motorcar==='private')continue;
-        for(const point of way.geometry||[]){const d=hav(myLat,myLon,point.lat,point.lon);if(d>=idealKm*820&&d<=idealKm*1120)candidates.push(point);}
-      }
-      if(candidates.length)return candidates[Math.floor(Math.random()*candidates.length)];
-    }catch(_){}finally{clearTimeout(timer);}
+    const candidates=(await roadPoints(centre.lat,centre.lon,radius,mode)).filter(p=>{const d=hav(myLat,myLon,p.lat,p.lon);return d>=idealKm*820&&d<=idealKm*1120;});
+    if(candidates.length)return candidates[Math.floor(Math.random()*candidates.length)];
   }
   throw new Error('No suitable public route found. Choose a target on the map or try a shorter distance.');
 }
+async function fetchRouteLine(from,toLat,toLon,mode){
+  const proxied=await viaProxy(`/api/route?from=${from[0].toFixed(5)},${from[1].toFixed(5)}&to=${toLat.toFixed(5)},${toLon.toFixed(5)}&mode=${mode}`);
+  if(proxied?.line)return proxied.line;
+  const data=await fetchJSON(`${ROUTERS[mode]}${from[1]},${from[0]};${toLon},${toLat}?overview=simplified&geometries=geojson`);
+  if(data.code!=='Ok'||!data.routes?.[0])throw new Error(data.code||'NoRoute');
+  return data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
+}
 
 async function smartPick(){
-  const btn=el('smart-btn');btn.textContent='Finding…';btn.disabled=true;
+  const done=busy(el('smart-btn'),'Searching…');
   const epoch=S._epoch,code=S.gameCode;
-  set('map-hint','Finding a public route near your chosen distance…');
+  set('map-hint','Looking for a public road or path at your chosen distance…');
   try{const picked=await findSmartTarget(S.myLat??HOME.lat,S.myLon??HOME.lon,idealRangeM()/1000);if(code===S.gameCode&&epoch===S._epoch)placeTarget(picked.lat,picked.lon);}
   catch(e){toast(e.message,6000);set('map-hint','Tap a publicly accessible place on the map');}
-  finally{btn.textContent='✦ Smart';btn.disabled=false;}
+  finally{done();}
 }
 
 /* ── CREATE GAME (Firebase) ──────────────────────────────── */
@@ -460,7 +543,7 @@ function gameSettings(){return {idealMin:S.idealMin,diff:S.diff,arrRadius:S.arrR
 async function goMap(){
   const epoch=S._epoch;
   S.myName=(el('host-name').value.trim()||storage.getItem('ll_nickname')||'Host').slice(0,20);storage.setItem('ll_nickname',S.myName);
-  const btn=el('btn-go-map');btn.disabled=true;btn.textContent='Preparing…';
+  const btn=el('btn-go-map');const done=busy(btn,'Preparing…');
   try{
     if(S.myLat==null&&navigator.geolocation)await new Promise(resolve=>navigator.geolocation.getCurrentPosition(p=>{if(S._epoch===epoch){S.myLat=p.coords.latitude;S.myLon=p.coords.longitude;}resolve();},()=>resolve(),{timeout:6000,maximumAge:30000}));
     if(S._epoch!==epoch)return;
@@ -468,25 +551,25 @@ async function goMap(){
     if(S.myLat==null)toast('Location unavailable. The map starts in Vienna; pan to your area.',6000);
     if(S.mode==='smart')await smartPick();
   }catch(e){toast('Could not create game: '+e.message,6000);}
-  finally{btn.disabled=false;updateGoMapBtn();}
+  finally{done();updateGoMapBtn();}
 }
 
 async function confirmTarget(){
   if(S.targetLat==null){toast('Place a target first');return;}
-  const btn=el('btn-confirm');btn.disabled=true;btn.textContent='Saving…';
+  const btn=el('btn-confirm');const done=busy(btn,'Saving…');
   const code=S.gameCode;
   try{
     let targets=null;
     if(S.gameMode==='multi'){
       targets=[{lat:S.targetLat,lon:S.targetLon}];
       const baseKm=Math.max(.2,hav(S.myLat??HOME.lat,S.myLon??HOME.lon,S.targetLat,S.targetLon)/1000);
-      for(let i=1;i<3;i++){btn.textContent='Finding target '+(i+1)+' / 3…';targets.push(await findSmartTarget(targets[i-1].lat,targets[i-1].lon,baseKm*.6));}
+      for(let i=1;i<3;i++){btn.textContent='Finding checkpoint '+(i+1)+' of 3…';targets.push(await findSmartTarget(targets[i-1].lat,targets[i-1].lon,baseKm*.6));}
     }
     if(code!==S.gameCode)return;
     await gRef().update({targetLat:S.targetLat,targetLon:S.targetLon,multiTargets:targets});
     S.multiTargets=targets||[];S.multiCurrent=0;goScreen('hlobby');renderHLobby();
   }catch(e){toast(e.message,6000);}
-  finally{btn.disabled=false;btn.textContent='Confirm target →';}
+  finally{done();}
 }
 
 /* ── HOST LOBBY ──────────────────────────────────────────── */
@@ -499,11 +582,10 @@ function renderHLobby(){
   set('hl-tlim',fmtTime(S.timeLimitSec));
   set('hl-diff',DIFF.labels[S.diff]);
   set('hl-radius',S.arrRadius+'m');
-  const modeLabels={standard:'Standard',elimination:'Elimination',whisper:'Whisper',hotcold:'Hot & Cold',sailor:'Sailor',multi:'Multi-Target',dynamic:'Dynamic'};
-  set('hl-mode',(S.transportMode==='walk'?'Walking · ':'Driving · ')+(modeLabels[S.gameMode]||S.gameMode));
-  set('hl-blind',S.blindStart?'🙈 On':'Off');
-  set('hl-blindfinish',S.blindFinish?'🏁 On':'Off');
-  set('hl-excludehost',S.excludeHost?'👻 On':'Off');
+  set('hl-mode',(MODE_NAMES[S.gameMode]||S.gameMode)+(S.transportMode==='walk'?', on foot':', by car'));
+  set('hl-blind',S.blindStart?'On':'Off');
+  set('hl-blindfinish',S.blindFinish?'Yes':'No, first arrival ends it');
+  set('hl-excludehost',S.excludeHost?'Off the leaderboard':'Can race');
   startPlayersListener();
   startSpecRequestsListener();
 }
@@ -517,11 +599,12 @@ function copyLink(){
 async function lockStart(){
   if(!S._isOnline){toast('Reconnect before starting the game.');return;}
   if(S.targetLat==null){toast('Set a target first');return;}
-  const racers=Object.values(S.latestPlayers).filter(p=>p.role==='navigator'&&!p.withdrawn);
+  // Same racer rule as the transaction below; the client check previously ignored "host stays off the leaderboard".
+  const racers=playerEntries(S.latestPlayers).filter(p=>p.role==='navigator'&&!p.withdrawn&&!(S.excludeHost&&p.id===S.hostPlayerToken));
   if(!racers.length){toast('Invite at least one navigator to start.');return;}
   if(S.elimMode&&racers.length<2){toast('Elimination needs at least two navigators.');return;}
   if(S.teamsMode&&!['red','blue'].every(team=>racers.some(p=>p.team===team))){toast('Both teams need a navigator.');return;}
-  const btn=el('btn-lock');if(btn.disabled)return;btn.disabled=true;btn.textContent='Starting…';
+  const btn=el('btn-lock');if(btn.disabled)return;const done=busy(btn,'Starting…');
   const code=S.gameCode,epoch=S._epoch,ref=gRef();
   try{
     await ref.once('value');
@@ -536,7 +619,7 @@ async function lockStart(){
     applyGame(result.snapshot.val());S.status='active';saveSession();
     showCountdown(()=>{launchHostActive();if(S.gameMode==='dynamic')startDynamicTarget();});
   }catch(e){toast('Could not start: '+e.message);}
-  finally{btn.disabled=false;btn.textContent='Start game →';}
+  finally{done();}
 }
 
 /* ── FIREBASE LISTENERS ──────────────────────────────────── */
@@ -561,11 +644,15 @@ function startPlayersListener(){
     set('sp-pcount', allNavs.length ? String(allNavs.length) : '—');
     // Lobby — show everyone including spectators
     if(S.screen==='hlobby'){
-      const newHtml=players.length
-        ? players.map((p,i)=>`<div class="player-row"><div class="p-dot" style="background:${PCOLS[i%PCOLS.length]}">${escHtml((p.name||'?')[0].toUpperCase())}</div><span class="p-name">${escHtml(p.name)}</span><span class="p-role-tag">${p.role==='spectator'?'👁 Spectator':'🧭 Navigator'}</span></div>`).join('')
-        : '<div class="empty-state">Waiting for players…</div>';
+      // Skip partial records (a disconnect write landing after a denied spectator was removed).
+      const roster=players.filter(p=>p.role&&p.name&&!p.withdrawn&&(p.role==='navigator'||p.specApproved||p.id===S.myToken));
+      const others=roster.filter(p=>p.id!==S.myToken);
+      const newHtml=others.length
+        ? others.map(p=>`<div class="player-row${p.online===false?' is-offline':''}"><div class="p-dot" style="--c:${p.role==='navigator'?colorFor(p.id):'var(--t3)'}">${escHtml((p.name||'?')[0].toUpperCase())}</div><span class="p-name">${escHtml(p.name)}</span><span class="p-role-tag">${p.role==='spectator'?'Watching':(S.teamsMode&&p.team?(p.team==='red'?'Red team':'Blue team'):'Navigator')}${p.online===false?', offline':''}</span></div>`).join('')
+        : '<div class="empty-state">Nobody here yet. Share the code or the link.</div>';
       if(newHtml!==S._lastLobbyHtml){const l=el('hl-players');if(l){l.innerHTML=newHtml;S._lastLobbyHtml=newHtml;}}
-      set('hl-badge',players.length+' joined');
+      const n=others.filter(p=>p.role==='navigator').length;
+      set('hl-badge',n===1?'1 navigator':n+' navigators');
     }
     // Check if this navigator was eliminated
     if(S.myToken&&!S.eliminated&&S.status==='active'&&S.screen==='nactive'){
@@ -582,7 +669,8 @@ function startPlayersListener(){
     }
     // Nav wait
     if(S.screen==='nwait'){
-      const newHtml=`<div class="player-row"><div class="p-dot" style="background:#007AFF">${escHtml((S.myName||'?')[0].toUpperCase())}</div><span class="p-name">${escHtml(S.myName)} <span style="color:var(--t3)">(you)</span></span></div>${players.length>1?`<div class="nw-others">+${players.length-1} other${players.length>2?'s':''}</div>`:''}`;
+      const others=players.filter(p=>p.role==='navigator'&&p.name&&!p.withdrawn&&p.id!==S.myToken).length;
+      const newHtml=others?`<div class="nw-others">${others===1?'1 other navigator':others+' other navigators'} waiting with you</div>`:'<div class="nw-others">You are the first one here</div>';
       if(newHtml!==S._lastNWaitHtml){const l=el('nw-players');if(l){l.innerHTML=newHtml;S._lastNWaitHtml=newHtml;}}
     }
     // Host active — show active navigators only
@@ -605,9 +693,12 @@ function startPlayersListener(){
     if(S.gameCode!==listeningCode)return;
     if(g.multiTargets)S.multiTargets=g.multiTargets;
     S.hostPlayerToken=g.hostToken||S.hostPlayerToken;
-    S._dynamicMoveCount=g.dynamicMoveCount||0;
+    const prevMoves=S._dynamicMoveCount||0;S._dynamicMoveCount=g.dynamicMoveCount||0;
     const target=Core.targetFor(g,{multiCurrent:S.multiCurrent});
     if(Core.validPoint(target.lat,target.lon)){
+      const moved=S.status==='active'&&Core.validPoint(S.targetLat,S.targetLon)&&(S.targetLat!==target.lat||S.targetLon!==target.lon);
+      // Dynamic mode: navigators were never told the target moved, and hot/cold compared against the old spot.
+      if(moved&&g.gameMode==='dynamic'&&S._dynamicMoveCount>prevMoves){S._hcHistory=[];S._lastProxBand=null;if(S.screen==='nactive'&&!S.isHost){toast('The target moved. Read the signal again.');haptic('heavy');playTone(330,.12,.14,'triangle');}}
       S.targetLat=target.lat;S.targetLon=target.lon;
       if(S.hostTgtM)S.hostTgtM.setLatLng([target.lat,target.lon]);
       if(S.hostArrCircle)S.hostArrCircle.setLatLng([target.lat,target.lon]);
@@ -623,6 +714,7 @@ function startPlayersListener(){
         });
       }
     }
+    if(g.status==='aborted'&&!g.startedAt&&!S.isHost&&S.status!=='aborted'){goHome();toast('The host closed this lobby.',4000);return;}
     if(['finished','aborted'].includes(g.status)&&S.status!==g.status){
       S.status=g.status;cancelCountdown();
       if(S.role==='spectator'&&!S.isHost&&!S.eliminated&&!g.players?.[S.myToken]?.specApproved){goHome();toast('This game has ended.');return;}
@@ -644,8 +736,7 @@ function launchHostActive(){
   if(btn)btn.classList.remove('hidden');
   if(S.elimMode&&S.isHost){
     if(S.elimIv)clearInterval(S.elimIv);
-    S.nextElimTime=S.startedAt+(Math.floor((serverNow()-S.startedAt)/300000)+1)*300000;
-    S.elimIv=setInterval(()=>{runElimCheck().catch(()=>{});S.nextElimTime=S.startedAt+(Math.floor((serverNow()-S.startedAt)/300000)+1)*300000;},5000);
+    S.elimIv=setInterval(()=>{runElimCheck().catch(()=>{});},5000);
   }
   startWakeLock();
   startAutoZoom();
@@ -669,6 +760,8 @@ async function toggleMyView(){
 
 function goHostView(){
   stopGPS();
+  // Peeking at the navigator view made the host a racer, so "let everyone finish" then waited for the host forever.
+  if(S.isHost&&!S.arrived&&S.role==='navigator'){S.role='spectator';pRef().update({role:'spectator'}).then(saveSession).catch(()=>{});}
   S.hostViewActive=true;
   goScreen('hactive');setTimeout(initHostMap,80);
   set('ha-code-badge',S.gameCode||'—');
@@ -696,9 +789,10 @@ function initHostMap(){
   addTiles(S.hostMap);
   L.control.zoom({position:'bottomright'}).addTo(S.hostMap);
   if(S.targetLat!=null){
-    S.hostTgtM=L.marker([S.targetLat,S.targetLon],{icon:pinIcon('#2358e8',20)}).bindPopup('<b>Target</b>').addTo(S.hostMap);
-    S.hostArrCircle=L.circle([S.targetLat,S.targetLon],{radius:S.arrRadius,color:'#007AFF',fillColor:'#007AFF',fillOpacity:.07,weight:1,dashArray:'4 4'}).addTo(S.hostMap);
+    S.hostTgtM=L.marker([S.targetLat,S.targetLon],{icon:controlIcon(),keyboard:false}).bindPopup('Target').addTo(S.hostMap);
+    S.hostArrCircle=L.circle([S.targetLat,S.targetLon],{radius:S.arrRadius,color:INK.control,fillColor:INK.control,fillOpacity:.08,weight:1.5,dashArray:'3 5',interactive:false}).addTo(S.hostMap);
   }
+  watchUserPan(S.hostMap);
   setTimeout(()=>S.hostMap.invalidateSize(),120);
   updateHostMapDots(Object.entries(S.latestPlayers).map(([id,p])=>({...p,id})).filter(p=>p.role==='navigator'));
 }
@@ -715,28 +809,40 @@ function renderNavCards(elId,players){
       if(d>maxDist){maxDist=d;dangerIdx=i;}
     });
   }
-  cards.innerHTML=players.map((p,i)=>{
-    const arr=p.arrived,elim=p.eliminated,isDanger=(i===dangerIdx);
-    const distTxt=arr?'Finished':elim?'Eliminated':p.lat!=null?(fmtDist(computeDist(p))+' '+distUnit(computeDist(p))):'Waiting for GPS';
+  const html=players.map((p,i)=>{
+    const arr=p.arrived,elim=p.eliminated,isDanger=(i===dangerIdx),d=computeDist(p);
+    const distTxt=arr?'Finished':elim?'Eliminated':d!=null?(fmtDist(d)+' '+distUnit(d)):'Waiting for GPS';
+    const notes=[S.gameMode==='multi'&&!arr?'checkpoint '+(Core.checkpointIndex(p.multiCurrent)+1)+' of 3':'',isDanger?'furthest out':'',p.online===false?'offline':''].filter(Boolean).join(', ');
     const cls=`nav-card${arr?' arrived':''}${elim?' elim':''}${isDanger?' danger':''}`;
-    return`<div class="${cls}"><div class="nc-dot" style="background:${elim?'#8e8e93':PCOLS[i%PCOLS.length]}"></div><div><div class="nc-name">${escHtml(p.name)}${isDanger?' · at risk':''}</div><div class="nc-dist${arr?' arrived':''}">${distTxt}${S.gameMode==='multi'&&!arr?' · '+(Core.checkpointIndex(p.multiCurrent)+1)+'/3':''}${p.online===false?' · offline':''}</div></div></div>`;
-  }).join('');
+    return`<div class="${cls}"><div class="nc-dot" style="--c:${elim?'var(--t3)':colorFor(p.id)}"></div><div class="nc-text"><div class="nc-name">${escHtml(p.name||'Navigator')}</div><div class="nc-dist${arr?' arrived':''}${d==null&&!arr&&!elim?' muted':''}">${distTxt}</div>${notes?`<div class="nc-note">${notes}</div>`:''}</div></div>`;
+  }).join('')||'<div class="empty-state">No navigators in the game.</div>';
+  if(cards._html!==html){cards.innerHTML=html;cards._html=html;}
 }
 
 function computeDist(p){const target=Core.targetFor(S,p);return Core.validPoint(p.lat,p.lon)?hav(p.lat,p.lon,target.lat,target.lon):null;}
 
+// Markers are moved in place. Removing and re-adding every marker on each update made them flicker and closed open tooltips.
+function syncDot(map,store,p,col,label){
+  const pt=[+p.lat,+p.lon],key=col+(p.eliminated?'x':'');
+  const m=store[p.id];
+  if(m&&m._key===key){m.setLatLng(pt);m.setTooltipContent?.(label);return;}
+  if(m)map.removeLayer(m);
+  store[p.id]=L.marker(pt,{icon:dotIcon(col,14,!p.eliminated),keyboard:false}).bindTooltip(label,{direction:'top'}).addTo(map);store[p.id]._key=key;
+}
+function pruneDots(map,store,ids){for(const id of Object.keys(store))if(!ids.has(id)){map.removeLayer(store[id]);delete store[id];}}
 function updateHostMapDots(players){
   if(!S.hostMap||!players)return;
-  Object.values(S.hostDots).forEach(m=>S.hostMap.removeLayer(m));S.hostDots={};
-  players.forEach((p,i)=>{
-    if(p.lat==null||p.lon==null)return;
+  const ids=new Set();
+  players.forEach(p=>{
+    if(!Core.validPoint(+p.lat,+p.lon))return;ids.add(p.id);
+    const col=p.eliminated?'#8a8f94':colorFor(p.id);
     if(!S.playerTrails[p.id])S.playerTrails[p.id]=[];
-    const trail=S.playerTrails[p.id],pt=[+p.lat,+p.lon];
-    const last=trail[trail.length-1];
+    const trail=S.playerTrails[p.id],pt=[+p.lat,+p.lon],last=trail[trail.length-1];
     if(!last||hav(last[0],last[1],pt[0],pt[1])>5){trail.push(pt);if(trail.length>1500)trail.splice(1,1);}
-    if(trail.length>1){if(S.hostTrails[p.id])S.hostMap.removeLayer(S.hostTrails[p.id]);S.hostTrails[p.id]=L.polyline(trail,{color:PCOLS[i%PCOLS.length],weight:2,opacity:.55,dashArray:'5 4'}).addTo(S.hostMap);}
-    S.hostDots[p.id]=L.marker(pt,{icon:dotIcon(PCOLS[i%PCOLS.length],13,true)}).bindTooltip(escHtml(p.name),{permanent:false,direction:'top'}).addTo(S.hostMap);
+    if(trail.length>1){if(S.hostTrails[p.id]?.setLatLngs)S.hostTrails[p.id].setLatLngs(trail);else{if(S.hostTrails[p.id])S.hostMap.removeLayer(S.hostTrails[p.id]);S.hostTrails[p.id]=L.polyline(trail,{color:col,weight:2.5,opacity:.6,interactive:false}).addTo(S.hostMap);}}
+    syncDot(S.hostMap,S.hostDots,p,col,escHtml(p.name||'Navigator'));
   });
+  pruneDots(S.hostMap,S.hostDots,ids);
 }
 
 async function abortGame(){
@@ -803,12 +909,12 @@ function renderSpecRequests(requests, containerIds){
   const html=requests.length?requests.map(r=>`
     <div class="spec-req-card" id="sr-${r.token}">
       <div class="spec-req-info">
-        <div class="spec-req-name">👁 ${escHtml(r.name)}</div>
-        <div class="spec-req-sub">Wants to join as spectator</div>
+        <div class="spec-req-name">${escHtml(r.name||'Someone')}</div>
+        <div class="spec-req-sub">wants to watch the map</div>
       </div>
       <div class="spec-req-btns">
-        <button class="btn-destruct sm" onclick="haptic('light');App.denySpec('${r.token}')">Deny</button>
-        <button class="btn-primary" style="font-size:12px;padding:6px 12px" onclick="haptic('medium');App.approveSpec('${r.token}')">Allow</button>
+        <button class="btn-quiet sm" onclick="haptic('light');App.denySpec('${r.token}')">Decline</button>
+        <button class="btn-primary sm" onclick="haptic('medium');App.approveSpec('${r.token}')">Let in</button>
       </div>
     </div>`).join(''):'';
   containerIds.forEach(id=>{
@@ -820,16 +926,20 @@ function renderSpecRequests(requests, containerIds){
 }
 
 async function approveSpec(token){
-  if(!S.gameCode)return;
-  await db.ref(`games/${S.gameCode}/players/${token}`).update({specApproved:true});
-  await db.ref(`games/${S.gameCode}/specRequests/${token}`).remove();
-  playApproveSound();haptic('medium');
+  if(!S.gameCode||!/^[a-zA-Z0-9_-]+$/.test(token))return;
+  try{
+    await db.ref(`games/${S.gameCode}/players/${token}`).transaction(p=>p?{...p,specApproved:true}:undefined,undefined,false);
+    await db.ref(`games/${S.gameCode}/specRequests/${token}`).remove();
+    playApproveSound();haptic('medium');
+  }catch(_){toast('Could not let them in. Check your connection and try again.');}
 }
 async function denySpec(token){
-  if(!S.gameCode)return;
-  await db.ref(`games/${S.gameCode}/players/${token}`).remove();
-  await db.ref(`games/${S.gameCode}/specRequests/${token}`).remove();
-  playDenySound();haptic('light');
+  if(!S.gameCode||!/^[a-zA-Z0-9_-]+$/.test(token))return;
+  try{
+    await db.ref(`games/${S.gameCode}/players/${token}`).remove();
+    await db.ref(`games/${S.gameCode}/specRequests/${token}`).remove();
+    playDenySound();haptic('light');
+  }catch(_){toast('Could not decline the request. Check your connection and try again.');}
 }
 
 // Listen for incoming spectator requests (host only)
@@ -851,7 +961,7 @@ async function joinGame(){
   if(!S._isOnline){toast('You’re offline. Reconnect before joining.');return;}
   const code=el('inp-code').value.trim().toUpperCase();const name=(el('inp-name').value.trim()||'Navigator').slice(0,20);
   if(!/^[A-Z0-9]{6}$/.test(code)){toast('Enter the six-character game code.');el('inp-code').focus();return;}
-  const btn=document.querySelector('#sc-join .btn-primary');btn.disabled=true;btn.textContent='Joining…';hide('join-err');
+  const btn=el('btn-join');const done=busy(btn,'Joining…');hide('join-err');
   try{
     const snap=await db.ref('games/'+code).once('value');const g=snap.val();
     if(S._epoch!==epoch)return;
@@ -870,7 +980,7 @@ async function joinGame(){
     goScreen('nwait');S.status='lobby';startPlayersListener();
     playJoinSound();
   }catch(e){set('join-err',e.message);show('join-err');}
-  finally{btn.disabled=false;btn.textContent='Join game →';}
+  finally{done();}
 }
 function applyGame(g){
   for(const key of ['idealMin','diff','arrRadius','timeLimitSec','noiseSeed','blindStart','blindFinish','excludeHost','teamsMode','transportMode','gameMode','startedAt','targetLat','targetLon'])if(g[key]!=null)S[key]=g[key];
@@ -886,7 +996,7 @@ function initSpecMap(){
   if(!el('specmap'))return;
   if(S.specMap){setTimeout(()=>S.specMap.invalidateSize(),50);return;}
   S.specMap=L.map('specmap',{center:[HOME.lat,HOME.lon],zoom:10,zoomControl:false});
-  addTiles(S.specMap);
+  addTiles(S.specMap);watchUserPan(S.specMap);startAutoZoom();
   L.control.zoom({position:'bottomright'}).addTo(S.specMap);
   setTimeout(()=>S.specMap.invalidateSize(),100);
   updateSpecMap({players:Object.entries(S.latestPlayers).map(([id,p])=>({...p,id})).filter(p=>p.role==='navigator'),target_lat:S.targetLat,target_lon:S.targetLon,arr_radius:S.arrRadius});
@@ -895,44 +1005,35 @@ function initSpecMap(){
 function updateSpecMap({players,target_lat,target_lon,arr_radius}){
   if(!S.specMap||!players)return;
   if(target_lat!=null&&!S.specTgtM){
-    S.specTgtM=L.marker([target_lat,target_lon],{icon:pinIcon('#007AFF',22)}).bindPopup('<b>🎯 Target</b>').addTo(S.specMap);
-    S.specArrCircle=L.circle([target_lat,target_lon],{radius:arr_radius,color:'#007AFF',fillColor:'#007AFF',fillOpacity:.1,weight:1.5,dashArray:'4 4'}).addTo(S.specMap);
+    S.specTgtM=L.marker([target_lat,target_lon],{icon:controlIcon(),keyboard:false}).bindPopup('Target').addTo(S.specMap);
+    S.specArrCircle=L.circle([target_lat,target_lon],{radius:arr_radius,color:INK.control,fillColor:INK.control,fillOpacity:.08,weight:1.5,dashArray:'3 5',interactive:false}).addTo(S.specMap);
     S.specMap.setView([target_lat,target_lon],14);
   }
-  Object.entries(S.specDots).forEach(([,m])=>S.specMap.removeLayer(m));S.specDots={};
-  players.forEach((p,i)=>{
-    if(p.lat==null||p.lon==null)return;
-    const col=PCOLS[i%PCOLS.length],pt=[+p.lat,+p.lon];
-    const dist=computeDist(p);
-    S.specDots[p.id]=L.marker(pt,{icon:dotIcon(col,14,true)}).bindTooltip(`<b>${escHtml(p.name)}</b><br>${p.arrived?'🏁 Arrived':dist!=null?fmtDist(dist)+' '+distUnit(dist):'—'}`,{permanent:false,direction:'top'}).addTo(S.specMap);
-    if(target_lat!=null&&!p.arrived&&S.transportMode!=='walk'){
-      const lastPos=S._lastRoutePos[p.id];
-      const target=Core.targetFor(S,p);const moved=!lastPos||hav(lastPos[0],lastPos[1],pt[0],pt[1])>30||lastPos[2]!==target.lat||lastPos[3]!==target.lon;
-      if((moved||!S.specRoutes[p.id])&&!S._routePending[p.id]){
-        S._routePending[p.id]=true;
-        const target=Core.targetFor(S,p);fetchRoute(p.id,pt,target.lat,target.lon,col);
-      }
-    }
+  const ids=new Set(),mode=S.transportMode==='walk'?'walk':'drive';
+  players.forEach(p=>{
+    if(!Core.validPoint(+p.lat,+p.lon))return;ids.add(p.id);
+    const col=p.eliminated?'#8a8f94':colorFor(p.id),pt=[+p.lat,+p.lon],dist=computeDist(p);
+    syncDot(S.specMap,S.specDots,p,col,`<b>${escHtml(p.name||'Navigator')}</b><br>${p.arrived?'Arrived':dist!=null?fmtDist(dist)+' '+distUnit(dist):'—'}`);
+    if(target_lat==null||p.arrived||p.eliminated){if(S.specRoutes[p.id]){S.specMap.removeLayer(S.specRoutes[p.id]);delete S.specRoutes[p.id];}return;}
+    const target=Core.targetFor(S,p),last=S._lastRoutePos[p.id],now=Date.now();
+    const moved=!last||hav(last[0],last[1],pt[0],pt[1])>40||last[2]!==target.lat||last[3]!==target.lon;
+    // Public routers allow roughly one request per second; a failing route used to be re-requested on every GPS write.
+    if(moved&&!S._routePending[p.id]&&now-(S._routeAt[p.id]||0)>15000){S._routePending[p.id]=true;S._routeAt[p.id]=now;fetchRoute(p.id,pt,target.lat,target.lon,col,mode);}
   });
+  pruneDots(S.specMap,S.specDots,ids);
 }
 
-async function fetchRoute(playerId,fromPt,toLat,toLon,col){
+async function fetchRoute(playerId,fromPt,toLat,toLon,col,mode='drive'){
   const epoch=S._epoch;
   if(!S.specMap){S._routePending[playerId]=false;return;}
-  const url=`https://router.project-osrm.org/route/v1/driving/${fromPt[1]},${fromPt[0]};${toLon},${toLat}?overview=full&geometries=geojson`;
-  const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),10000);
   try{
-    const res=await fetch(url,{signal:ctrl.signal});clearTimeout(timer);
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    if(data.code!=='Ok'||!data.routes||!data.routes[0])throw new Error(data.code||'NoRoute');
-    const latlngs=data.routes[0].geometry.coordinates.map(c=>[c[1],c[0]]);
-    if(!S.specMap||epoch!==S._epoch){return;}
+    const latlngs=await fetchRouteLine(fromPt,toLat,toLon,mode);
+    if(!S.specMap||epoch!==S._epoch)return;
     if(S.specRoutes[playerId])S.specMap.removeLayer(S.specRoutes[playerId]);
-    S.specRoutes[playerId]=L.polyline(latlngs,{color:col,weight:3.5,opacity:.75}).addTo(S.specMap);
+    S.specRoutes[playerId]=L.polyline(latlngs,{color:col,weight:3,opacity:.55,dashArray:mode==='walk'?'2 6':null,lineCap:'round',interactive:false}).addTo(S.specMap);
     S.specRoutes[playerId].bringToBack();
     S._lastRoutePos[playerId]=[...fromPt,toLat,toLon];
-  }catch(_){clearTimeout(timer);}
+  }catch(_){}
   finally{if(epoch===S._epoch)S._routePending[playerId]=false;}
 }
 
@@ -971,6 +1072,7 @@ function handleGPSPos(pos){
     }
   }
   S.prevLat=lat;S.prevLon=lon;S.prevGPSTime=now;S.myLat=lat;S.myLon=lon;S.lastAccuracy=acc;
+  if(Date.now()-(S._bgMoved||0)>8000){S._bgMoved=Date.now();moveBackdrop(lat,lon);}
   // Blind start: record the first GPS fix as the "start" point
   if(S.blindStart&&S.blindStartLat==null&&!S.blindUnlocked){
     S.blindStartLat=lat;S.blindStartLon=lon;
@@ -980,20 +1082,20 @@ function handleGPSPos(pos){
   // GPS pill
   const pill=el('na-gps');
   if(pill){
-    if(acc>50){pill.className='na-gps lost';set('na-gps-txt','~'+Math.round(acc)+'m');}
-    else{pill.className='na-gps live';set('na-gps-txt','Live');}
+    if(acc>50){pill.classList.remove('lost','live');pill.classList.add('lost');set('na-gps-txt','~'+Math.round(acc)+'m');}
+    else{pill.classList.remove('lost','live');pill.classList.add('live');set('na-gps-txt','Live');}
   }
   // Host GPS pill (always shows host's own GPS on host bar)
   const hPill=el('ha-gps');
   if(hPill){
-    if(acc>50){hPill.className='na-gps lost';set('ha-gps-txt','~'+Math.round(acc)+'m');}
-    else{hPill.className='na-gps live';set('ha-gps-txt','Live');}
+    if(acc>50){hPill.classList.remove('lost','live');hPill.classList.add('lost');set('ha-gps-txt','~'+Math.round(acc)+'m');}
+    else{hPill.classList.remove('lost','live');hPill.classList.add('live');set('ha-gps-txt','Live');}
   }
   // Spectator GPS pill
   const sPill=el('sp-gps');
   if(sPill){
-    if(acc>50){sPill.className='na-gps lost';set('sp-gps-txt','~'+Math.round(acc)+'m');}
-    else{sPill.className='na-gps live';set('sp-gps-txt','Live');}
+    if(acc>50){sPill.classList.remove('lost','live');sPill.classList.add('lost');set('sp-gps-txt','~'+Math.round(acc)+'m');}
+    else{sPill.classList.remove('lost','live');sPill.classList.add('live');set('sp-gps-txt','Live');}
   }
   // Ripple: only spawn when showing the number (not in HC/whisper modes)
   // and only when we've actually moved (not every 1s backup poll)
@@ -1005,13 +1107,13 @@ function handleGPSPos(pos){
 }
 function handleGPSErr(err){
   spawnRipple('error');
-  if(err.code===1)showGPSWarn('Location access denied','Tap the 🔒 in your browser bar → Allow Location → refresh.');
+  if(err.code===1)showGPSWarn('Location access denied','Allow location for this site in your browser settings, then reload.');
   else if(err.code===2)showGPSWarn('GPS signal lost','Move outside or near a window.');
   else set('na-upd','GPS slow — retrying…');
 }
 function showGPSWarn(title,body){
   show('gps-warn');set('gps-warn-title',title);set('gps-warn-body',body);
-  const pill=el('na-gps');if(pill){pill.className='na-gps lost';set('na-gps-txt','Blocked');}
+  const pill=el('na-gps');if(pill){pill.classList.remove('lost','live');pill.classList.add('lost');set('na-gps-txt','Blocked');}
 }
 
 async function sendPosUpdate(manual=false){return sendPosUpdateQueued(manual);}
@@ -1037,6 +1139,8 @@ function updateNavDisplay(distM){
     else if(distM<1000)nc.classList.add('prox-close');
   }
   if(nu) nu.textContent=distUnit(distM);
+  // Hairline tape: ticks slide one notch per 10 m, so every step visibly moves the scale.
+  const tape=el('na-tape');if(tape)tape.style.setProperty('--shift',(-(distM%1000)/10*10%200).toFixed(1)+'px');
   set('na-upd','Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
 }
 
@@ -1077,11 +1181,12 @@ function initResMap(){
   const start=S.myTrail[0]||(Core.validPoint(S.myLat,S.myLon)?[S.myLat,S.myLon]:null);
   S.resMap=L.map('resultmap',{center:target||start||[HOME.lat,HOME.lon],zoom:14,zoomControl:false});addTiles(S.resMap);
   const points=[];
-  if(target){points.push(target);L.marker(target,{icon:pinIcon('#2358e8',20)}).bindPopup('<b>Target</b>').addTo(S.resMap);}
-  if(start){points.push(start);L.marker(start,{icon:dotIcon('#8e8e93',10)}).bindPopup('<b>Start</b>').addTo(S.resMap);}
-  if(target&&start)L.polyline([start,target],{color:'#2358e8',weight:1.5,dashArray:'6 5',opacity:.35}).addTo(S.resMap);
-  const trails=Object.entries(S.playerTrails).filter(([id])=>id!==S.myToken).map(([,trail],i)=>({trail,color:PCOLS[i%PCOLS.length]}));
-  trails.push({trail:S.myTrail,color:'#16846a'});
+  if(target){points.push(target);L.marker(target,{icon:controlIcon()}).bindPopup('Target').addTo(S.resMap);}
+  if(start){points.push(start);L.marker(start,{icon:startIcon()}).bindPopup('Your start').addTo(S.resMap);}
+  // The straight line: the "Luftlinie" itself, drawn the way a course is drawn on an orienteering map.
+  if(target&&start)L.polyline([start,target],{color:INK.control,weight:2,opacity:.9,interactive:false}).addTo(S.resMap);
+  const trails=Object.entries(S.playerTrails).filter(([id])=>id!==S.myToken).map(([id,trail])=>({trail,color:colorFor(id)}));
+  trails.push({trail:S.myTrail,color:cssVar('--ink','#1B1F23')});
   trails.forEach(({trail,color})=>{const valid=trail.filter(p=>Array.isArray(p)&&Core.validPoint(p[0],p[1]));if(valid.length>1){points.push(...valid);L.polyline(valid,{color,weight:2.5,opacity:.7}).addTo(S.resMap);}});
   if(points.length>1)try{S.resMap.fitBounds(points,{padding:[50,50],maxZoom:16});}catch(_){}
 }
@@ -1108,6 +1213,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(storage.getItem('ll_theme')==='dark'||(!storage.getItem('ll_theme')&&window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches)){
     document.documentElement.setAttribute('data-theme','dark');set('theme-label','Light mode');
   }
+  syncThemeMeta();initBackdrop();heroReading();
   var slt=el('sl-time');if(slt)slt.addEventListener('input',upSetup);upSetup();
   if(FIREBASE_CONFIG.apiKey==='YOUR_API_KEY'){
     setTimeout(()=>toast('⚠️ Fill in FIREBASE_CONFIG in the source file',6000),800);
@@ -1122,12 +1228,22 @@ window.addEventListener('DOMContentLoaded',()=>{
   renderStats();
   startOfflineDetection();
   checkBattery();
+  // Browsers keep audio suspended until a tap; unlock on the first one so the countdown and arrival sounds play.
+  const unlock=()=>{try{getAudioCtx().resume();}catch(_){}};document.addEventListener('pointerdown',unlock,{once:true,capture:true});
+  booted=true;
   const jc=new URLSearchParams(location.search).get('join');
   if(jc&&/^[a-zA-Z0-9]{6}$/.test(jc)){const inp=el('inp-code');if(inp)inp.value=jc.toUpperCase();if(readSession()?.code===jc.toUpperCase()){goScreen('land');checkRejoin();}else goScreen('join');return;}
   goScreen('land');
   setTimeout(checkRejoin, 800);
 });
 
+// The landing's one moment of motion: the example distance ticks down once, like a navigator closing in.
+function heroReading(){
+  const n=el('hero-num');if(!n||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)return;
+  const from=2.41,to=1.28,t0=performance.now(),dur=2200;
+  const step=t=>{const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);n.textContent=(from+(to-from)*e).toFixed(2);if(k<1&&S.screen==='land')requestAnimationFrame(step);else n.textContent=to.toFixed(2);};
+  requestAnimationFrame(step);
+}
 /* ── SOUND ───────────────────────────────────────────────── */
 // Apple-inspired: short sine tones, clean attack/decay, no Web Audio harshness
 function getAudioCtx(){
@@ -1203,10 +1319,10 @@ function playProxEnterSound(band){
 }
 function toggleSound(){
   S.soundEnabled=!S.soundEnabled;
-  const ico=S.soundEnabled?'🔊':'🔇';
+  const ico=S.soundEnabled?'Sound on':'Sound off';
   ['sound-btn','sound-btn-host','sound-btn-spec'].forEach(id=>{
     const btn=el(id);
-    if(btn){btn.textContent=ico;btn.classList.toggle('active',S.soundEnabled);}
+    if(btn){btn.title=ico;btn.setAttribute('aria-label',ico);btn.setAttribute('aria-pressed',String(S.soundEnabled));btn.classList.toggle('active',S.soundEnabled);}
   });
   if(S.soundEnabled){
     try{getAudioCtx().resume();}catch(_){}
@@ -1231,14 +1347,14 @@ function updateBlindDisplay(distM){
       S.blindUnlocked=true;
       playTone(523,0.1,0.15);setTimeout(()=>playTone(659,0.15,0.18),100);
       haptic('medium');
-      toast('Distance unlocked — you\'ve moved 300m from start',2500);
+      toast('Distance revealed. You are 300 m from your start.',2500);
       if(eyebrow) eyebrow.textContent='';
       if(nd)nd.classList.remove('blind-num');
       updateNavDisplay(distM);
       return;
     }
     const remaining=Math.max(0,Math.ceil(300-fromStart));
-    if(eyebrow) eyebrow.textContent=`${Math.round(fromStart)}m from start`;
+    if(eyebrow) eyebrow.textContent=`Hidden until 300 m from your start. ${Math.round(fromStart)} m so far`;
   } else {
     if(eyebrow) eyebrow.textContent='Acquiring GPS…';
   }
@@ -1247,18 +1363,18 @@ function updateBlindDisplay(distM){
 }
 
 /* ── REPLAY ──────────────────────────────────────────────── */
-function stopReplay(){S._replayVersion=(S._replayVersion||0)+1;clearTimeout(S._replayTimer);const btn=el('replay-btn');if(btn){btn.disabled=false;btn.textContent='▶ Replay Routes';}}
+function stopReplay(){S._replayVersion=(S._replayVersion||0)+1;clearTimeout(S._replayTimer);const btn=el('replay-btn');if(btn){btn.disabled=false;btn.textContent='Replay routes';}}
 function playReplay(){
   const btn=el('replay-btn');
   if(!S.resMap||(!S.myTrail.length&&!Object.values(S.playerTrails).some(t=>t.length>1))){toast('No route data to replay');return;}
   btn.disabled=true;btn.textContent='Playing…';
   stopReplay();btn.disabled=true;btn.textContent='Playing…';const epoch=S._epoch,version=S._replayVersion;
   const allTrails=[];
-  if(S.myTrail.length>1) allTrails.push({trail:S.myTrail,color:'#34C759'});
-  Object.entries(S.playerTrails).forEach(([id,trail],i)=>{
-    if(id!==S.myToken&&trail.length>1) allTrails.push({trail,color:PCOLS[i%PCOLS.length]});
+  if(S.myTrail.length>1) allTrails.push({trail:S.myTrail,color:cssVar('--ink','#1B1F23')});
+  Object.entries(S.playerTrails).forEach(([id,trail])=>{
+    if(id!==S.myToken&&trail.length>1) allTrails.push({trail,color:colorFor(id)});
   });
-  if(!allTrails.length){btn.disabled=false;btn.textContent='▶ Replay Routes';return;}
+  if(!allTrails.length){btn.disabled=false;btn.textContent='Replay routes';return;}
   // Remove old replay layers
   if(S._replayLayers){S._replayLayers.forEach(l=>{try{S.resMap.removeLayer(l);}catch(_){}});}
   S._replayLayers=[];
@@ -1275,7 +1391,7 @@ function playReplay(){
     };
     step();
   });
-  S._replayTimer=setTimeout(()=>{if(version===S._replayVersion){btn.disabled=false;btn.textContent='▶ Replay Routes';}},Math.max(...allTrails.map(t=>t.trail.length))*30+100);
+  S._replayTimer=setTimeout(()=>{if(version===S._replayVersion){btn.disabled=false;btn.textContent='Replay routes';}},Math.max(...allTrails.map(t=>t.trail.length))*30+100);
 }
 
 /* ── WAKE LOCK ───────────────────────────────────────────── */
@@ -1363,9 +1479,7 @@ function startMapOrientation(which,map,frame){
   S._compassMap=map;
 
   S._orientListener=(e)=>{
-    const heading = e.webkitCompassHeading != null
-      ? e.webkitCompassHeading
-      : (e.absolute&&e.alpha!=null?(360-e.alpha)%360:null);
+    const heading = deviceHeading(e);
     if(heading==null)return;
     S._compassHeading=Core.smoothHeading(S._compassHeading,heading);
     // Rotate only the frame — Leaflet container itself is untouched
@@ -1432,7 +1546,7 @@ function setGameMode(m){
   S.gameMode=m;
   S.elimMode=(m==='elimination');
   S.whisperMode=(m==='whisper');
-  document.querySelectorAll('.mode-card').forEach(c=>{const selected=c.id==='mode-card-'+m;c.classList.toggle('active',selected);c.setAttribute('aria-pressed',String(selected));});
+  document.querySelectorAll('.mode-card').forEach(c=>{const selected=c.id==='mode-card-'+m;c.classList.toggle('active',selected);c.setAttribute('aria-checked',String(selected));c.tabIndex=selected?0:-1;});
   if(['hotcold','sailor','whisper'].includes(m))setBlindStart(false);
   const warn=el('mode-warn'),warnTxt=el('mode-warn-txt');
   if(m==='whisper'){
@@ -1508,7 +1622,7 @@ function checkRejoin(){
       const status=snap.val();
       if(status==='active'||status==='lobby'){
         S._rejoinCode=code;S._rejoinToken=token;S._rejoinName=name;S._rejoinRole=role;
-        set('rejoin-sub',`Game ${code} is still active`);
+        set('rejoin-sub',`Game ${code} is still ${status==='lobby'?'in the lobby':'running'}.`);
         el('rejoin-bar').classList.remove('hidden');
       } else {
         clearSession();
@@ -1585,7 +1699,7 @@ function startWhisperTimer(){
   if(!S.whisperMode)return;stopWhisperTimer();whisperHide();show('na-whisper-cd');
   const tick=()=>{
     const phase=Core.whisperPhase(serverNow(),S.startedAt);
-    set('na-whisper-cd',phase.visible?'SIGNAL LIVE':'NEXT SIGNAL '+fmtTime(phase.remaining));
+    set('na-whisper-cd',phase.visible?'Signal open':'Next signal '+fmtTime(phase.remaining));
     if(phase.visible&&!S._whisperShowing&&Core.validPoint(S.myLat,S.myLon))whisperReveal(noiseDist(hav(S.myLat,S.myLon,S.targetLat,S.targetLon),S.noiseSeed));
     if(!phase.visible&&S._whisperShowing)whisperHide();S._whisperShowing=phase.visible;
   };tick();S.whisperIv=setInterval(tick,500);
@@ -1600,7 +1714,7 @@ function whisperReveal(distM){
     nd.classList.add('updating'); // flash animation
   }
   if(nu) nu.textContent=distUnit(distM);
-  if(eyebrow) eyebrow.textContent='Fades in 8s';
+  if(eyebrow) eyebrow.textContent='Visible for 8 seconds';
   spawnRipple('auto');
   playTone(659,0.10,0.15);setTimeout(()=>playTone(880,0.14,0.18),120);
   haptic('medium');
@@ -1628,114 +1742,63 @@ function stopWhisperTimer(){
   var nwc=el('na-whisper-cd');if(nwc)nwc.classList.add('hidden');
 }
 
-/* ── FILLRESULTS — with team colors, host exclusion, route stats ── */
+/* ── RESULTS ──────────────────────────────────────────────── */
+const MODE_NAMES={standard:'Standard',elimination:'Elimination',whisper:'Whisper',hotcold:'Hot and cold',sailor:'Sailor',multi:'Three checkpoints',dynamic:'Moving target'};
+function trailLength(trail){let m=0;for(let i=1;i<trail.length;i++)m+=hav(trail[i-1][0],trail[i-1][1],trail[i][0],trail[i][1]);return m;}
 function fillResults(players){
   const me=players?.find(p=>p.id===S.myToken);if(me){S.arrived=!!me.arrived;S.arrivalElapsed=me.arrSec??null;}
-  const elapsed=S.arrivalElapsed!==undefined&&S.arrivalElapsed!==null?S.arrivalElapsed:(S.timeLimitSec-currentTimeRemaining());
-  set('res-time',fmtTime(elapsed));set('stat-time',fmtTime(elapsed));
-  set('stat-dist',S.startDist?(S.startDist/1000).toFixed(1)+' km':'—');
-
-  // Game mode pill
-  var modePill=el('res-mode-pill');
-  if(modePill){
-    var modeLabels2={standard:'🎯 Standard',elimination:'⚡ Elimination',whisper:'👂 Whisper',hotcold:'🌡️ Hot \u0026 Cold',sailor:'🧭 Sailor',multi:'🎯 Multi-Target',dynamic:'🔄 Dynamic'};
-    modePill.textContent=modeLabels2[S.gameMode]||'🏁 Route Revealed';
-  }
-
-  // Team result banner
-  var teamBanner=el('team-result-banner');
-  var teamIco=el('team-result-ico');
-  var teamTitle=el('team-result-title');
-  if(teamBanner&&S.teamsMode){
-    var allP2=players||[];
-    var redArr2=allP2.some(function(p){return p.team==='red'&&p.arrived;});
-    var blueArr2=allP2.some(function(p){return p.team==='blue'&&p.arrived;});
-    if(redArr2||blueArr2){
-      teamBanner.classList.remove('hidden');
-      if(redArr2&&!blueArr2){teamIco.textContent='\uD83D\uDD34';teamTitle.textContent='Red Team Wins!';teamTitle.style.color='#FF3B30';}
-      else if(blueArr2&&!redArr2){teamIco.textContent='\uD83D\uDD35';teamTitle.textContent='Blue Team Wins!';teamTitle.style.color='#007AFF';}
-      else{teamIco.textContent='\uD83C\uDFC1';teamTitle.textContent='Both Teams Arrived!';teamTitle.style.color='var(--t1)';}
-      // Hide individual winner row
-      var wr=el('winner-row');if(wr)wr.classList.add('hidden');
-    } else {
-      teamBanner.classList.add('hidden');
-    }
-  } else if(teamBanner){
-    teamBanner.classList.add('hidden');
-  }
-
+  const elapsed=S.arrivalElapsed!=null?S.arrivalElapsed:(S.timeLimitSec-currentTimeRemaining());
+  set('stat-dist',S.startDist?fmtLen(S.startDist):'—');
+  set('res-mode-pill',(MODE_NAMES[S.gameMode]||'Standard')+(S.transportMode==='walk'?', on foot':', by car'));
   const rows=el('result-rows');
   if(!rows||!players)return;
-
-  // Build full navigator list
-  let navs=players.filter(function(p){return p.role==='navigator';});
-  // Host exclusion
-  if(S.excludeHost&&S.hostPlayerToken) navs=navs.filter(function(p){return p.id!==S.hostPlayerToken;});
+  let navs=players.filter(p=>p.role==='navigator'&&p.name);
+  if(S.excludeHost&&S.hostPlayerToken)navs=navs.filter(p=>p.id!==S.hostPlayerToken);
   set('stat-players',navs.length);
-
-  // Sort: arrived first by time, then DNF
   const sorted=Core.rankPlayers(navs.map(p=>({...p,distance:computeDist(p)})));
-
-  // Winner row — teams override
   const winner=sorted.find(p=>p.arrived);
-  el('winner-row').classList.toggle('hidden',S.teamsMode&&!!winner);set('res-name',winner?winner.name:(S.status==='active'?'No finishers yet':'No finishers'));set('res-time',winner?fmtTime(winner.arrSec):'—');set('stat-time',winner?fmtTime(winner.arrSec):'—');set('res-winner-sub',winner?'First to reach the target':(S.status==='active'?'The game is still running':'The game ended before anyone reached the target'));
-  el('winner-row').querySelector('.winner-ico').textContent=winner?'🏆':'—';
-  if(!S.teamsMode&&winner){
-    set('res-name',winner.arrived?winner.name:'—');
-    var wrDiv=el('winner-row');
-    if(wrDiv){
-      var wr=el('res-winner-sub');
-      if(wr){
-        if(S.gameMode==='elimination')wr.textContent='Last one standing';
-        else if(S.gameMode==='whisper')wr.textContent='Found it in the whispers';
-        else if(S.gameMode==='hotcold')wr.textContent='Felt the way there';
-        else if(S.gameMode==='sailor')wr.textContent='Sailed to the target';
-        else wr.textContent='First to reach the target';
-      }
-      const idx=navs.findIndex(p=>p.id===winner.id);
-      const col=PCOLS[idx%PCOLS.length];
-      wrDiv.style.borderColor=winner.arrived?col:'var(--border)';
-      wrDiv.style.background=winner.arrived?col+'18':'rgba(0,0,0,.04)';
-    }
+  // Headline: team result, individual winner, or a plain statement that nobody made it.
+  const banner=el('team-result-banner');
+  const red=navs.some(p=>p.team==='red'&&p.arrived),blue=navs.some(p=>p.team==='blue'&&p.arrived);
+  const teamWin=S.teamsMode&&(red||blue);
+  if(banner){
+    banner.classList.toggle('hidden',!teamWin);
+    if(teamWin){const t=red&&blue?'both':red?'red':'blue';banner.dataset.team=t;set('team-result-title',t==='both'?'Both teams reached the target':t==='red'?'Red team wins':'Blue team wins');}
   }
-
-  // Leaderboard rows with team color dots
-  rows.innerHTML=sorted.map(function(p,i){
-    const col=p.team==='red'?'#FF3B30':p.team==='blue'?'#007AFF':PCOLS[i%PCOLS.length];
-    const medal=p.arrived?(['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'][i]||''):'';
-    const pos=medal||'<span style="font-size:12px;font-weight:700;color:var(--t3)">'+(i+1)+'</span>';
-    const time=p.arrived?fmtTime(p.arrSec):'<span style="color:var(--t3)">DNF</span>';
-    const dist=p.startDist?'<span class="rr-dist">'+(p.startDist/1000).toFixed(1)+'km</span>':'';
-    var teamTag='';
-    if(S.teamsMode&&p.team) teamTag='<span class="rr-team" style="color:'+(p.team==='red'?'#FF3B30':'#007AFF')+'">'+(p.team==='red'?'R':'B')+'</span>';
-    return'<div class="rr-row">'+
-      '<span class="rr-pos">'+pos+'</span>'+
-      '<div class="rr-dot" style="background:'+col+'"></div>'+
-      '<span class="rr-name">'+escHtml(p.name)+'</span>'+
-      teamTag+
-      dist+
-      '<span class="rr-time">'+time+'</span>'+
-    '</div>';
-  }).join('');
-
-  // Route stats for this player
+  const wr=el('winner-row');wr.classList.toggle('hidden',teamWin);
+  wr.style.setProperty('--c',winner?colorFor(winner.id):'var(--t3)');
+  wr.classList.toggle('no-winner',!winner);
+  set('res-name',winner?winner.name:(S.status==='active'?'Still running':'Nobody reached it'));
+  set('res-time',winner?fmtTime(winner.arrSec):'');set('stat-time',winner?fmtTime(winner.arrSec):'—');
+  const sub={elimination:'Last one standing',whisper:'Found it between the whispers',hotcold:'Found it by feel',sailor:'Followed the needle there',multi:'All three checkpoints, first'}[S.gameMode]||'First to the target';
+  set('res-winner-sub',winner?sub:(S.status==='active'?'Others are still out there':'The clock ran out before anyone arrived'));
+  rows.innerHTML=sorted.map((p,i)=>{
+    const col=p.team==='red'?'var(--team-red)':p.team==='blue'?'var(--team-blue)':colorFor(p.id);
+    const pos=p.arrived?String(i+1):'–';
+    const time=p.arrived?fmtTime(p.arrSec):(p.eliminated?'out':'did not finish');
+    const team=S.teamsMode&&p.team?`<span class="rr-team" data-team="${p.team==='red'?'red':'blue'}">${p.team==='red'?'Red':'Blue'}</span>`:'';
+    const dist=p.startDist?`<span class="rr-dist">${fmtLen(p.startDist)}</span>`:'';
+    return `<div class="rr-row${p.arrived?' fin':''}${p.id===S.myToken?' me':''}" data-color="${p.team?'':col}"><span class="rr-pos">${pos}</span><span class="rr-dot" style="--c:${col}"></span><span class="rr-name">${escHtml(p.name)}</span>${p.id===S.myToken?'<span class="rr-you">you</span>':''}${team}${dist}<span class="rr-time">${time}</span></div>`;
+  }).join('')||'<div class="empty-state">No navigators took part.</div>';
   if(S.myTrail.length>1){
-    let walked=0;
-    for(let i=1;i<S.myTrail.length;i++) walked+=hav(S.myTrail[i-1][0],S.myTrail[i-1][1],S.myTrail[i][0],S.myTrail[i][1]);
+    const walked=trailLength(S.myTrail);
     const eff=S.startDist&&walked>0?Math.min(100,Math.round((S.startDist/walked)*100)):null;
-    const myRank=winner&&winner.id===S.myToken?1:sorted.findIndex(function(p){return p.id===S.myToken;})+1;
-    set('rs-walked',walked>1000?(walked/1000).toFixed(1)+' km':Math.round(walked)+' m');
-    set('rs-efficiency',eff?eff+'%':'—');
-    set('rs-rank',myRank>0?myRank+' / '+sorted.length:'—');
-    var rs=el('route-stats');if(rs)rs.classList.remove('hidden');
+    const myRank=sorted.findIndex(p=>p.id===S.myToken)+1;
+    set('rs-walked',fmtLen(walked));set('rs-efficiency',eff?eff+'%':'—');set('rs-rank',myRank>0?myRank+' of '+sorted.length:'—');
+    show('route-stats');
   }
-
-  // Save stats to localStorage
-  saveGameStats(elapsed,sorted.length,winner&&winner.id===S.myToken);
+  saveGameStats(elapsed,sorted.length,!!winner&&winner.id===S.myToken);
 }
 
 /* ── HOT & COLD COMPASS ──────────────────────────────────── */
 // Bearing from (lat1,lon1) to (lat2,lon2) in degrees 0-360
+// Compass heading in degrees, corrected for a phone held in landscape.
+function deviceHeading(e){
+  const raw=e.webkitCompassHeading!=null?e.webkitCompassHeading:(e.absolute&&e.alpha!=null?(360-e.alpha)%360:null);
+  if(raw==null||!Number.isFinite(raw))return null;
+  const turn=(screen.orientation&&Number.isFinite(screen.orientation.angle))?screen.orientation.angle:(Number(window.orientation)||0);
+  return ((raw+turn)%360+360)%360;
+}
 function bearingTo(lat1,lon1,lat2,lon2){
   const dLon=(lon2-lon1)*Math.PI/180;
   const y=Math.sin(dLon)*Math.cos(lat2*Math.PI/180);
@@ -1753,9 +1816,12 @@ function startHotCold(){
   if(!S._hcHistory) S._hcHistory=[];
   if(S.lastDist) S._hcHistory=[{dist:S.lastDist,ts:Date.now()}];
   updateHotColdTrend();
+  // Phones stop sending fixes when you stand still, so a "HOT" pulse used to stay on indefinitely. Re-read every 2 s.
+  S._hcIv=setInterval(()=>{const cut=Date.now()-8000;while(S._hcHistory.length&&S._hcHistory[0].ts<cut)S._hcHistory.shift();updateHotColdTrend();},2000);
 }
 
 function stopHotCold(){
+  clearInterval(S._hcIv);S._hcIv=null;
   var ndw4=el('na-dist-wrapper');if(ndw4)ndw4.classList.remove('hidden');
   var hcs3=el('hc-screen');if(hcs3)hcs3.classList.add('hidden');
   var rb4=el('refresh-btn');if(rb4)rb4.classList.remove('hidden');
@@ -1859,11 +1925,15 @@ async function enableCompass(){try{if(await DeviceOrientationEvent.requestPermis
 
 function _startSailorListener(){
   if(S._sailorListener)return;S._sailorSmoothHeading=null;
+  S._sailorLastReading=0;
+  setTimeout(()=>{if(S._sailorListener&&!S._sailorLastReading)set('sailor-hint','No compass reading yet. Hold your phone flat and away from metal.');},3000);
   S._sailorListener=e=>{
-    const raw=e.webkitCompassHeading!=null?e.webkitCompassHeading:(e.absolute&&e.alpha!=null?(360-e.alpha)%360:null);
-    if(raw==null){set('sailor-hint','Waiting for a compass reading. Hold your phone flat.');return;}
+    const raw=deviceHeading(e);
+    // Android fires both a relative and an absolute event; the relative one has no heading. Ignoring it stops the hint flickering.
+    if(raw==null)return;
+    S._sailorLastReading=Date.now();
     S._sailorSmoothHeading=Core.smoothHeading(S._sailorSmoothHeading,raw);S._sailorHeading=S._sailorSmoothHeading;
-    set('sailor-hint','Follow the blue tip');updateSailorNeedle();
+    set('sailor-hint','Walk where the needle points');updateSailorNeedle();
   };
   window.addEventListener('deviceorientation',S._sailorListener,true);window.addEventListener('deviceorientationabsolute',S._sailorListener,true);
 }
@@ -1884,7 +1954,8 @@ function updateSailorNeedle(){
   const needleAngle=targetBearing-S._sailorHeading;
   const needle=el('sailor-needle');
   if(needle){
-    needle.style.transform=`rotate(${needleAngle}deg)`;
+    S._needleAngle=Core.unwrapAngle(S._needleAngle,needleAngle);
+    needle.style.transform=`rotate(${S._needleAngle}deg)`;
     // Add pulse animation when aligned (within 5 degrees)
     const normalizedAngle=((needleAngle%360)+360)%360;
     const isAligned=normalizedAngle<5||normalizedAngle>355;
@@ -1901,38 +1972,28 @@ function startDynamicTarget(){
   stopDynamicTarget();if(!S.isHost)return;
   S._dynamicMoveIv=setInterval(async()=>{
     const round=Math.floor((serverNow()-S.startedAt)/180000);
-    if(S.status!=='active'||round<1||round<=(S._dynamicMoveCount||0)||S._dynamicPicking)return;
-    S._dynamicPicking=true;const code=S.gameCode;
-    try{const point=await findSmartTarget(S.targetLat,S.targetLon,.08);if(code!==S.gameCode||S.status!=='active')return;
+    // _dynamicTried is local: the room listener overwrites _dynamicMoveCount, so a failed search used to retry
+    // (and hit Overpass, and toast) every five seconds until the next round.
+    if(S.status!=='active'||round<1||round<=(S._dynamicMoveCount||0)||round<=(S._dynamicTried||0)||S._dynamicPicking)return;
+    S._dynamicPicking=true;S._dynamicTried=round;const code=S.gameCode;
+    // 80 m used to be the shift, smaller than a 100 or 200 m arrival radius. Scale it so the move is noticeable.
+    const shiftKm=Math.max(.25,S.arrRadius*3/1000);
+    try{const point=await findSmartTarget(S.targetLat,S.targetLon,shiftKm);if(code!==S.gameCode||S.status!=='active')return;
       const result=await gRef().transaction(game=>game?.status==='active'&&round>(game.dynamicMoveCount||0)?{...game,targetLat:point.lat,targetLon:point.lon,dynamicMoveCount:round}:undefined,undefined,false);if(result.committed&&code===S.gameCode)toast('The target moved. Find the new signal.');
-    }catch(_){S._dynamicMoveCount=round;toast('No suitable nearby route found. Target stays in place.');}
+    }catch(_){toast('No public route nearby to move to. The target stays put this round.');}
     finally{S._dynamicPicking=false;}
   },5000);
 }
 function stopDynamicTarget(){
   if(S._dynamicMoveIv){clearInterval(S._dynamicMoveIv);S._dynamicMoveIv=null;}
 }
-function checkTeamArrival(players){
-  if(!S.teamsMode) return false;
-  const teams={red:false,blue:false};
-  players.forEach(p=>{
-    if(p.role==='navigator'&&p.arrived&&p.team) teams[p.team]=true;
-  });
-  if(teams.red||teams.blue){
-    const winner=teams.red&&!teams.blue?'🔴 Red Team':!teams.red&&teams.blue?'🔵 Blue Team':'Both Teams';
-    set('res-name',winner+' wins!');
-    return true;
-  }
-  return false;
-}
-
 /* ── AUTO-ZOOM HOST MAP ───────────────────────────────────── */
 function startAutoZoom(){
   if(S._autoZoomIv) clearInterval(S._autoZoomIv);
   S._autoZoomIv=setInterval(()=>{
     if(S.screen!=='hactive'&&S.screen!=='spectator') return;
     const map=S.screen==='hactive'?S.hostMap:S.specMap;
-    if(!map) return;
+    if(!map||Date.now()-(S._userPannedAt||0)<30000||S.mapOrientMode.host||S.mapOrientMode.spec) return;
     const pts=[];
     if(S.targetLat!=null) pts.push([S.targetLat,S.targetLon]);
     Object.values(S.latestPlayers).forEach(p=>{
@@ -1957,8 +2018,8 @@ async function sendPosUpdateQueued(manual=false){
   else if(S.gameMode==='sailor')updateSailorNeedle();
   else if(S.whisperMode){if(S._whisperShowing)updateNavDisplay(noised);}
   else{updateNavDisplay(noised);if(!manual)playProximitySound(dist);}
-  if(S.gameMode==='multi'&&(!S.blindStart||S.blindUnlocked))set('na-eyebrow','CHECKPOINT '+(S.multiCurrent+1)+' / '+S.multiTargets.length);
-  if(S.gameMode==='dynamic')set('na-eyebrow','MOVING TARGET · SHIFT '+(S._dynamicMoveCount||0));
+  if(S.gameMode==='multi'&&(!S.blindStart||S.blindUnlocked))set('na-eyebrow','Checkpoint '+(S.multiCurrent+1)+' of '+S.multiTargets.length);
+  if(S.gameMode==='dynamic')set('na-eyebrow',S._dynamicMoveCount?'The target has moved '+(S._dynamicMoveCount===1?'once':S._dynamicMoveCount+' times'):'The target moves every 3 minutes');
   if(!S._isOnline){set('na-upd','Offline · distance still updates; arrival needs connection');return;}
   if(!S._lastFix||Date.now()-S._lastFix>20000){set('na-upd','Waiting for a fresh GPS fix before syncing');return;}
   if(S._writePending)return;
@@ -1968,7 +2029,7 @@ async function sendPosUpdateQueued(manual=false){
   const code=S.gameCode,token=S.myToken,epoch=S._epoch;S._writePending=true;S._lastSent=Date.now();
   const ref=pRef();
   const upd={lat:S.myLat,lon:S.myLon,accuracy:S.lastAccuracy,speedKmh:S.speedKmh,lastSeen:SV.TIMESTAMP,startDist:S.startDist,online:true,blindUnlocked:S.blindUnlocked,blindStartLat:S.blindStartLat,blindStartLon:S.blindStartLon};
-  if(isArrival||Date.now()-(S._lastTrailSent||0)>15000){upd.trail=S.myTrail.slice(-1500);S._lastTrailSent=Date.now();}
+  if(isArrival||Date.now()-(S._lastTrailSent||0)>15000){upd.trail=Core.simplifyTrail(S.myTrail);S._lastTrailSent=Date.now();}
   try{
     if(isArrival){
       const room=db.ref('games/'+code),fixTime=S._lastFix,checkpoint=S.multiCurrent;
@@ -1994,7 +2055,7 @@ async function sendPosUpdateQueued(manual=false){
       S.arrived=!!me.arrived;S.arrivalElapsed=me.arrSec??null;S._hcHistory=[];saveSession();
       if(game.status==='finished'){S.status='finished';fillResults(playerEntries(game.players));goScreen('results');}
       else if(S.arrived&&S.status==='active')triggerArrival(me.arrSec,S.startDist);
-      else if(S.status==='active')toast('Checkpoint '+S.multiCurrent+' found. On to the next!');
+      else if(S.status==='active')toast('Checkpoint '+S.multiCurrent+' found. The signal now points to the next one.');
       playArrivalSound();
     }else await ref.update(upd);
   }catch(e){if(code===S.gameCode)toast('Could not sync this position. Retrying with your next fix.');}
@@ -2070,219 +2131,54 @@ function pwaDismiss(){
   storage.setItem('pwa-dismissed','1');
 }
 
-/* ── SHARE RESULT CARD (fixed — zoomed map + stats) ─────── */
+/* ── SHARE CARD ────────────────────────────────────────────── */
+// Drawn like a finished orienteering course: start triangle, magenta straight line, control circle, and the routes people took.
 async function shareResult(){
   try{
-    const canvas=document.createElement('canvas');
-    const dpr=Math.min(window.devicePixelRatio||1,2);
-    const W=600,H=800;
-    canvas.width=W*dpr;canvas.height=H*dpr;
-    const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
-    const dark=document.documentElement.getAttribute('data-theme')==='dark';
-
-    // Background gradient
-    const grad=ctx.createLinearGradient(0,0,W,H);
-    if(dark){grad.addColorStop(0,'#0a1628');grad.addColorStop(0.5,'#0d1f3c');grad.addColorStop(1,'#05080f');}
-    else{grad.addColorStop(0,'#c8e6ff');grad.addColorStop(0.5,'#ddf0fb');grad.addColorStop(1,'#eef4f0');}
-    ctx.fillStyle=grad;
-    ctx.beginPath();ctx.roundRect?ctx.roundRect(0,0,W,H,24):ctx.rect(0,0,W,H);ctx.fill();
-
-    // Subtle top accent line
-    ctx.fillStyle='#007AFF';
-    ctx.beginPath();ctx.roundRect?ctx.roundRect(40,36,W-80,3,1.5):ctx.rect(40,36,W-80,3);ctx.fill();
-
-    // Header
-    ctx.fillStyle=dark?'rgba(255,255,255,.92)':'rgba(0,0,0,.88)';
-    ctx.font='bold 28px -apple-system,Arial,sans-serif';
-    ctx.fillText('Luftlinie',40,72);
-    ctx.fillStyle=dark?'rgba(255,255,255,.4)':'rgba(0,0,0,.4)';
-    ctx.font='12px -apple-system,Arial,sans-serif';
-    ctx.fillText('as the crow flies',40,90);
-
-    // Game mode badge
-    const modeLabels={standard:'Standard',elimination:'Elimination',whisper:'Whisper',hotcold:'Hot \u0026 Cold',sailor:'Sailor',multi:'Multi-Target',dynamic:'Dynamic'};
-    const modeLabel=modeLabels[S.gameMode]||'Standard';
-    const modeColors={standard:'#007AFF',elimination:'#FF9F0A',whisper:'#BF5AF2',hotcold:'#FF3B30',sailor:'#34C759',multi:'#007AFF',dynamic:'#FF9F0A'};
-    const mCol=modeColors[S.gameMode]||'#007AFF';
-    ctx.fillStyle=mCol;
-    ctx.beginPath();ctx.roundRect?ctx.roundRect(40,100,100,26,13):ctx.rect(40,100,100,26);ctx.fill();
-    ctx.fillStyle='white';ctx.font='bold 12px -apple-system,Arial,sans-serif';
-    ctx.fillText(modeLabel,52,118);
-
-    // Game code + date
-    ctx.fillStyle=dark?'rgba(255,255,255,.35)':'rgba(0,0,0,.35)';
-    ctx.font='12px -apple-system,Arial,sans-serif';
-    const dateStr=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    ctx.fillText('Game '+S.gameCode+'  \u00B7  '+dateStr,152,117);
-
-    // Map area with trails
-    const mapX=40,mapY=140,mapW=W-80,mapH=220;
-    ctx.save();
-    ctx.beginPath();ctx.roundRect?ctx.roundRect(mapX,mapY,mapW,mapH,12):ctx.rect(mapX,mapY,mapW,mapH);ctx.clip();
-    ctx.fillStyle=dark?'#0f1a2a':'#d4e8f0';ctx.fillRect(mapX,mapY,mapW,mapH);
-
-    if(S.resMap){
-      try{
-        const bounds=S.resMap.getBounds();
-        const toXY=function(lat,lon){
-          const south=bounds.getSouth(),north=bounds.getNorth();
-          const west=bounds.getWest(),east=bounds.getEast();
-          const latRad=lat*Math.PI/180;
-          const mercN=Math.log(Math.tan(Math.PI/4+latRad/2));
-          const mercS=Math.log(Math.tan(Math.PI/4+south*Math.PI/360));
-          const mercN2=Math.log(Math.tan(Math.PI/4+north*Math.PI/360));
-          const nx=(lon-west)/(east-west);
-          const ny=1-(mercN-mercS)/(mercN2-mercS);
-          return[mapX+nx*mapW,mapY+ny*mapH];
-        };
-        // Draw trails
-        const drawTrail=function(trail,color,weight){
-          if(trail.length<2)return;
-          ctx.strokeStyle=color;ctx.lineWidth=weight;ctx.lineCap='round';ctx.lineJoin='round';
-          ctx.beginPath();
-          trail.forEach(function(pt,i){
-            var xy=toXY(pt[0],pt[1]);
-            i?ctx.lineTo(xy[0],xy[1]):ctx.moveTo(xy[0],xy[1]);
-          });
-          ctx.stroke();
-        };
-        // Other player trails
-        Object.entries(S.playerTrails).forEach(function(entry){
-          var trail=entry[1];
-          var idx=parseInt(entry[0])||0;
-          if(trail.length>1)drawTrail(trail,PCOLS[idx%PCOLS.length],2);
-        });
-        // My trail
-        if(S.myTrail.length>1)drawTrail(S.myTrail,'#34C759',2.5);
-        // Target pin
-        if(S.targetLat!=null){
-          var tp=toXY(S.targetLat,S.targetLon);
-          ctx.fillStyle='#007AFF';ctx.beginPath();ctx.arc(tp[0],tp[1],8,0,Math.PI*2);ctx.fill();
-          ctx.fillStyle='white';ctx.beginPath();ctx.arc(tp[0],tp[1],4,0,Math.PI*2);ctx.fill();
-        }
-        // Start pin
-        if(S.myTrail.length>0){
-          var sp=toXY(S.myTrail[0][0],S.myTrail[0][1]);
-          ctx.fillStyle='#8e8e93';ctx.beginPath();ctx.arc(sp[0],sp[1],5,0,Math.PI*2);ctx.fill();
-        }
-      }catch(_){}
+    try{await document.fonts?.ready;}catch(_){}
+    const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+    const paper=cssVar('--paper','#FFFFFF'),ink=cssVar('--ink','#1B1F23'),mag=cssVar('--magenta','#B4166F'),brown=cssVar('--contour','#A0582A'),muted=cssVar('--t2','#555');
+    const F=(w,size)=>`${w} ${size}px "Inter", system-ui, sans-serif`;
+    x.fillStyle=paper;x.fillRect(0,0,W,H);
+    x.strokeStyle=brown;x.globalAlpha=.22;x.lineWidth=2;
+    for(let i=0;i<14;i++){x.beginPath();for(let t=0;t<=64;t++){const a=t/64*Math.PI*2,r=60+i*46+Math.sin(a*3+i*.7)*14+Math.cos(a*5-i)*9;const px=W*.7+Math.cos(a)*r*1.25,py=420+Math.sin(a)*r*.8;t?x.lineTo(px,py):x.moveTo(px,py);}x.closePath();x.stroke();}
+    x.globalAlpha=1;
+    x.fillStyle=ink;x.font=F(800,64);x.fillText('Luftlinie',72,120);
+    x.fillStyle=muted;x.font=F(500,30);x.fillText((MODE_NAMES[S.gameMode]||'Standard')+', '+new Date().toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}),72,168);
+    const box={x:72,y:220,w:W-144,h:520};
+    const pts=[],target=Core.validPoint(S.targetLat,S.targetLon)?[S.targetLat,S.targetLon]:null,start=S.myTrail[0]||null;
+    if(target)pts.push(target);if(start)pts.push(start);
+    const trails=Object.entries(S.playerTrails).filter(([id,t])=>id!==S.myToken&&t.length>1).map(([id,t])=>({t,col:colorFor(id),w:5}));
+    if(S.myTrail.length>1)trails.push({t:S.myTrail,col:ink,w:7});
+    trails.forEach(r=>pts.push(...r.t));
+    if(pts.length>1){
+      let s1=Infinity,n1=-Infinity,w1=Infinity,e1=-Infinity;pts.forEach(p=>{s1=Math.min(s1,p[0]);n1=Math.max(n1,p[0]);w1=Math.min(w1,p[1]);e1=Math.max(e1,p[1]);});
+      const k=Math.cos(((s1+n1)/2)*Math.PI/180),spanX=Math.max(1e-6,(e1-w1)*k),spanY=Math.max(1e-6,n1-s1),sc=Math.min(box.w/spanX,box.h/spanY)*.86;
+      const cx=box.x+box.w/2,cy=box.y+box.h/2,mx=(w1+e1)/2,my=(s1+n1)/2,P=p=>[cx+(p[1]-mx)*k*sc,cy-(p[0]-my)*sc];
+      trails.forEach(r=>{x.strokeStyle=r.col;x.lineWidth=r.w;x.lineCap=x.lineJoin='round';x.beginPath();r.t.forEach((p,i)=>{const q=P(p);i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]);});x.stroke();});
+      if(start&&target){const a=P(start),b=P(target);x.strokeStyle=mag;x.lineWidth=5;x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();
+        x.lineWidth=6;x.beginPath();x.moveTo(a[0],a[1]-26);x.lineTo(a[0]+23,a[1]+14);x.lineTo(a[0]-23,a[1]+14);x.closePath();x.fillStyle=paper;x.fill();x.stroke();}
+      if(target){const b=P(target);x.strokeStyle=mag;x.lineWidth=7;x.fillStyle=paper;x.beginPath();x.arc(b[0],b[1],30,0,Math.PI*2);x.fill();x.stroke();}
     }
-    ctx.restore();
-    // Map border
-    ctx.strokeStyle=dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.08)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.roundRect?ctx.roundRect(mapX,mapY,mapW,mapH,12):ctx.rect(mapX,mapY,mapW,mapH);ctx.stroke();
-
-    // Winner section
-    var winY=mapY+mapH+28;
-    if(S.teamsMode){
-      // Find which team won
-      var teamWinner='';
-      var allP=S.latestPlayers?Object.values(S.latestPlayers):[];
-      var redArr=allP.some(function(p){return p.team==='red'&&p.arrived;});
-      var blueArr=allP.some(function(p){return p.team==='blue'&&p.arrived;});
-      if(redArr&&!blueArr)teamWinner='Red Team';
-      else if(blueArr&&!redArr)teamWinner='Blue Team';
-      else if(redArr&&blueArr)teamWinner='Both Teams';
-      if(teamWinner){
-        ctx.fillStyle=dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.85)';
-        ctx.font='bold 14px -apple-system,Arial,sans-serif';
-        ctx.fillText('Team Winner',40,winY);
-        ctx.fillStyle='#FF3B30';ctx.font='bold 22px -apple-system,Arial,sans-serif';
-        ctx.fillText(teamWinner,40,winY+28);
-      }
-    } else {
-      var winnerRow=el('winner-row');
-      var winnerName=el('res-name')?el('res-name').textContent:'—';
-      var winnerTime=el('res-time')?el('res-time').textContent:'—';
-      ctx.fillStyle=dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.85)';
-      ctx.font='bold 14px -apple-system,Arial,sans-serif';
-      ctx.fillText('Winner',40,winY);
-      ctx.fillStyle='#34C759';ctx.font='bold 22px -apple-system,Arial,sans-serif';
-      ctx.fillText(winnerName,40,winY+28);
-      ctx.fillStyle=dark?'rgba(255,255,255,.5)':'rgba(0,0,0,.5)';
-      ctx.font='16px "SF Mono","Menlo",monospace';
-      ctx.fillText(winnerTime,40,winY+50);
-    }
-
-    // Stats row
-    var statY=winY+(S.teamsMode?65:75);
-    var stats=[
-      [el('stat-dist')?el('stat-dist').textContent:'—','Distance'],
-      [el('stat-time')?el('stat-time').textContent:'—','Best Time'],
-      [el('stat-players')?el('stat-players').textContent:'—','Players']
-    ];
-    // Add efficiency if available
-    var effText='';
-    if(S.myTrail.length>1){
-      var walked=0;
-      for(var i=1;i<S.myTrail.length;i++)walked+=hav(S.myTrail[i-1][0],S.myTrail[i-1][1],S.myTrail[i][0],S.myTrail[i][1]);
-      var eff=S.startDist&&walked>0?Math.min(100,Math.round((S.startDist/walked)*100)):null;
-      effText=eff?eff+'%':'';
-    }
-    if(effText){
-      stats.push([effText,'Efficiency']);
-    }
-    var statW=stats.length===4?135:170;
-    stats.forEach(function(s,i){
-      var sx=40+i*statW;
-      ctx.fillStyle=dark?'rgba(255,255,255,.85)':'rgba(0,0,0,.85)';
-      ctx.font='bold 16px "SF Mono","Menlo",monospace';ctx.fillText(s[0],sx,statY);
-      ctx.fillStyle=dark?'rgba(255,255,255,.38)':'rgba(0,0,0,.38)';
-      ctx.font='11px -apple-system,Arial,sans-serif';ctx.fillText(s[1],sx,statY+16);
+    const teamShown=!el('team-result-banner').classList.contains('hidden');
+    let y=830;
+    x.fillStyle=muted;x.font=F(500,30);x.fillText(teamShown?'Result':'Winner',72,y);
+    x.fillStyle=ink;x.font=F(800,teamShown?64:92);x.fillText(teamShown?el('team-result-title').textContent:el('res-name').textContent,72,y+92);
+    const t=el('res-time').textContent;if(t&&!teamShown){x.fillStyle=mag;x.font=F(800,92);x.textAlign='right';x.fillText(t,W-72,y+92);x.textAlign='left';}
+    y+=170;
+    [...el('result-rows').querySelectorAll('.rr-row')].slice(0,5).forEach(row=>{
+      x.fillStyle=ink;x.font=F(600,34);x.fillText(row.querySelector('.rr-pos').textContent,72,y);
+      x.fillStyle=row.dataset.color||ink;x.beginPath();x.arc(132,y-11,11,0,Math.PI*2);x.fill();
+      x.fillStyle=ink;x.font=F(500,34);x.fillText(row.querySelector('.rr-name').textContent,162,y);
+      x.textAlign='right';x.fillStyle=muted;x.fillText(row.querySelector('.rr-time').textContent,W-72,y);x.textAlign='left';y+=54;
     });
-
-    // Leaderboard
-    var lbY=statY+36;
-    ctx.fillStyle=dark?'rgba(255,255,255,.5)':'rgba(0,0,0,.5)';
-    ctx.font='bold 12px -apple-system,Arial,sans-serif';
-    ctx.fillText('Leaderboard',40,lbY);
-    lbY+=20;
-
-    var rows2=el('result-rows');
-    if(rows2){
-      rows2.querySelectorAll('.rr-row').forEach(function(row,i){
-        var dot=row.querySelector('.rr-dot');
-        var col2=dot&&dot.style.background?dot.style.background:PCOLS[i%PCOLS.length];
-        var nameEl=row.querySelector('.rr-name');
-        var timeEl=row.querySelector('.rr-time');
-        var name=nameEl?nameEl.textContent:'';
-        var time=timeEl?timeEl.textContent:'';
-        // Dot
-        ctx.fillStyle=col2;ctx.beginPath();ctx.arc(50,lbY-3,5,0,Math.PI*2);ctx.fill();
-        // Name
-        ctx.fillStyle=i===0?(dark?'rgba(255,255,255,.92)':'rgba(0,0,0,.9)'):(dark?'rgba(255,255,255,.7)':'rgba(0,0,0,.7)');
-        ctx.font=(i===0?'bold ':'')+'14px -apple-system,Arial,sans-serif';
-        ctx.fillText(name,64,lbY);
-        // Time
-        ctx.textAlign='right';
-        ctx.fillStyle=i===0?'#34C759':(dark?'rgba(255,255,255,.45)':'rgba(0,0,0,.45)');
-        ctx.font='bold 13px "SF Mono","Menlo",monospace';
-        ctx.fillText(time,W-40,lbY);
-        ctx.textAlign='left';
-        lbY+=26;
-      });
-    }
-
-    // Footer
-    ctx.fillStyle=dark?'rgba(255,255,255,.15)':'rgba(0,0,0,.12)';
-    ctx.font='11px -apple-system,Arial,sans-serif';
-    ctx.fillText(location.host,40,H-24);
-    ctx.textAlign='right';
-    ctx.fillText('You know how far. You don\'t know where.',W-40,H-24);
-    ctx.textAlign='left';
-
-    canvas.toBlob(async function(blob){
-      if(!blob)return;
-      var file=new File([blob],'luftlinie-result.png',{type:'image/png'});
-      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:'Luftlinie Result'});
-      } else {
-        var a=document.createElement('a');
-        a.href=URL.createObjectURL(blob);a.download='luftlinie-result.png';a.click();
-        toast('Result saved!');
-      }
+    x.fillStyle=muted;x.font=F(500,26);x.fillText(location.host+'   You know how far. Not where.',72,H-64);
+    c.toBlob(async blob=>{
+      if(!blob)return;const file=new File([blob],'luftlinie-result.png',{type:'image/png'});
+      if(navigator.canShare?.({files:[file]})){try{await navigator.share({files:[file],title:'Luftlinie result'});}catch(_){}}
+      else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='luftlinie-result.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast('Result card saved');}
     },'image/png');
-  }catch(e){ toast('Could not generate share card'); }
+  }catch(e){toast('Could not create the result card.');}
 }
 
 /* ── ADVANCED OPTIONS TOGGLE ─────────────────────────────── */
@@ -2313,7 +2209,8 @@ const App={
 const Nav={go:goScreen};
 
 window.addEventListener('DOMContentLoaded',()=>{
-  document.querySelectorAll('.mode-card,.adv-toggle,.stats-card-header').forEach(control=>{control.tabIndex=0;control.setAttribute('role','button');control.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();control.click();}});});
+  document.querySelectorAll('.mode-card').forEach(card=>{card.setAttribute('role','radio');card.addEventListener('keydown',event=>{const cards=[...document.querySelectorAll('.mode-card')],i=cards.indexOf(card);if(event.key==='ArrowDown'||event.key==='ArrowRight'){event.preventDefault();cards[(i+1)%cards.length].click();cards[(i+1)%cards.length].focus();}if(event.key==='ArrowUp'||event.key==='ArrowLeft'){event.preventDefault();const n=cards[(i-1+cards.length)%cards.length];n.click();n.focus();}if(event.key===' '||event.key==='Enter'){event.preventDefault();card.click();}});});setGameMode(S.gameMode);
+  document.querySelectorAll('.adv-toggle,.stats-card-header').forEach(control=>{control.tabIndex=0;control.setAttribute('role','button');control.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();control.click();}});});
   document.querySelectorAll('button[title]').forEach(button=>button.setAttribute('aria-label',button.title));
   document.querySelectorAll('.star').forEach(button=>button.setAttribute('aria-label',DIFF.labels[+button.dataset.v]));
   el('inp-code').addEventListener('keydown',event=>{if(event.key==='Enter')el('inp-name').focus();});

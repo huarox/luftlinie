@@ -1,662 +1,516 @@
 <!DOCTYPE html>
-
-<!-- Luftlinie — real-world navigation, shared in real time. -->
-
+<!-- Luftlinie — a real-world distance game. Visual language borrowed from orienteering maps:
+     start triangle, magenta course line, control circle, brown contours. -->
 <html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#007AFF">
+<meta name="theme-color" content="#EEEEEA" id="meta-theme">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Luftlinie">
-<meta name="msapplication-TileColor" content="#007AFF">
-<meta name="msapplication-tap-highlight" content="no">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Luftlinie — Find your way</title>
-<meta name="description" content="You know how far. You don’t know where. A real-world navigation game for friends. Host a game, share a code, and follow your instinct.">
+<title>Luftlinie</title>
+<meta name="description" content="You know how far. Not where. A real-world game for friends: one hidden target, a distance that updates as you move.">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'%3E%3Crect width='60' height='60' rx='14' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232196f3'/%3E%3Cstop offset='1' stop-color='%230050c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='30' cy='30' r='7' fill='white'/%3E%3Ccircle cx='30' cy='30' r='14' stroke='white' stroke-width='1.5' fill='none' opacity='.55'/%3E%3Ccircle cx='30' cy='30' r='21' stroke='white' stroke-width='1' fill='none' opacity='.28'/%3E%3Cline x1='30' y1='7' x2='30' y2='13' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='53' y1='30' x2='47' y2='30' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='30' y1='53' x2='30' y2='47' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='7' y1='30' x2='13' y2='30' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232196f3'/%3E%3Cstop offset='1' stop-color='%230050c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='90' cy='90' r='20' fill='white'/%3E%3Ccircle cx='90' cy='90' r='42' stroke='white' stroke-width='4' fill='none' opacity='.55'/%3E%3Ccircle cx='90' cy='90' r='63' stroke='white' stroke-width='3' fill='none' opacity='.28'/%3E%3Cline x1='90' y1='18' x2='90' y2='40' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='162' y1='90' x2='140' y2='90' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='90' y1='162' x2='90' y2='140' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='18' y1='90' x2='40' y2='90' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
-<link rel="icon" sizes="192x192" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='44' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%232196f3'/%3E%3Cstop offset='1' stop-color='%230050c8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='96' cy='96' r='22' fill='white'/%3E%3Ccircle cx='96' cy='96' r='45' stroke='white' stroke-width='4.5' fill='none' opacity='.55'/%3E%3Ccircle cx='96' cy='96' r='67' stroke='white' stroke-width='3' fill='none' opacity='.28'/%3E%3Cline x1='96' y1='20' x2='96' y2='44' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='172' y1='96' x2='148' y2='96' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='96' y1='172' x2='96' y2='148' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3Cline x1='20' y1='96' x2='44' y2='96' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="apple-touch-icon" href="logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..700&family=Inter+Tight:wght@500..800&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<noscript><div style="position:fixed;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:center;background:#f0f4fa;padding:32px;text-align:center;font-family:-apple-system,sans-serif"><div><h1 style="font-size:22px;margin-bottom:8px">Luftlinie</h1><p style="color:#666;font-size:15px;margin-bottom:16px">JavaScript is required to play this game.</p><p style="color:#999;font-size:13px">Please enable JavaScript in your browser settings and reload.</p></div></div></noscript>
-<div id="bg" aria-hidden="true">
-  <div class="bg-blob b1"></div><div class="bg-blob b2"></div>
-  <div class="bg-blob b3"></div><div class="bg-noise"></div>
-</div>
+<noscript><div class="noscript"><h1>Luftlinie needs JavaScript</h1><p>Turn on JavaScript in your browser settings, then reload.</p></div></noscript>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+    <symbol id="i-car" viewBox="0 0 24 24"><path d="m4 11 2-6h12l2 6M3 11h18v7H3zM6 18v2m12-2v2M6.5 14.5h2m7 0h2"/></symbol>
+    <symbol id="i-walk" viewBox="0 0 24 24"><circle cx="13.5" cy="4" r="1.8"/><path d="m8 21 3.5-7m4 7-3-7V8.5L9 11H6m6.5-2.5 3.5 4h3"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 6 6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z"/></symbol>
+    <symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a5.5 5.5 0 0 1 3.5 6"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></symbol>
+    <symbol id="i-north" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m12 5 3.5 10L12 13l-3.5 2z"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14m6-12v14"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-4.5M4 4v3h3M4 13a8 8 0 0 0 14.5 4.5M20 20v-3h-3"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></symbol>
+  </defs>
+</svg>
+<div id="bgmap" aria-hidden="true"></div><div id="bgveil" aria-hidden="true"></div>
 <div id="app">
 
 <!-- ══ LANDING ══ -->
-
 <div class="sc active" id="sc-land">
-  <header class="land-header"><a class="wordmark" href="./" aria-label="Luftlinie home"><img src="logo.svg" alt="" width="30" height="30">luftlinie</a><span class="edition">THE WAY THERE IS THE GAME</span><button class="theme-switch" onclick="toggleTheme()" id="theme-label" aria-label="Toggle color theme">Dark mode</button></header>
-  <div class="rejoin-bar hidden" id="rejoin-bar" style="position:absolute;top:max(16px,env(safe-area-inset-top,16px));left:16px;right:16px;margin:0">
-    <div class="rejoin-ico">🔄</div>
+  <header class="land-header">
+    <a class="wordmark" href="./" aria-label="Luftlinie home"><img src="logo.svg" alt="" width="28" height="28">Luftlinie</a>
+    <button class="icon-btn" onclick="toggleTheme()" aria-label="Switch colour theme"><svg class="ico"><use href="#i-moon"/></svg><span class="vh" id="theme-label">Dark mode</span></button>
+  </header>
+  <div class="glass rejoin-bar hidden" id="rejoin-bar" role="region" aria-label="Rejoin your game">
     <div class="rejoin-info">
-      <div class="rejoin-title">Rejoin game?</div>
-      <div class="rejoin-sub" id="rejoin-sub">Game is still active</div>
+      <div class="rejoin-title">You were in a game</div>
+      <div class="rejoin-sub" id="rejoin-sub">It is still running.</div>
     </div>
     <div class="rejoin-btns">
-      <button class="btn-destruct sm" onclick="App.dismissRejoin()">Skip</button>
-      <button class="btn-primary" style="font-size:13px;padding:7px 14px" onclick="App.doRejoin()">Rejoin</button>
+      <button class="btn-quiet sm" onclick="App.dismissRejoin()">Forget it</button>
+      <button class="btn-primary sm" onclick="App.doRejoin()">Rejoin</button>
     </div>
   </div>
   <main class="landing-main">
-    <div class="landing-copy"><p class="eyebrow"><span class="live-dot"></span> A LITTLE DISTANCE. A LOT OF INSTINCT.</p>
-      <h1>You know<br>how far.<br><span>Not where.</span></h1>
-      <p class="landing-description">One hidden destination. A distance that changes with every move. Find your way there, together.</p>
-      <div class="land-actions"><button class="btn-primary btn-lg" onclick="haptic('light');Nav.go('setup')">Host a game <span aria-hidden="true">↗</span></button><button class="btn-secondary btn-lg" onclick="haptic('light');Nav.go('join')">Join with a code <span aria-hidden="true">→</span></button></div>
-      <p class="landing-note">No account needed <span>·</span> Walk or ride along</p>
+    <section class="hero">
+      <div class="hero-stage" aria-hidden="true">
+        <span class="tgt-pin hero-pin"><i></i></span>
+        <div class="glass bubble hero-bubble"><span class="reading-num" id="hero-num">1.28</span><span class="reading-unit">km away</span></div>
+      </div>
+      <div class="glass sheet hero-sheet">
+        <h1 class="hero-title">You know <b>how far.</b> Not where.</h1>
+        <p class="hero-lede">Someone hides a spot on the map. Everyone else sees only the straight-line distance, updating as they move. First one there wins.</p>
+        <div class="land-actions">
+          <button class="btn-primary btn-lg" onclick="haptic('light');Nav.go('setup')">Host a game</button>
+          <button class="btn-glass btn-lg" onclick="haptic('light');Nav.go('join')">Join with a code</button>
+        </div>
+        <p class="landing-note">No account. Works on foot or from the passenger seat.</p>
+      </div>
+    </section>
+    <section class="glass sheet steps" aria-labelledby="how-title">
+      <h2 id="how-title">How a round goes</h2>
+      <ol>
+        <li><strong>Hide the target.</strong> The host taps a public spot on the map, or lets Luftlinie pick a road or path at the right distance.</li>
+        <li><strong>Share the code.</strong> Friends open the link or type six characters. No sign-up.</li>
+        <li><strong>Follow the number.</strong> Walk or ride. The distance shrinks or grows. Read it, turn, try again.</li>
+      </ol>
+    </section>
+    <div id="stats-card" class="glass sheet stats-card hidden">
+      <div class="stats-card-header" onclick="toggleStatsCard()">
+        <span class="stats-card-title">Your record on this phone</span>
+        <svg class="ico stats-card-chevron" id="stats-chevron"><use href="#i-chev"/></svg>
+      </div>
+      <div class="stats-card-body hidden" id="stats-card-body">
+        <div class="sc-stat"><span class="sc-stat-l">Games</span><span class="sc-stat-v" id="sc-games">0</span></div>
+        <div class="sc-stat"><span class="sc-stat-l">Wins</span><span class="sc-stat-v" id="sc-wins">0</span></div>
+        <div class="sc-stat"><span class="sc-stat-l">Fastest finish</span><span class="sc-stat-v" id="sc-best">—</span></div>
+        <div class="sc-stat"><span class="sc-stat-l">Route efficiency</span><span class="sc-stat-v" id="sc-eff">—</span></div>
+        <div class="sc-stat"><span class="sc-stat-l">Travelled</span><span class="sc-stat-v" id="sc-dist">—</span></div>
+        <button class="btn-text" onclick="resetStats()">Clear record</button>
+      </div>
     </div>
-    <div class="instrument" aria-label="Example distance display: 1.28 kilometres to a hidden target">
-      <div class="instrument-top"><span>FIELD INSTRUMENT / 01</span><span class="instrument-live"><span class="live-dot"></span> FIND YOUR WAY</span></div>
-      <div class="radar"><div class="radar-ring r1"></div><div class="radar-ring r2"></div><div class="radar-ring r3"></div><div class="radar-cross"></div><span class="radar-point"></span><div class="instrument-reading"><span class="instrument-label">DISTANCE TO THE UNKNOWN</span><strong>1.28<span>km</span></strong><span class="instrument-caption">Every move tells you something.</span></div></div>
-      <div class="instrument-bottom"><span>NO MAP. NO ROUTE.</span><span>JUST YOUR INSTINCT. ↗</span></div>
-    </div>
-    <ol class="how-it-works"><li><span>01</span><div><strong>Hide a destination</strong><p>Pick a spot or let Smart find one.</p></div></li><li><span>02</span><div><strong>Bring your people</strong><p>Share a code. Everyone joins on their phone.</p></div></li><li><span>03</span><div><strong>Follow the distance</strong><p>Move, read the signal, find your way.</p></div></li></ol>
   </main>
-  <!-- Persistent stats card on landing page -->
-  <div id="stats-card" class="stats-card hidden">
-    <div class="stats-card-header" onclick="toggleStatsCard()">
-      <span class="stats-card-title">Your Stats</span>
-      <span class="stats-card-chevron" id="stats-chevron">▾</span>
-    </div>
-    <div class="stats-card-body hidden" id="stats-card-body">
-      <div class="sc-stat"><span class="sc-stat-v" id="sc-games">0</span><span class="sc-stat-l">Games</span></div>
-      <div class="sc-stat"><span class="sc-stat-v" id="sc-wins">0</span><span class="sc-stat-l">Wins</span></div>
-      <div class="sc-stat"><span class="sc-stat-v" id="sc-best">—</span><span class="sc-stat-l">Best Time</span></div>
-      <div class="sc-stat"><span class="sc-stat-v" id="sc-eff">—</span><span class="sc-stat-l">Avg Efficiency</span></div>
-      <div class="sc-stat"><span class="sc-stat-v" id="sc-dist">—</span><span class="sc-stat-l">Total Distance</span></div>
-      <button class="stats-reset-btn" onclick="resetStats()">Reset</button>
-    </div>
-  </div>
-  <footer class="land-foot"><span>LUFTLINIE <span class="foot-meaning">/ as the crow flies</span></span><span>7 ways to find your way <span class="foot-meaning">· GPS + friends</span></span></footer>
-  <div class="pwa-banner hidden" role="region" aria-label="Install Luftlinie" id="pwa-banner">
-    <div class="pwa-ico">📲</div>
+  <footer class="land-foot"><span><i>Luftlinie</i> is German for “as the crow flies”.</span><span id="connection-status">Connecting…</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">Map © OpenStreetMap contributors</a></footer>
+  <div class="glass pwa-banner hidden" role="region" aria-label="Install Luftlinie" id="pwa-banner">
     <div class="pwa-info">
-      <div class="pwa-title">Add to Home Screen</div>
-      <div class="pwa-sub">Install Luftlinie for the best experience</div>
+      <div class="pwa-title">Put Luftlinie on your home screen</div>
+      <div class="pwa-sub">It opens full-screen and keeps the display awake during a game.</div>
     </div>
-    <button class="btn-primary" style="font-size:13px;padding:7px 14px;flex-shrink:0" onclick="App.pwaInstall()">Install</button>
-    <button class="btn-text" style="font-size:20px;padding:4px 6px;min-height:auto" onclick="App.pwaDismiss()">×</button>
+    <button class="btn-primary sm" onclick="App.pwaInstall()">Install</button>
+    <button class="btn-text" onclick="App.pwaDismiss()" aria-label="Not now">Not now</button>
   </div>
 </div>
 
 <!-- ══ SETUP ══ -->
-
 <div class="sc" id="sc-setup">
-  <div class="top-bar">
-    <button class="back-btn" onclick="haptic('light');App.goHome()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
-    </button>
-    <span class="top-title">Create your game</span>
-    <div style="width:72px"></div>
+  <div class="top-bar float">
+    <button class="back-btn" onclick="haptic('light');App.goHome()"><svg class="ico"><use href="#i-back"/></svg>Back</button>
+    <span class="top-title">New game</span>
+    <span class="top-spacer"></span>
   </div>
   <div class="body-scroll">
+    <div class="page-intro"><h1>Set the course</h1><p>How far away should the target be, and how will people find it?</p></div>
 
-<div class="page-intro"><p class="eyebrow">01 / SET THE CHALLENGE</p><h1>Make it an adventure.</h1><p>Choose how you travel and how you find your way.</p></div><label class="section-label" for="host-name">Your name</label>
-<div class="card" style="margin-bottom:22px">
-  <div style="padding:10px 14px">
-    <input class="input" aria-label="Your name as host" id="host-name" placeholder="Enter your name" maxlength="20" inputmode="text" autocomplete="nickname" autocapitalize="words">
-  </div>
-</div>
+    <label class="section-label" for="host-name">Your name</label>
+    <div class="glass group"><input class="input" id="host-name" placeholder="So players know who’s hosting" maxlength="20" autocomplete="nickname" autocapitalize="words"></div>
 
-<div class="section-label">How Far?</div>
-<div class="card" style="margin-bottom:22px">
-  <div class="card-row"><span class="row-label" id="sv-time-label">Drive time</span><span class="row-val" id="sv-time">30 min</span></div>
-  <div class="seg-ctrl" id="seg-travel" style="margin:10px 14px 0">
-    <button class="seg active" data-v="drive" onclick="App.setTransportMode('drive')"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 10 2-6h12l2 6M3 10h18v9H3zM6 19v2m12-2v2M6 14h2m8 0h2"/></svg>Drive</button>
-    <button class="seg" data-v="walk" onclick="App.setTransportMode('walk')"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="4" r="2"/><path d="m7 21 4-7m4 7-3-7V8l-3 3H5m7-3 4 5h4"/></svg>Walk</button>
-  </div>
-  <input type="range" class="slider" aria-label="Ideal travel time in minutes" id="sl-time" min="10" max="90" value="30" oninput="App.upSetup()">
-  <div class="slider-marks"><span>10 min</span><span>30</span><span>60</span><span>90 min</span></div>
-  <div class="timelimit-row">
-    <span class="tl-lbl">Time to find it</span><span class="tl-val" id="sv-limit">60 min</span>
-  </div>
-</div>
+    <div class="section-label" id="lbl-travel">Getting there</div>
+    <div class="glass group">
+      <div class="seg-ctrl" id="seg-travel" role="group" aria-labelledby="lbl-travel">
+        <button class="seg active" data-v="drive" onclick="App.setTransportMode('drive')"><svg class="ico"><use href="#i-car"/></svg>By car</button>
+        <button class="seg" data-v="walk" onclick="App.setTransportMode('walk')"><svg class="ico"><use href="#i-walk"/></svg>On foot</button>
+      </div>
+      <div class="slider-block">
+        <div class="slider-head"><span id="sv-time-label">Drive time</span><output id="sv-time" for="sl-time">30 min</output></div>
+        <input type="range" class="slider" aria-label="How long it should take to get there, in minutes" id="sl-time" min="10" max="90" step="5" value="30" oninput="App.upSetup()">
+        <div class="slider-marks" aria-hidden="true"><span>10</span><span>30</span><span>50</span><span>70</span><span>90</span></div>
+      </div>
+      <div class="timelimit-row"><span>Time allowed to find it</span><strong id="sv-limit">60 min</strong></div>
+    </div>
 
-<div class="section-label">Target</div>
-<div class="card" style="margin-bottom:22px">
-  <div class="seg-ctrl" id="seg-mode" style="margin:0 14px 10px">
-    <button class="seg active" data-v="manual" onclick="App.setMode('manual')"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 10c0 5-7 12-7 12S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/></svg>Choose a place</button>
-    <button class="seg" data-v="smart" onclick="App.setMode('smart')"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/></svg>Find one for me</button>
-  </div>
-  <p class="mode-hint" id="mode-hint" style="font-size:12px;color:var(--t3);padding:4px 14px 4px;line-height:1.5">Tap the map to drop the target.</p>
-</div>
+    <div class="section-label" id="lbl-target">Choosing the target</div>
+    <div class="glass group">
+      <div class="seg-ctrl" id="seg-mode" role="group" aria-labelledby="lbl-target">
+        <button class="seg active" data-v="manual" onclick="App.setMode('manual')"><svg class="ico"><use href="#i-pin"/></svg>I’ll pick it</button>
+        <button class="seg" data-v="smart" onclick="App.setMode('smart')"><svg class="ico"><use href="#i-search"/></svg>Pick for me</button>
+      </div>
+      <p class="hint" id="mode-hint">Tap the map to drop the target.</p>
+    </div>
 
-<div class="section-label">Your signal</div>
-<div class="card" style="margin-bottom:22px">
-  <div class="mode-card-grid">
-    <div class="mode-card active" id="mode-card-standard" onclick="App.setGameMode('standard')">
-      <div class="mode-card-ico"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg></div>
-      <div class="mode-card-name">Standard</div>
-      <div class="mode-card-desc">Race to the target</div>
+    <div class="section-label">What navigators see</div>
+    <div class="glass mode-list" role="radiogroup" aria-label="Game mode">
+      <div class="mode-card active" id="mode-card-standard" onclick="App.setGameMode('standard')"><span class="mode-card-name">Standard</span><span class="mode-card-desc">The live distance, always on screen.</span></div>
+      <div class="mode-card" id="mode-card-elimination" onclick="App.setGameMode('elimination')"><span class="mode-card-name">Elimination</span><span class="mode-card-desc">Every 5 minutes the furthest player is out.</span></div>
+      <div class="mode-card" id="mode-card-whisper" onclick="App.setGameMode('whisper')"><span class="mode-card-name">Whisper</span><span class="mode-card-desc">The distance shows for 8 seconds each minute.</span></div>
+      <div class="mode-card" id="mode-card-hotcold" onclick="App.setGameMode('hotcold')"><span class="mode-card-name">Hot and cold</span><span class="mode-card-desc">No number. A pulse says warmer or colder.</span></div>
+      <div class="mode-card" id="mode-card-sailor" onclick="App.setGameMode('sailor')"><span class="mode-card-name">Sailor</span><span class="mode-card-desc">No number. A needle points the way.</span></div>
+      <div class="mode-card" id="mode-card-multi" onclick="App.setGameMode('multi')"><span class="mode-card-name">Three checkpoints</span><span class="mode-card-desc">Reach three targets in order.</span></div>
+      <div class="mode-card" id="mode-card-dynamic" onclick="App.setGameMode('dynamic')"><span class="mode-card-name">Moving target</span><span class="mode-card-desc">The target shifts every 3 minutes.</span></div>
     </div>
-    <div class="mode-card" id="mode-card-elimination" onclick="App.setGameMode('elimination')">
-      <div class="mode-card-ico"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m13 2-8 12h6l-1 8 9-13h-6z"/></svg></div>
-      <div class="mode-card-name">Elimination</div>
-      <div class="mode-card-desc">Furthest out every 5 min</div>
-    </div>
-    <div class="mode-card" id="mode-card-whisper" onclick="App.setGameMode('whisper')">
-      <div class="mode-card-ico"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10v4m4-8v12m4-15v18m4-15v12m4-8v4"/></svg></div>
-      <div class="mode-card-name">Whisper</div>
-      <div class="mode-card-desc">Distance once per minute</div>
-    </div>
-    <div class="mode-card" id="mode-card-hotcold" onclick="App.setGameMode('hotcold')">
-      <div class="mode-card-ico"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14V5a3 3 0 0 1 6 0v9a5 5 0 1 1-6 0Z"/><path d="M12 9v8"/><circle cx="12" cy="18" r="1"/></svg></div>
-      <div class="mode-card-name">Hot & Cold</div>
-      <div class="mode-card-desc">Find it by feel alone</div>
-    </div>
-    <div class="mode-card" id="mode-card-sailor" onclick="App.setGameMode('sailor')">
-      <div class="mode-card-ico"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m16 8-2.5 5.5L8 16l2.5-5.5Z"/></svg></div>
-      <div class="mode-card-name">Sailor</div>
-      <div class="mode-card-desc">Compass points to target</div>
-    </div>
-    <div class="mode-card" id="mode-card-multi" onclick="App.setGameMode('multi')">
-      <div class="mode-card-ico"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="18" r="2"/><circle cx="12" cy="6" r="2"/><circle cx="20" cy="16" r="2"/><path d="m6 16 5-8m2 0 6 6"/></svg></div>
-      <div class="mode-card-name">Multi-Target</div>
-      <div class="mode-card-desc">Find 3 targets to win</div>
-    </div>
-    <div class="mode-card" id="mode-card-dynamic" onclick="App.setGameMode('dynamic')">
-      <div class="mode-card-ico"><svg class="line-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7a9 9 0 0 0-15-2L2 8m0-6v6h6m-4 9a9 9 0 0 0 15 2l3-3m0 6v-6h-6"/></svg></div>
-      <div class="mode-card-name">Dynamic</div>
-      <div class="mode-card-desc">Target moves every 3 min</div>
-    </div>
-  </div>
-  <div class="mode-warn hidden" id="mode-warn" style="padding:0 14px 12px;display:flex;align-items:flex-start;font-size:12px;color:var(--t3);line-height:1.5">
-    <span>⚠️</span><span id="mode-warn-txt"></span>
-  </div>
-</div>
+    <div class="mode-warn hidden" id="mode-warn"><span id="mode-warn-txt"></span></div>
 
-<div class="adv-toggle" id="adv-toggle" aria-expanded="false" aria-controls="adv-section" onclick="App.toggleAdvanced()">
-  <svg class="adv-toggle-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-  Fine-tune your game
-</div>
-<div class="adv-section" id="adv-section" inert>
-  <div class="section-label" style="margin-top:4px">Arrival Radius</div>
-  <div class="card" style="margin-bottom:18px">
-    <div class="radius-row" style="padding:12px 14px">
-      <div class="mini-seg" id="seg-radius">
-        <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
-        <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
-        <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
-        <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
+    <div class="adv-toggle" id="adv-toggle" aria-expanded="false" aria-controls="adv-section" onclick="App.toggleAdvanced()">
+      <span>More rules</span><svg class="ico adv-toggle-chevron"><use href="#i-chev"/></svg>
+    </div>
+    <div class="adv-section" id="adv-section" inert>
+      <div class="section-label" id="lbl-radius">Counts as arrived within</div>
+      <div class="glass group">
+        <div class="mini-seg" id="seg-radius" role="group" aria-labelledby="lbl-radius">
+          <button class="mseg" data-v="25" onclick="App.setRadius(25)">25 m</button>
+          <button class="mseg active" data-v="50" onclick="App.setRadius(50)">50 m</button>
+          <button class="mseg" data-v="100" onclick="App.setRadius(100)">100 m</button>
+          <button class="mseg" data-v="200" onclick="App.setRadius(200)">200 m</button>
+        </div>
+      </div>
+      <div class="section-label">How much spare time</div>
+      <div class="glass group">
+        <div class="stars-row" id="stars">
+          <button class="star on" data-v="1" onclick="App.setDiff(1)"></button>
+          <button class="star on" data-v="2" onclick="App.setDiff(2)"></button>
+          <button class="star on" data-v="3" onclick="App.setDiff(3)"></button>
+          <button class="star" data-v="4" onclick="App.setDiff(4)"></button>
+          <button class="star" data-v="5" onclick="App.setDiff(5)"></button>
+        </div>
+        <p class="hint" id="diff-txt">Medium, 2× the drive time</p>
+      </div>
+      <div class="section-label">Rules</div>
+      <div class="glass group rules">
+        <div class="setup-toggle-row">
+          <div><div class="setup-toggle-label">Teams</div><div class="setup-toggle-sub">Red against blue. First team to arrive wins.</div></div>
+          <label class="switch"><input type="checkbox" id="sw-teams" aria-label="Play in teams" onchange="App.setTeamsMode(this.checked)"><span class="switch-track"></span></label>
+        </div>
+        <div class="setup-toggle-row">
+          <div><div class="setup-toggle-label">Start in the dark</div><div class="setup-toggle-sub">The distance appears once you are 300 m from your start.</div></div>
+          <label class="switch"><input type="checkbox" id="sw-blind" aria-label="Start in the dark" onchange="App.setBlindStart(this.checked)"><span class="switch-track"></span></label>
+        </div>
+        <div class="setup-toggle-row">
+          <div><div class="setup-toggle-label">Let everyone finish</div><div class="setup-toggle-sub">Play continues after the first arrival.</div></div>
+          <label class="switch"><input type="checkbox" id="sw-blindfinish" aria-label="Let everyone finish" checked onchange="App.setBlindFinish(this.checked)"><span class="switch-track"></span></label>
+        </div>
+        <div class="setup-toggle-row">
+          <div><div class="setup-toggle-label">Keep the host off the leaderboard</div><div class="setup-toggle-sub">The host knows where the target is.</div></div>
+          <label class="switch"><input type="checkbox" id="sw-excludehost" aria-label="Keep the host off the leaderboard" checked onchange="App.setExcludeHost(this.checked)"><span class="switch-track"></span></label>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="section-label">Difficulty</div>
-  <div class="card" style="margin-bottom:18px">
-    <div class="stars-row" id="stars">
-      <button class="star on" data-v="1" onclick="App.setDiff(1)">★</button>
-      <button class="star on" data-v="2" onclick="App.setDiff(2)">★</button>
-      <button class="star on" data-v="3" onclick="App.setDiff(3)">★</button>
-      <button class="star" data-v="4" onclick="App.setDiff(4)">★</button>
-      <button class="star" data-v="5" onclick="App.setDiff(5)">★</button>
-    </div>
-    <p class="diff-text" id="diff-txt" style="padding:0 14px 12px;font-size:13px;color:var(--t2);line-height:1.5">Medium — 2× ideal drive time</p>
-  </div>
-  <div class="section-label">Rules</div>
-  <div class="card" style="margin-bottom:4px">
-    <div class="setup-toggle-row">
-      <div><div class="setup-toggle-label">Teams</div><div class="setup-toggle-sub">Red vs Blue</div></div>
-      <label class="ios-switch"><input type="checkbox" id="sw-teams" aria-label="Play in teams" onchange="App.setTeamsMode(this.checked)"><span class="ios-switch-track"></span></label>
-    </div>
-    <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-      <div><div class="setup-toggle-label">Start in the dark</div><div class="setup-toggle-sub">Distance hidden until 300m from start</div></div>
-      <label class="ios-switch"><input type="checkbox" id="sw-blind" aria-label="Blind start" onchange="App.setBlindStart(this.checked)"><span class="ios-switch-track"></span></label>
-    </div>
-    <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-      <div><div class="setup-toggle-label">Let everyone finish</div><div class="setup-toggle-sub">Others keep playing after first arrival</div></div>
-      <label class="ios-switch"><input type="checkbox" id="sw-blindfinish" aria-label="Let everyone finish" checked onchange="App.setBlindFinish(this.checked)"><span class="ios-switch-track"></span></label>
-    </div>
-    <div class="setup-toggle-row" style="border-top:1px solid var(--border2)">
-      <div><div class="setup-toggle-label">Host stays off the leaderboard</div><div class="setup-toggle-sub">Host hidden from results</div></div>
-      <label class="ios-switch"><input type="checkbox" id="sw-excludehost" aria-label="Exclude host from results" checked onchange="App.setExcludeHost(this.checked)"><span class="ios-switch-track"></span></label>
-    </div>
-  </div>
-</div>
-
-<button class="btn-primary btn-lg btn-full" style="margin-top:24px" id="btn-go-map" onclick="haptic('medium');App.goMap()">
-  Place Target on Map →
-</button>
-
+    <div class="sticky-cta"><button class="btn-primary btn-lg btn-full" id="btn-go-map" onclick="haptic('medium');App.goMap()">Choose the target on the map</button></div>
   </div>
 </div>
 
 <!-- ══ MAP (target placement) ══ -->
-
 <div class="sc map-sc" id="sc-map">
   <div class="map-topbar">
-    <button class="map-back-btn" aria-label="Back to game setup" onclick="haptic('light');Nav.go('setup')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
-    </button>
-    <div role="status" class="map-pill" id="map-hint">Tap map to place target</div>
-    <button class="smart-btn" id="smart-btn" onclick="haptic('light');App.smartPick()">✦ Smart</button>
+    <button class="glass map-back-btn" aria-label="Back to game setup" onclick="haptic('light');Nav.go('setup')"><svg class="ico"><use href="#i-back"/></svg></button>
+    <div role="status" class="glass map-pill" id="map-hint">Tap the map to place the target</div>
+    <button class="glass smart-btn" id="smart-btn" onclick="haptic('light');App.smartPick()"><svg class="ico"><use href="#i-search"/></svg>Pick for me</button>
   </div>
-  <div id="leafmap"></div><div class="map-credit">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
-  <div class="map-foot"><p class="map-placement-note">Choose a public place everyone can reach. The host sees the destination.</p>
-    <span class="map-foot-info" id="map-info">No target set</span>
-    <button class="btn-primary" id="btn-confirm" disabled onclick="haptic('medium');App.confirmTarget()">Confirm →</button>
+  <div id="leafmap"></div>
+  <div class="glass map-foot">
+    <div class="map-foot-text"><p class="map-placement-note">Pick somewhere public that everyone can legally reach.</p><span class="map-foot-info" id="map-info">No target yet</span></div>
+    <button class="btn-primary" id="btn-confirm" disabled onclick="haptic('medium');App.confirmTarget()">Use this target</button>
   </div>
 </div>
 
 <!-- ══ HOST LOBBY ══ -->
-
 <div class="sc" id="sc-hlobby">
-  <div class="top-bar">
-    <button class="back-btn" onclick="haptic('light');Nav.go('map')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
-    </button>
+  <div class="top-bar float">
+    <button class="back-btn" onclick="haptic('light');Nav.go('map')"><svg class="ico"><use href="#i-back"/></svg>Target</button>
     <span class="top-title">Lobby</span>
-    <span class="badge blue" id="hl-badge">0 joined</span>
+    <span class="badge" id="hl-badge">0 navigators</span>
   </div>
   <div class="body-scroll">
-    <div class="code-card">
-      <div class="code-eye">Game Code</div>
-      <div class="code-big" role="button" tabindex="0" aria-label="Copy game code" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.copyCodeTap()}" id="hl-code" onclick="App.copyCodeTap()" title="Tap to copy">——</div>
+    <div class="glass code-card">
+      <div class="code-eye">Game code</div>
+      <div class="code-big" role="button" tabindex="0" aria-label="Copy game code" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();App.copyCodeTap()}" id="hl-code" onclick="App.copyCodeTap()">——</div>
       <div class="code-sub" id="hl-code-sub">Tap to copy</div>
-      <div style="display:flex;margin-top:12px;justify-content:center">
-        <button class="btn-secondary btn-sm" style="margin-right:8px" onclick="haptic('light');App.copyLink()">
-          <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          Copy Link
-        </button>
-        <button class="btn-secondary btn-sm" onclick="haptic('light');App.showQR()">
-          <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
-          QR Code
-        </button>
+      <div class="code-actions">
+        <button class="btn-glass sm" onclick="haptic('light');App.copyLink()"><svg class="ico"><use href="#i-copy"/></svg>Copy invite link</button>
+        <button class="btn-glass sm" onclick="haptic('light');App.showQR()"><svg class="ico"><use href="#i-qr"/></svg>Show QR code</button>
       </div>
     </div>
-    <div class="section-label" style="margin-top:20px">Players</div>
+    <div class="section-label">Players</div>
     <div id="spec-requests" class="hidden"></div>
-    <div id="hl-players" class="player-list"><div class="empty-state">Waiting for players…</div></div>
-    <div class="section-label" style="margin-top:20px">Game Details</div>
-    <div class="card card-list">
-      <div class="list-row"><span class="row-label">Time limit</span><span class="row-val blue" id="hl-tlim">—</span></div>
-      <div class="list-row"><span class="row-label">Difficulty</span><span class="row-val" id="hl-diff">—</span></div>
-      <div class="list-row"><span class="row-label">Arrival radius</span><span class="row-val" id="hl-radius">—</span></div>
-      <div class="list-row"><span class="row-label">Game mode</span><span class="row-val" id="hl-mode">—</span></div>
-      <div class="list-row"><span class="row-label">Blind start</span><span class="row-val" id="hl-blind">—</span></div>
-      <div class="list-row"><span class="row-label">Blind finish</span><span class="row-val" id="hl-blindfinish">—</span></div>
-      <div class="list-row"><span class="row-label">Exclude host</span><span class="row-val" id="hl-excludehost">—</span></div>
-      <div class="list-row"><span class="row-label">Target</span><span class="row-val green" id="hl-target">✓ Set</span></div>
-    </div>
-    <button class="btn-green btn-lg btn-full" style="margin-top:20px" id="btn-lock" onclick="haptic('medium');App.lockStart()">
-      <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-      Lock &amp; Start
-    </button>
+    <div id="hl-players" class="glass player-list"><div class="empty-state">Nobody here yet. Share the code or the link.</div></div>
+    <div class="section-label">This game</div>
+    <dl class="glass card-list">
+      <div class="list-row"><dt>Time allowed</dt><dd id="hl-tlim">—</dd></div>
+      <div class="list-row"><dt>Mode</dt><dd id="hl-mode">—</dd></div>
+      <div class="list-row"><dt>Arrived within</dt><dd id="hl-radius">—</dd></div>
+      <div class="list-row"><dt>Spare time</dt><dd id="hl-diff">—</dd></div>
+      <div class="list-row"><dt>Start in the dark</dt><dd id="hl-blind">—</dd></div>
+      <div class="list-row"><dt>Everyone finishes</dt><dd id="hl-blindfinish">—</dd></div>
+      <div class="list-row"><dt>Host</dt><dd id="hl-excludehost">—</dd></div>
+      <div class="list-row"><dt>Target</dt><dd id="hl-target">Placed</dd></div>
+    </dl>
+    <div class="sticky-cta"><button class="btn-primary btn-lg btn-full" id="btn-lock" onclick="haptic('medium');App.lockStart()">Start the game</button></div>
   </div>
 </div>
 
 <!-- ══ HOST ACTIVE ══ -->
-
 <div class="sc map-sc" id="sc-hactive">
-  <div class="game-bar">
+  <div class="game-bar float">
     <div class="game-bar-left">
-      <div class="na-players">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span id="ha-pcount">—</span>
-      </div>
+      <div class="na-players" title="Navigators"><svg class="ico"><use href="#i-people"/></svg><span id="ha-pcount">—</span></div>
       <span class="elim-countdown hidden" id="ha-elim-cd"></span>
     </div>
-    <div class="game-bar-center">
-      <div class="gbar-lbl">Time Left</div>
-      <div class="gbar-timer" id="ha-timer">00:00</div>
-    </div>
+    <div class="game-bar-center"><div class="gbar-lbl">Time left</div><div class="gbar-timer" id="ha-timer">00:00</div></div>
     <div class="game-bar-right">
-      <div class="na-gps" id="ha-gps"><span class="gps-dot"></span><span id="ha-gps-txt">GPS</span></div>
-      <button class="toolbar-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
-      <button class="toolbar-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="Map orientation">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-      </button>
-      <button class="toolbar-btn view-toggle" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()" title="Switch to navigator view">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-      </button>
-      <button class="btn-destruct sm" id="ha-end-btn" onclick="haptic('medium');App.abortGame()">End</button>
+      <div class="na-gps hidden" id="ha-gps"><span class="gps-dot"></span><span id="ha-gps-txt">GPS</span></div>
+      <button class="icon-btn sound-btn active" id="sound-btn-host" onclick="haptic('light');App.toggleSound()" title="Sound on" aria-pressed="true"><svg class="ico"><use href="#i-sound"/></svg></button>
+      <button class="icon-btn" id="compass-btn-host" onclick="haptic('light');App.toggleMapOrientation('host')" title="Turn the map with your phone"><svg class="ico"><use href="#i-north"/></svg></button>
+      <button class="icon-btn view-toggle" id="btn-role-toggle" onclick="haptic('medium');App.toggleMyView()" title="See the navigator view"><svg class="ico"><use href="#i-phone"/></svg></button>
+      <button class="btn-danger sm" id="ha-end-btn" onclick="haptic('medium');App.abortGame()">End</button>
     </div>
   </div>
-  <div class="map-rotate-container" id="hostmap-wrap"><div class="map-rotate-frame" id="hostmap-frame"><div id="hostmap"></div></div></div><div class="map-credit">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
-  <div class="host-panel">
-    <div id="spec-requests-active" class="hidden" style="margin-bottom:8px"></div>
+  <div class="map-rotate-container" id="hostmap-wrap"><div class="map-rotate-frame" id="hostmap-frame"><div id="hostmap"></div></div></div>
+  <div class="glass host-panel">
+    <div id="spec-requests-active" class="hidden"></div>
     <div class="hp-row">
-      <span class="section-label" style="margin:0">Game Code</span>
-      <span class="badge blue" id="ha-code-badge" style="font-family:var(--mono);letter-spacing:1px;cursor:pointer" onclick="haptic('light');App.copyCodeTap()">—</span>
-    </div>
-    <div class="hp-row">
-      <span class="section-label" style="margin:0">Navigators</span>
-      <span class="badge blue" id="ha-nbadge">0</span>
+      <span class="hp-label">Navigators <span class="badge" id="ha-nbadge">0</span></span>
+      <span class="hp-actions">
+        <button class="code-chip" id="ha-code-badge" onclick="haptic('light');App.copyCodeTap()" aria-label="Copy game code">—</button>
+        <button class="icon-btn" onclick="haptic('light');App.showQR()" title="Show QR code"><svg class="ico"><use href="#i-qr"/></svg></button>
+        <button class="icon-btn" onclick="haptic('light');App.copyLink()" title="Copy invite link"><svg class="ico"><use href="#i-copy"/></svg></button>
+      </span>
     </div>
     <div id="ha-cards" class="nav-card-grid"></div>
-    <div style="display:flex;margin-top:10px">
-      <button class="btn-secondary btn-sm btn-full" onclick="haptic('light');App.showQR()" style="flex:1;margin-right:8px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/></svg>
-        QR Code
-      </button>
-      <button class="btn-secondary btn-sm btn-full" onclick="haptic('light');App.copyLink()" style="flex:1">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        Copy Link
-      </button>
-    </div>
   </div>
 </div>
 
 <!-- ══ SPECTATOR MAP ══ -->
-
 <div class="sc map-sc" id="sc-spectator">
-  <div class="game-bar">
+  <div class="game-bar float">
     <div class="game-bar-left">
-      <div class="na-players">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span id="sp-pcount">—</span>
-      </div>
+      <div class="na-players" title="Navigators"><svg class="ico"><use href="#i-people"/></svg><span id="sp-pcount">—</span></div>
       <span class="elim-countdown hidden" id="sp-elim-cd"></span>
     </div>
-    <div class="game-bar-center">
-      <div class="gbar-lbl">Time Left</div>
-      <div class="gbar-timer" id="sp-timer">00:00</div>
-    </div>
+    <div class="game-bar-center"><div class="gbar-lbl">Time left</div><div class="gbar-timer" id="sp-timer">00:00</div></div>
     <div class="game-bar-right">
-      <div class="na-gps" id="sp-gps"><span class="gps-dot"></span><span id="sp-gps-txt">GPS</span></div>
-      <button class="toolbar-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
-      <button class="toolbar-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="Map orientation">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-      </button>
-      <button class="btn-destruct sm" id="spec-leave-btn" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
+      <div class="na-gps hidden" id="sp-gps"><span class="gps-dot"></span><span id="sp-gps-txt">GPS</span></div>
+      <button class="icon-btn sound-btn active" id="sound-btn-spec" onclick="haptic('light');App.toggleSound()" title="Sound on" aria-pressed="true"><svg class="ico"><use href="#i-sound"/></svg></button>
+      <button class="icon-btn" id="compass-btn-spec" onclick="haptic('light');App.toggleMapOrientation('spec')" title="Turn the map with your phone"><svg class="ico"><use href="#i-north"/></svg></button>
+      <button class="btn-quiet sm" id="spec-leave-btn" onclick="haptic('light');App.leaveOrHostView()">Leave</button>
     </div>
   </div>
-  <div class="map-rotate-container" id="specmap-wrap"><div class="map-rotate-frame" id="specmap-frame"><div id="specmap"></div></div></div><div class="map-credit">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
-  <div class="host-panel">
-    <div id="spec-requests-spec" class="hidden" style="margin-bottom:8px"></div>
-    <div class="hp-row">
-      <span class="section-label" style="margin:0">Navigators</span>
-      <span class="badge" style="background:rgba(191,90,242,.15);color:#BF5AF2" id="sp-nbadge">0</span>
-    </div>
+  <div class="map-rotate-container" id="specmap-wrap"><div class="map-rotate-frame" id="specmap-frame"><div id="specmap"></div></div></div>
+  <div class="glass host-panel">
+    <div id="spec-requests-spec" class="hidden"></div>
+    <div class="hp-row"><span class="hp-label">Navigators <span class="badge" id="sp-nbadge">0</span></span></div>
     <div id="sp-cards" class="nav-card-grid"></div>
   </div>
 </div>
+
+<!-- ══ JOIN ══ -->
 <div class="sc" id="sc-join">
-  <div class="top-bar">
-    <button class="back-btn" onclick="haptic('light');App.goHome()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Back
-    </button>
-    <span class="top-title">Join Game</span>
-    <div style="width:72px"></div>
+  <div class="top-bar float">
+    <button class="back-btn" onclick="haptic('light');App.goHome()"><svg class="ico"><use href="#i-back"/></svg>Back</button>
+    <span class="top-title">Join a game</span>
+    <span class="top-spacer"></span>
   </div>
   <div class="body-scroll">
-    <div class="join-intro page-intro"><p class="eyebrow">02 / JOIN THE ADVENTURE</p><h1>Your people are waiting.</h1><p>Enter the six-character code from your host.</p></div><div class="section-label">Game code</div>
-    <div class="card" style="margin-bottom:18px">
-      <div style="padding:10px 14px">
-        <input class="input mono" aria-label="Six-character game code" id="inp-code" placeholder="ABC 123" maxlength="6" inputmode="text" autocomplete="off" autocapitalize="characters" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
-      </div>
+    <div class="page-intro"><h1>Join a game</h1><p>Type the six-character code the host gave you.</p></div>
+    <label class="section-label" for="inp-code">Game code</label>
+    <div class="glass group"><input class="input code-input" id="inp-code" placeholder="ABC234" maxlength="6" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"></div>
+    <label class="section-label" for="inp-name">Your name</label>
+    <div class="glass group"><input class="input" id="inp-name" placeholder="What the others will see" maxlength="20" autocomplete="nickname" autocapitalize="words"></div>
+    <div class="section-label" id="lbl-role">I want to</div>
+    <div class="seg-ctrl" id="seg-role" role="group" aria-labelledby="lbl-role">
+      <button class="seg active" data-v="navigator" aria-pressed="true" onclick="App.setRole('navigator')">Find the target</button>
+      <button class="seg" data-v="spectator" aria-pressed="false" onclick="App.setRole('spectator')">Watch the map</button>
     </div>
-    <div class="section-label">Your Name</div>
-    <div class="card" style="margin-bottom:18px">
-      <div style="padding:10px 14px">
-        <input class="input" aria-label="Your name" id="inp-name" placeholder="Your name" maxlength="20" inputmode="text" autocomplete="nickname" autocapitalize="words">
-      </div>
-    </div>
-    <div class="section-label">Role</div>
-    <div class="seg-ctrl" id="seg-role" style="margin-bottom:18px">
-      <button class="seg active" data-v="navigator" onclick="App.setRole('navigator')">Find the target</button>
-      <button class="seg" data-v="spectator" onclick="App.setRole('spectator')">Watch the game</button>
-    </div>
+    <p class="hint">Watchers see everyone’s position and the target. The host has to let you in.</p>
     <div class="hidden" id="team-pick-field">
-      <div class="section-label">Your Team</div>
-      <div class="team-pick" style="margin-bottom:18px">
-        <button class="team-btn team-red" id="team-btn-red" onclick="App.setTeam('red')">🔴 Red Team</button>
-        <button class="team-btn team-blue" id="team-btn-blue" onclick="App.setTeam('blue')">🔵 Blue Team</button>
+      <div class="section-label" id="lbl-team">Your team</div>
+      <div class="team-pick" role="group" aria-labelledby="lbl-team">
+        <button class="team-btn team-red" id="team-btn-red" onclick="App.setTeam('red')">Red</button>
+        <button class="team-btn team-blue" id="team-btn-blue" onclick="App.setTeam('blue')">Blue</button>
       </div>
     </div>
-    <button class="btn-primary btn-lg btn-full" onclick="haptic('medium');App.joinGame()">Join →</button>
-    <div class="err-msg hidden" role="alert" id="join-err" style="margin-top:10px"></div>
+    <div class="err-msg hidden" role="alert" id="join-err"></div>
+    <div class="sticky-cta"><button class="btn-primary btn-lg btn-full" id="btn-join" onclick="haptic('medium');App.joinGame()">Join</button></div>
   </div>
 </div>
 
 <!-- ══ NAV WAIT ══ -->
-
 <div class="sc" id="sc-nwait">
-  <div class="top-bar">
-    <button class="back-btn" onclick="haptic('light');App.leaveGame()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>Leave
-    </button>
+  <div class="top-bar float">
+    <button class="back-btn" onclick="haptic('light');App.leaveGame()"><svg class="ico"><use href="#i-back"/></svg>Leave</button>
     <span class="top-title" id="nw-title">Game ——</span>
-    <div style="width:72px"></div>
+    <span class="top-spacer"></span>
   </div>
   <div class="nwait-body">
-    <div class="radar">
-      <div class="radar-ring rr1"></div><div class="radar-ring rr2"></div><div class="radar-ring rr3"></div>
-      <div class="radar-core">
-        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
-    </div>
+    <svg class="wait-contours" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="30"/><circle cx="100" cy="100" r="52"/><circle cx="100" cy="100" r="74"/><circle cx="100" cy="100" r="96"/><path class="start" d="M100 86 114 110H86Z"/></svg>
     <div class="nw-name" id="nw-name">You</div>
-    <div class="nw-status">Waiting for host to start…</div>
-    <div id="nw-players" class="nwait-list"></div>
     <div class="role-pill" id="nw-role">Navigator</div>
+    <div class="nw-status">The host starts the game. Stay on this screen.</div>
+    <div id="nw-players" class="nwait-list"></div>
   </div>
 </div>
 
 <!-- ══ NAV ACTIVE ══ -->
-
 <div class="sc nav-active-sc" id="sc-nactive">
-  <div class="game-bar">
+  <div class="game-bar float">
     <div class="game-bar-left">
-      <div class="na-players">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <span id="na-pcount">—</span>
-      </div>
-      <span class="whisper-cd hidden" id="na-whisper-cd">👂 —:——</span>
-    </div>
-    <div class="game-bar-center">
-      <div class="gbar-lbl">Time Left</div>
-      <div class="gbar-timer" id="na-timer">—</div>
+      <div class="glass chip gbar-time"><span class="vh">Time left</span><span class="gbar-timer" id="na-timer">—</span></div>
+      <span class="whisper-cd glass chip hidden" id="na-whisper-cd"></span>
+      <span class="elim-countdown glass chip hidden" id="na-elim-cd"></span>
     </div>
     <div class="game-bar-right">
-      <div class="na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
-      <button class="toolbar-btn sound-btn active" id="sound-btn" onclick="haptic('light');App.toggleSound()" title="Sound">🔊</button>
-      <button class="toolbar-btn view-toggle" id="btn-host-back" onclick="haptic('medium');App.goHostView()" title="Back to host view" style="display:none">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-      <button class="btn-destruct sm" id="na-leave-btn" onclick="haptic('medium');App.leaveGame()">Leave</button>
+      <div class="glass chip na-players" title="Navigators"><svg class="ico"><use href="#i-people"/></svg><span id="na-pcount">—</span></div>
+      <div class="glass chip na-gps" id="na-gps"><span class="gps-dot"></span><span id="na-gps-txt">GPS</span></div>
     </div>
   </div>
-  <div class="offline-banner hidden" role="status" id="na-offline">Connection lost. Your distance still updates; reconnect to finish.</div>
-  <div class="battery-banner hidden" role="status" id="na-battery">Battery running low. Keep Luftlinie open to track your progress.</div>
-  <div class="gps-warn hidden" id="gps-warn">
-    <span>⚠️</span>
-    <div class="gps-warn-text">
-      <strong id="gps-warn-title">GPS blocked</strong>
-      <span id="gps-warn-body">Enable location in browser settings.</span>
-    </div>
+  <div class="banners">
+    <div class="offline-banner glass hidden" role="status" id="na-offline">No connection. Your distance still updates, but arriving needs a connection.</div>
+    <div class="battery-banner glass hidden" role="status" id="na-battery">Battery below 15%. Keep this screen open to stay in the game.</div>
+    <div class="gps-warn glass hidden" id="gps-warn" role="alert"><strong id="gps-warn-title">Location blocked</strong><span id="gps-warn-body">Allow location for this site, then reload.</span></div>
   </div>
   <div class="na-center" id="na-center">
-    <!-- Standard distance display -->
-    <div class="na-dist-wrapper" id="na-dist-wrapper">
-      <div class="na-dist-row">
-        <div class="na-dist" id="na-dist">—</div>
-        <div class="na-unit" id="na-unit">KM</div>
-      </div>
-      <div class="na-ripples" id="na-ripples"></div>
+    <div class="na-tape" id="na-tape" aria-hidden="true"></div>
+    <div class="na-dist-wrapper glass bubble" id="na-dist-wrapper">
       <div class="na-eyebrow" id="na-eyebrow"></div>
+      <div class="na-dist" id="na-dist">—</div>
+      <div class="na-unit-row"><span class="na-unit" id="na-unit">km</span><span class="na-caption">in a straight line</span></div>
+      <div class="na-ripples" id="na-ripples" aria-hidden="true"></div>
     </div>
-    <!-- Hot/Cold pulse — overlays na-center, pure distance feedback, no bearing -->
     <div class="hc-screen hidden" id="hc-screen">
-      <div class="hc-ring-wrap">
-        <div class="hc-ring" id="hc-ring1"></div>
-        <div class="hc-ring" id="hc-ring2"></div>
-        <div class="hc-ring" id="hc-ring3"></div>
-        <div class="hc-core" id="hc-core"></div>
-      </div>
-      <div class="hc-word" id="hc-word">—</div>
+      <div class="hc-ring-wrap"><div class="hc-ring" id="hc-ring1"></div><div class="hc-ring" id="hc-ring2"></div><div class="hc-ring" id="hc-ring3"></div><div class="hc-core glass" id="hc-core"></div></div>
+      <div class="hc-word" id="hc-word" aria-live="polite">—</div>
     </div>
-    <!-- Sailor compass — directional only, no distance -->
     <div class="sailor-screen hidden" id="sailor-screen">
-      <div class="sailor-compass">
-        <div class="sailor-glow-ring"></div>
-        <div class="sailor-pulse-ring"></div>
-        <div class="sailor-ticks">
-          <span class="s-tick s-n">N</span>
-          <span class="s-tick s-e">E</span>
-          <span class="s-tick s-s">S</span>
-          <span class="s-tick s-w">W</span>
-          <span class="s-tick s-ne">NE</span>
-          <span class="s-tick s-se">SE</span>
-          <span class="s-tick s-sw">SW</span>
-          <span class="s-tick s-nw">NW</span>
-        </div>
-        <div class="sailor-needle" id="sailor-needle">
-          <div class="needle-tip"></div>
-          <div class="needle-tail"></div>
-        </div>
+      <div class="sailor-compass glass">
+        <div class="sailor-glow-ring"></div><div class="sailor-pulse-ring"></div>
+        <div class="sailor-ticks"><span class="s-tick s-n">N</span><span class="s-tick s-e">E</span><span class="s-tick s-s">S</span><span class="s-tick s-w">W</span><span class="s-tick s-ne"></span><span class="s-tick s-se"></span><span class="s-tick s-sw"></span><span class="s-tick s-nw"></span></div>
+        <div class="sailor-needle" id="sailor-needle"><div class="needle-tip"></div><div class="needle-tail"></div></div>
         <div class="sailor-center-dot"></div>
       </div>
-      <div class="sailor-distance" id="sailor-distance">— km</div>
-      <div class="sailor-hint" id="sailor-hint">Point your phone forward</div><button class="btn-secondary" id="enable-compass" onclick="App.enableCompass()">Enable compass</button>
+      <div class="sailor-distance hidden" id="sailor-distance">—</div>
+      <div class="sailor-hint" id="sailor-hint">Hold your phone flat in front of you</div>
+      <button class="btn-glass hidden" id="enable-compass" onclick="App.enableCompass()">Turn on the compass</button>
     </div>
-    <button class="refresh-link" onclick="haptic('light');App.manualRefresh()" id="refresh-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15M1 20v-6h6"/></svg>
-      refresh
-    </button>
   </div>
   <div class="na-foot">
-    <div class="na-upd" id="na-upd">Acquiring GPS…</div>
+    <div class="na-upd" id="na-upd" role="status">Finding your location…</div>
+    <nav class="glass dock" aria-label="Game controls">
+      <button class="dock-btn" onclick="haptic('light');App.manualRefresh()" id="refresh-btn"><svg class="ico"><use href="#i-refresh"/></svg><span>Update</span></button>
+      <button class="dock-btn sound-btn active" id="sound-btn" onclick="haptic('light');App.toggleSound()" title="Sound on" aria-pressed="true"><svg class="ico"><use href="#i-sound"/></svg><span>Sound</span></button>
+      <button class="dock-btn view-toggle" id="btn-host-back" onclick="haptic('medium');App.goHostView()" title="Back to the host map" style="display:none"><svg class="ico"><use href="#i-map"/></svg><span>Host map</span></button>
+      <button class="dock-btn" id="na-leave-btn" onclick="haptic('medium');App.leaveGame()"><svg class="ico"><use href="#i-back"/></svg><span>Leave</span></button>
+    </nav>
   </div>
 </div>
 
 <!-- ══ RESULTS ══ -->
-
 <div class="sc map-sc" id="sc-results">
-  <div class="map-topbar" style="justify-content:center">
-    <div class="map-pill green-pill" id="res-mode-pill">🏁 Route Revealed</div>
-  </div>
-  <div id="resultmap"></div><div class="map-credit">&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
-  <div class="results-panel">
-    <!-- Team result banner -->
+  <div class="map-topbar center"><div class="glass map-pill" id="res-mode-pill">Standard</div></div>
+  <div id="resultmap"></div>
+  <div class="glass results-panel">
     <div class="team-result-banner hidden" id="team-result-banner">
-      <span class="team-result-ico" id="team-result-ico"></span>
-      <div class="team-result-info">
-        <div class="team-result-title" id="team-result-title"></div>
-        <div class="team-result-sub">First team to reach the target</div>
-      </div>
+      <span class="team-result-ico" id="team-result-ico" aria-hidden="true"></span>
+      <div class="team-result-info"><div class="team-result-title" id="team-result-title"></div><div class="team-result-sub">First team to reach the target</div></div>
     </div>
     <div class="winner-row" id="winner-row">
-      <span class="winner-ico">🏆</span>
-      <div class="winner-info">
-        <div class="winner-name" id="res-name">—</div>
-        <div class="winner-sub" id="res-winner-sub">First to reach the target</div>
-      </div>
-      <div class="winner-time" id="res-time">—</div>
-    </div>
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat"><div class="stat-v blue" id="stat-dist">—</div><div class="stat-l">Distance</div></div>
-      <div class="stat"><div class="stat-v green" id="stat-time">—</div><div class="stat-l">Best Time</div></div>
-      <div class="stat"><div class="stat-v" id="stat-players">—</div><div class="stat-l">Players</div></div>
-    </div>
-    <div class="route-stats hidden" id="route-stats">
-      <div class="rs"><div class="rs-v" id="rs-walked">—</div><div class="rs-l">Walked</div></div>
-      <div class="rs"><div class="rs-v" id="rs-efficiency">—</div><div class="rs-l">Efficiency</div></div>
-      <div class="rs"><div class="rs-v" id="rs-rank">—</div><div class="rs-l">Your Rank</div></div>
+      <span class="winner-ico" aria-hidden="true"></span>
+      <div class="winner-info"><div class="winner-name" id="res-name">—</div><div class="winner-sub" id="res-winner-sub">First to the target</div></div>
+      <div class="winner-time" id="res-time"></div>
     </div>
     <div id="result-rows" class="result-rows"></div>
-    <button class="share-btn" onclick="haptic('light');App.shareResult()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-      Share Result Card
-    </button>
-    <button class="replay-btn" id="replay-btn" onclick="haptic('light');App.playReplay()">▶ Replay Routes</button>
-    <button class="btn-primary btn-lg btn-full" onclick="haptic('light');App.goHome()">New Game</button>
+    <dl class="stats-grid" id="stats-grid">
+      <div class="stat"><dt>Straight line</dt><dd id="stat-dist">—</dd></div>
+      <div class="stat"><dt>Winning time</dt><dd id="stat-time">—</dd></div>
+      <div class="stat"><dt>Navigators</dt><dd id="stat-players">—</dd></div>
+    </dl>
+    <dl class="route-stats stats-grid hidden" id="route-stats">
+      <div class="stat"><dt>You travelled</dt><dd id="rs-walked">—</dd></div>
+      <div class="stat"><dt>Efficiency</dt><dd id="rs-efficiency">—</dd></div>
+      <div class="stat"><dt>Your place</dt><dd id="rs-rank">—</dd></div>
+    </dl>
+    <div class="results-actions">
+      <button class="btn-glass" onclick="haptic('light');App.shareResult()"><svg class="ico"><use href="#i-share"/></svg>Share result</button>
+      <button class="btn-glass" id="replay-btn" onclick="haptic('light');App.playReplay()"><svg class="ico"><use href="#i-play"/></svg>Replay routes</button>
+    </div>
+    <button class="btn-primary btn-lg btn-full" onclick="haptic('light');App.goHome()">Done</button>
   </div>
 </div>
 
 <!-- ABORT SHEET -->
-
 <div class="action-sheet hidden" id="as-abort">
   <div class="as-box">
-    <div class="as-title">Abort Game?</div>
-    <div class="as-msg">This ends the game for all players immediately.</div>
+    <div class="as-title">End the game for everyone?</div>
+    <div class="as-msg">Navigators stop where they are and go to the results.</div>
     <div class="as-actions">
-      <button class="btn-primary btn-full" style="background:var(--red);box-shadow:0 2px 8px rgba(255,59,48,.3)" onclick="App.confirmAbort()">End Game for Everyone</button>
-      <button class="btn-secondary btn-full" onclick="haptic('light');App.cancelAbort()">Cancel</button>
+      <button class="btn-danger btn-full" onclick="App.confirmAbort()">End the game</button>
+      <button class="btn-glass btn-full" onclick="haptic('light');App.cancelAbort()">Keep playing</button>
     </div>
   </div>
 </div>
 
 </div><!-- #app -->
 
-<!-- QR SHEET -->
-
 <div class="qr-sheet hidden" id="qr-sheet" onclick="haptic('light');App.hideQR()">
   <div class="qr-box" onclick="event.stopPropagation()">
-    <div class="qr-title">Scan to Join</div>
-    <div class="qr-sub" id="qr-sub">Game Code: ——</div>
+    <div class="qr-title">Scan to join</div>
+    <div class="qr-sub" id="qr-sub">Game code ——</div>
     <div id="qr-canvas"></div>
-    <button class="btn-secondary btn-full" style="margin-top:16px" onclick="haptic('light');App.hideQR()">Done</button>
-    <div class="qr-handle" style="margin-top:16px"></div>
+    <button class="btn-glass btn-full" onclick="haptic('light');App.hideQR()">Done</button>
   </div>
 </div>
 
-<!-- OVERLAYS -->
-
 <div class="overlay hidden" id="ov-cd">
   <div class="cd-wrap">
-    <svg class="cd-svg" viewBox="0 0 160 160">
-      <circle class="cd-ring-bg" cx="80" cy="80" r="72"/>
-      <circle class="cd-ring-fg" id="cd-arc" cx="80" cy="80" r="72"/>
-    </svg>
-    <div class="cd-inner">
-      <div class="cd-num" id="cd-num">3</div>
-    </div>
+    <svg class="cd-svg" viewBox="0 0 160 160"><circle class="cd-ring-bg" cx="80" cy="80" r="72"/><circle class="cd-ring-fg" id="cd-arc" cx="80" cy="80" r="72"/></svg>
+    <div class="cd-inner"><div class="cd-num" id="cd-num">3</div></div>
   </div>
-  <div class="cd-lbl">Get Ready</div>
+  <div class="cd-lbl">Get ready</div>
 </div>
 
 <div class="overlay hidden" id="ov-speed">
   <div class="warn-box">
-    <div class="warn-ico">⚠️</div>
-    <div class="warn-title" id="speed-warn-title">Passenger Mode Only</div>
-    <p class="warn-body" id="speed-warn-body">If you’re in a car, the passenger operates Luftlinie. Keep your attention on the road.</p>
+    <div class="warn-title" id="speed-warn-title">Passengers only</div>
+    <p class="warn-body" id="speed-warn-body">If you’re in a car, the passenger holds the phone. The driver watches the road.</p>
     <button class="btn-primary" onclick="haptic('light');App.dismissSpeed()">Understood</button>
   </div>
 </div>
 
 <div class="overlay hidden" id="ov-eliminated">
-  <div class="arrive-rings"><div class="arr-ring ar1" style="border-color:rgba(255,59,48,.3)"></div><div class="arr-ring ar2" style="border-color:rgba(255,59,48,.3)"></div></div>
-  <div class="arrive-box">
-    <div class="arrive-ico" style="filter:none">💀</div>
-    <div class="arrive-title" style="color:var(--red)">Eliminated</div>
-    <div class="arrive-time">You were furthest from the target</div>
+  <div class="arrive-box elim">
+    <svg class="arrive-sym" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22"/><path d="M17 47 47 17"/></svg>
+    <div class="arrive-title">You’re out</div>
+    <div class="arrive-time">You were the furthest from the target at the cut.</div>
     <div class="arrive-dist" id="elim-rank"></div>
-    <button class="btn-primary btn-lg" onclick="haptic('medium');App.watchAfterElim()">👁 Watch Game</button>
+    <button class="btn-primary btn-lg" onclick="haptic('medium');App.watchAfterElim()">Watch the rest</button>
   </div>
 </div>
 
 <div class="overlay hidden" id="ov-arrive">
-  <div class="arrive-rings"><div class="arr-ring ar1"></div><div class="arr-ring ar2"></div></div>
   <div class="arrive-box">
-    <div class="arrive-ico">🏁</div>
-    <div class="arrive-title">Target Reached!</div>
+    <svg class="arrive-sym" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22"/><circle cx="32" cy="32" r="14"/></svg>
+    <div class="arrive-title">You found it</div>
     <div class="arrive-time" id="arr-time">—</div>
     <div class="arrive-dist" id="arr-dist"></div>
-    <button class="btn-primary btn-lg" onclick="haptic('medium');App.showResults()">View Results →</button>
+    <button class="btn-primary btn-lg" onclick="haptic('medium');App.showResults()">See the results</button>
   </div>
 </div>
 
 <div role="status" aria-live="polite" id="toast" class="toast hidden"></div>
 
-<!-- ══ SCRIPTS ══ -->
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <script src="core.js"></script>
 <script src="app.js"></script>
-
 </body>
 </html>

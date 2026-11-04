@@ -31,6 +31,16 @@ Fine-tune the arrival radius, difficulty, teams, blind start, and whether everyo
 
 Internet access is required to host, join, synchronize, and confirm arrival. During a connection loss, an already loaded navigator can still read their locally computed distance. Keep the page open: mobile browsers may suspend GPS and timers in the background. Dynamic target movement and elimination require the host to remain connected with the app open.
 
+## Version 3
+
+**Design.** Liquid Glass with Hairline details: a real map sits behind every screen (sharp on the landing, frosted in forms, heavily blurred while navigating so it never reveals the target). Controls are clear glass capsules and sheets. Numbers are set in Inter at weight 100; lists use one-pixel rules; the distance screen has a sliding tape measure with a red index. Respects reduced motion and reduced transparency. Alternative directions that were considered are in `design-candidates/` (not deployed).
+
+**Fixes.** Host leaving the lobby now closes it; a host peeking at the navigator view no longer blocks “let everyone finish”; every client sees the elimination countdown; the moving target shifts a meaningful distance, retries at most once per round and tells navigators; stable player colours; maps update markers in place and stop auto-zooming while you pan; hot and cold decays when you stand still; the Sailor needle no longer spins across north; runtime errors no longer blank a running game; unit rounding, timer beeps and busy-button glitches.
+
+**Map services.** Overpass with three mirrors and no private driveways or parking aisles; FOSSGIS OSRM for both car and foot routes, throttled per player; trails simplified to at most 400 points before upload.
+
+**Cloudflare.** `functions/api/` adds `/api/roads`, `/api/route` and `/api/health` (edge-cached, same-site only, proper User-Agent). `npm run deploy` uploads `dist/` and the functions together; `npm run deploy:preview` deploys a preview branch first; `npm run dev:cf` runs both locally. A dashboard upload of `dist/` alone still works: the app then calls the public services directly.
+
 ## Version 2 improvements
 
 - Responsive field-instrument design, light/dark themes, consistent icons, keyboard access, screen-reader labels, and reduced-motion support.

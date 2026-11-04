@@ -14,7 +14,7 @@ function fixture(options={}){
   w.setTimeout=(fn,ms)=>schedule(fn,ms,0);w.setInterval=(fn,ms)=>schedule(fn,ms,ms);
   w.clearInterval=w.clearTimeout=id=>pending.delete(id);w.requestAnimationFrame=fn=>options.deferredFrames?w.setTimeout(fn,16):fn();w.matchMedia=()=>({matches:false});
   const tick=async ms=>{const until=now+ms;let count=0;while(true){const next=[...pending].filter(([,t])=>t.at<=until).sort((a,b)=>a[1].at-b[1].at)[0];if(!next)break;if(++count>1000)throw Error('Timer loop');const[id,t]=next;now=t.at;if(t.repeat)t.at+=t.repeat;else pending.delete(id);await t.fn();await new Promise(r=>setImmediate(r));}now=until;};
-  const layer=()=>{const obj={};for(const method of ['addTo','bindPopup','bindTooltip','setLatLng','setView','invalidateSize','remove','removeLayer','on','flyTo','fitBounds','bringToBack','addLatLng'])obj[method]=()=>obj;obj.attributionControl={remove(){}};return obj;};
+  const layer=()=>{const obj={};for(const method of ['setLatLngs','setTooltipContent','addTo','bindPopup','bindTooltip','setLatLng','setView','invalidateSize','remove','removeLayer','on','flyTo','fitBounds','bringToBack','addLatLng'])obj[method]=()=>obj;obj.attributionControl={remove(){}};return obj;};
   w.L={map:layer,marker:layer,circle:layer,polyline:layer,tileLayer:layer,divIcon:()=>({}),latLngBounds:()=>[],control:{zoom:layer}};
   w.navigator.vibrate=()=>{};w.HTMLMediaElement.prototype.play=()=>Promise.resolve();w.HTMLMediaElement.prototype.pause=()=>{};
   const get=path=>path.split('/').filter(Boolean).reduce((o,k)=>o?.[k],data)??null;
@@ -43,7 +43,7 @@ function active(f,overrides={}){
   f.put('games/ABC234',{status:'active',gameMode:f.S.gameMode,multiTargets:f.S.multiTargets,startedAt:f.S.startedAt,timeLimitSec:f.S.timeLimitSec,targetLat:0,targetLon:0,arrRadius:50,blindFinish:true,players:{player:{role:'navigator',name:'Test',arrived:false},other:{role:'navigator',name:'Other',arrived:false}}});
 }
 test('boot leaves only the landing screen interactive and zero distance uses metres',async()=>{
-  const f=fixture();await f.flush();assert.equal(f.S.screen,'land');assert.equal(f.w.document.querySelector('#sc-join').inert,true);assert.equal(f.distUnit(0),'M');await f.close();
+  const f=fixture();await f.flush();assert.equal(f.S.screen,'land');assert.equal(f.w.document.querySelector('#sc-join').inert,true);assert.equal(f.distUnit(0),'m');await f.close();
 });
 test('game creation reserves a unique lobby and persists host identity before starting',async()=>{
   const f=fixture();await f.flush();await f.createGameFB();const game=f.get('games/'+f.S.gameCode);assert.equal(game.hostToken,f.S.myToken);assert.equal(game.players[f.S.myToken].role,'spectator');assert.equal(JSON.parse(f.w.localStorage.getItem('ll_session')).isHost,true);await f.close();
