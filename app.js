@@ -242,7 +242,7 @@ function goScreen(id){
     if(S.status!=='active'){clearInterval(S.timerIv);clearInterval(S.elimIv);stopDynamicTarget();}
   }
   if(id==='setup'){setGameMode(S.gameMode);setMode(S.mode);setTransportMode(S.transportMode);setDiff(S.diff);setRadius(S.arrRadius);setBlindStart(S.blindStart);setBlindFinish(S.blindFinish);setExcludeHost(S.excludeHost);setTeamsMode(S.teamsMode);upSetup();updateGoMapBtn();}
-  requestAnimationFrame(()=>{if(S.screen!==id)return;const heading=sc?.querySelector('h1,.top-title');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}});
+  requestAnimationFrame(()=>{if(S.screen!==id)return;const heading=sc?.querySelector('h1')||sc?.querySelector('.top-title:not(:empty)');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}});
   const epoch=S._epoch,init={map:initLeafMap,hactive:initHostMap,spectator:initSpecMap,results:initResMap}[id];
   if(init)setTimeout(()=>{if(S._epoch===epoch&&S.screen===id)init();},80);
   if(id==='spectator')updateSpecLeaveBtn();
@@ -458,9 +458,9 @@ function placeTarget(lat,lon){
   const myLat=S.myLat??HOME.lat,myLon=S.myLon??HOME.lon;
   const dKm=hav(myLat,myLon,lat,lon)/1000,idealKm=idealRangeM()/1000,pct=Math.round(dKm/idealKm*100);
   const pill=el('map-hint');
-  pill.dataset.tone=pct>140?'far':pct<50?'near':'ok';
-  pill.textContent=pct>140?`${dKm.toFixed(1)} km away, much further than the ${S.idealMin} min you set`:pct<50?`${dKm.toFixed(1)} km away, closer than the ${S.idealMin} min you set`:`${dKm.toFixed(1)} km away, a good fit for ${S.idealMin} min`;
-  set('map-info',`${lat.toFixed(5)}, ${lon.toFixed(5)}`);
+  pill.textContent='Tap to move it';
+  const info=el('map-info');info.dataset.tone=pct>140?'far':pct<50?'near':'ok';
+  info.textContent=pct>140?`${dKm.toFixed(1)} km away. Further than ${S.idealMin} min allows.`:pct<50?`${dKm.toFixed(1)} km away. Closer than ${S.idealMin} min.`:`${dKm.toFixed(1)} km away. A good fit for ${S.idealMin} min.`;
   el('btn-confirm').disabled=false;
 }
 
@@ -483,7 +483,7 @@ async function viaProxy(path,ms=12000){
   catch(e){if(proxyState==='unknown')proxyState='absent';return null;}
 }
 async function roadPoints(lat,lon,radius,mode){
-  const proxied=await viaProxy(`/api/roads?lat=${lat.toFixed(5)}&lon=${lon.toFixed(5)}&radius=${Math.round(radius)}&mode=${mode}`,32000);
+  const proxied=await viaProxy(`/api/roads?lat=${lat.toFixed(5)}&lon=${lon.toFixed(5)}&radius=${Math.round(radius)}&mode=${mode}`,15000);
   if(proxied?.points)return proxied.points;
   const q=Core.overpassQuery(lat,lon,radius,mode);
   for(const mirror of OVERPASS_MIRRORS){
@@ -492,9 +492,38 @@ async function roadPoints(lat,lon,radius,mode){
   }
   return [];
 }
+// Primary method: snap candidate points to the routing network ("nearest" service). Routing profiles only
+// contain ways you may legally use, so a snapped point is on a public road or path. It answers in about a
+// second, unlike Overpass, which is frequently at capacity (502) or times out.
+const NEAREST={drive:'https://routing.openstreetmap.de/routed-car/nearest/v1/driving/',walk:'https://routing.openstreetmap.de/routed-foot/nearest/v1/driving/'};
+async function snapToNetwork(lat,lon,profile){
+  const data=await fetchJSON(`${NEAREST[profile]}${lon.toFixed(6)},${lat.toFixed(6)}?number=1`,{},7000);
+  const wp=data?.code==='Ok'&&data.waypoints?.[0];
+  if(!wp||!Array.isArray(wp.location))return null;
+  return {lat:+wp.location[1].toFixed(6),lon:+wp.location[0].toFixed(6),offset:Number(wp.distance)||0};
+}
+async function snappedCandidate(myLat,myLon,idealKm,mode,bearing){
+  const c=Core.destination(myLat,myLon,idealKm*1000,bearing);
+  const p=await snapToNetwork(c.lat,c.lon,mode);
+  if(!p||p.offset>Math.max(150,idealKm*1000*.15))return null; // nothing routable nearby (a lake, a field)
+  const d=hav(myLat,myLon,p.lat,p.lon);
+  if(d<idealKm*820||d>idealKm*1120)return null;
+  // Car games: the point must also be on the walking network, which rules out motorways and expressways.
+  if(mode==='drive'){const f=await snapToNetwork(p.lat,p.lon,'walk');if(!f||hav(p.lat,p.lon,f.lat,f.lon)>20)return null;}
+  return {lat:p.lat,lon:p.lon};
+}
 async function findSmartTarget(myLat,myLon,idealKm){
   const mode=S.transportMode==='walk'?'walk':'drive';
-  for(let attempt=0;attempt<3;attempt++){
+  // Up to three rounds of four bearings in parallel, spread around the compass.
+  for(let round=0;round<3;round++){
+    const start=Math.random()*360;
+    const results=await Promise.allSettled([0,90,180,270].map(o=>snappedCandidate(myLat,myLon,idealKm,mode,(start+o+(Math.random()*40-20))%360)));
+    const ok=results.filter(r=>r.status==='fulfilled'&&r.value).map(r=>r.value);
+    if(ok.length)return ok[Math.floor(Math.random()*ok.length)];
+    if(results.every(r=>r.status==='rejected'))break; // routing service unreachable: try Overpass instead
+  }
+  // Fallback: Overpass road geometry (proxied on Cloudflare, mirrors otherwise).
+  for(let attempt=0;attempt<2;attempt++){
     const centre=Core.destination(myLat,myLon,idealKm*1000,Math.random()*360);
     const radius=Math.max(150,Math.min(2000,idealKm*600));
     const candidates=(await roadPoints(centre.lat,centre.lon,radius,mode)).filter(p=>{const d=hav(myLat,myLon,p.lat,p.lon);return d>=idealKm*820&&d<=idealKm*1120;});
@@ -579,7 +608,7 @@ function renderHLobby(){
   if(codeEl&&code.length===6){
     codeEl.innerHTML=`${code.slice(0,3)}<span class="code-sep">·</span>${code.slice(3)}`;
   } else if(codeEl){ codeEl.textContent=code; }
-  set('hl-tlim',fmtTime(S.timeLimitSec));
+  set('hl-tlim',Math.round(S.timeLimitSec/60)+' min');
   set('hl-diff',DIFF.labels[S.diff]);
   set('hl-radius',S.arrRadius+'m');
   set('hl-mode',(MODE_NAMES[S.gameMode]||S.gameMode)+(S.transportMode==='walk'?', on foot':', by car'));
@@ -1157,7 +1186,7 @@ function spawnRipple(type='auto'){
 function triggerArrival(arrSec,startDist){
   stopGPS();
   el('ov-arrive').classList.remove('hidden');
-  set('arr-time','Time: '+fmtTime(arrSec));
+  set('arr-time',fmtTime(arrSec));
   const d=startDist||(S.startDist||0);
   set('arr-dist',d?(d/1000).toFixed(1)+' km straight-line':'');
 }

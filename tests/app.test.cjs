@@ -204,3 +204,21 @@ test('deferred browser frames leave the landing interactive and cannot activate 
   const f=fixture({deferredFrames:true});await f.flush();await f.tick(16);assert.equal(f.w.document.querySelector('#sc-land').inert,false);
   f.goScreen('setup');f.goScreen('land');await f.tick(16);assert.equal(f.w.document.querySelectorAll('.sc.active').length,1);assert.equal(f.w.document.querySelector('.sc.active').id,'sc-land');await f.close();
 });
+
+test('smart target snaps to the public routing network without waiting on Overpass',async()=>{
+  const f=fixture();await f.flush();const calls=[];
+  f.w.fetch=async url=>{calls.push(String(url));const m=String(url).match(/nearest\/v1\/driving\/([-\d.]+),([-\d.]+)/);
+    if(!m)throw new Error('Overpass should not be needed');
+    return {ok:true,json:async()=>({code:'Ok',waypoints:[{location:[+m[1]+0.0003,+m[2]],distance:22}]})};};
+  f.S.transportMode='walk';const p=await f.findSmartTarget(48.2,16.37,2);
+  const d=f.w.LuftlinieCore.distance(48.2,16.37,p.lat,p.lon);assert.ok(d>1640&&d<2240,'within the distance band: '+d);
+  assert.ok(calls.every(u=>u.includes('routed-foot/nearest')));await f.close();
+});
+
+test('car targets that are not on the walking network (motorways) are rejected',async()=>{
+  const f=fixture();await f.flush();
+  f.w.fetch=async url=>{const u=String(url),m=u.match(/nearest\/v1\/driving\/([-\d.]+),([-\d.]+)/);if(!m)throw new Error('offline');
+    // car snaps fine, but the nearest walkable point is 300 m away: a motorway
+    const off=u.includes('routed-foot')?0.004:0;return {ok:true,json:async()=>({code:'Ok',waypoints:[{location:[+m[1]+off,+m[2]],distance:10}]})};};
+  f.S.transportMode='drive';await assert.rejects(f.findSmartTarget(48.2,16.37,5),/No suitable public route/);await f.close();
+});

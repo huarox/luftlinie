@@ -66,17 +66,19 @@
   <main class="landing-main">
     <section class="hero">
       <div class="hero-stage" aria-hidden="true">
+        <svg class="hero-line" viewBox="0 0 100 100" preserveAspectRatio="none"><line class="halo" x1="20" y1="80" x2="76" y2="22"/><line x1="20" y1="80" x2="76" y2="22"/></svg>
+        <span class="you-pin hero-you"></span>
         <span class="tgt-pin hero-pin"><i></i></span>
         <div class="glass bubble hero-bubble"><span class="reading-num" id="hero-num">1.28</span><span class="reading-unit">km away</span></div>
       </div>
       <div class="glass sheet hero-sheet">
-        <h1 class="hero-title">You know <b>how far.</b> Not where.</h1>
-        <p class="hero-lede">Someone hides a spot on the map. Everyone else sees only the straight-line distance, updating as they move. First one there wins.</p>
+        <h1 class="hero-title"><span>You know</span> <b>how far.</b> <span>Not where.</span></h1>
+        <p class="hero-lede">One hidden place. Everyone sees only the straight-line distance to it. First one there wins.</p>
         <div class="land-actions">
           <button class="btn-primary btn-lg" onclick="haptic('light');Nav.go('setup')">Host a game</button>
           <button class="btn-glass btn-lg" onclick="haptic('light');Nav.go('join')">Join with a code</button>
         </div>
-        <p class="landing-note">No account. Works on foot or from the passenger seat.</p>
+        <p class="landing-note">No account needed. On foot or by car.</p>
       </div>
     </section>
     <section class="glass sheet steps" aria-labelledby="how-title">
@@ -117,7 +119,7 @@
 <div class="sc" id="sc-setup">
   <div class="top-bar float">
     <button class="back-btn" onclick="haptic('light');App.goHome()"><svg class="ico"><use href="#i-back"/></svg>Back</button>
-    <span class="top-title">New game</span>
+    <span class="top-title" aria-hidden="true"></span>
     <span class="top-spacer"></span>
   </div>
   <div class="body-scroll">
@@ -213,12 +215,12 @@
 <div class="sc map-sc" id="sc-map">
   <div class="map-topbar">
     <button class="glass map-back-btn" aria-label="Back to game setup" onclick="haptic('light');Nav.go('setup')"><svg class="ico"><use href="#i-back"/></svg></button>
-    <div role="status" class="glass map-pill" id="map-hint">Tap the map to place the target</div>
+    <div class="glass map-pill" id="map-hint">Tap to place the target</div>
     <button class="glass smart-btn" id="smart-btn" onclick="haptic('light');App.smartPick()"><svg class="ico"><use href="#i-search"/></svg>Pick for me</button>
   </div>
   <div id="leafmap"></div>
   <div class="glass map-foot">
-    <div class="map-foot-text"><p class="map-placement-note">Pick somewhere public that everyone can legally reach.</p><span class="map-foot-info" id="map-info">No target yet</span></div>
+    <div class="map-foot-text"><p class="map-placement-note">Pick somewhere public that everyone can legally reach.</p><span class="map-foot-info" id="map-info" role="status">No target yet</span></div>
     <button class="btn-primary" id="btn-confirm" disabled onclick="haptic('medium');App.confirmTarget()">Use this target</button>
   </div>
 </div>
@@ -316,7 +318,7 @@
 <div class="sc" id="sc-join">
   <div class="top-bar float">
     <button class="back-btn" onclick="haptic('light');App.goHome()"><svg class="ico"><use href="#i-back"/></svg>Back</button>
-    <span class="top-title">Join a game</span>
+    <span class="top-title" aria-hidden="true"></span>
     <span class="top-spacer"></span>
   </div>
   <div class="body-scroll">
@@ -351,7 +353,7 @@
     <span class="top-spacer"></span>
   </div>
   <div class="nwait-body">
-    <svg class="wait-contours" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="30"/><circle cx="100" cy="100" r="52"/><circle cx="100" cy="100" r="74"/><circle cx="100" cy="100" r="96"/><path class="start" d="M100 86 114 110H86Z"/></svg>
+    <div class="glass bubble beacon" aria-hidden="true"><span></span><span></span><span></span><i></i></div>
     <div class="nw-name" id="nw-name">You</div>
     <div class="role-pill" id="nw-role">Navigator</div>
     <div class="nw-status">The host starts the game. Stay on this screen.</div>
